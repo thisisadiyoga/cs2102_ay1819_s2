@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>Meeple World</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+		<!-- Custom styles for this template-->
+		<link href="stylesheets/index.css" rel="stylesheet">
+  </head>
+	<body id="page-top">
+		<%- include navbar.ejs %>
+		
+		<div id="wrapper">
+			<%- include sidebar.ejs %>
+			
+			<div id="content-wrapper">
+				<div class="container-fluid">
+					<%- include name.ejs %>
+					
+					<div class="card mb-3">
+						<div class="card-header">
+							<i class="fas fa-trophy"></i> &nbsp; Play List
+						</div>
+						<div class="card-body">
+							<div class="table-responsive">
+								<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+									<thead>
+										<tr>
+											<th>Game Name</th>
+											<th>Player 1</th>
+											<th>Player 2</th>
+										</tr>
+									</thead>
+									<tfoot>
+										<th>Total: <i><%= ctx %></i></th>
+										<th>Win: <i><%= win %></i></th>
+										<th>Avg: <i><%= avg ? avg.toFixed(3) : 0.000 %></i></th>
+									</tfoot>
+									<tbody>
+										<% for(var i=0; i<tbl.length; i++) { %>
+										<tr>
+											<td><%= tbl[i].game%></td>
+											<td>
+												<%= tbl[i].user1%> &nbsp;
+												<% if(tbl[i].user1 === user) { %>
+													<i class='fas fa-user fa-fw'></i>
+												<% } %>
+												<% if(tbl[i].user1 === tbl[i].winner) { %>
+													<i class='fas fa-check-square fa-fw'></i>
+												<% } %>
+											</td>
+											<td>
+												<%= tbl[i].user2%> &nbsp;
+												<% if(tbl[i].user2 === user) { %>
+													<i class='fas fa-user fa-fw'></i>
+												<% } %>
+												<% if(tbl[i].user2 === tbl[i].winner) { %>
+													<i class='fas fa-check-square fa-fw'></i>
+												<% } %>
+											</td>
+										</tr>
+										<% } %>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="card-footer small text-muted"><span class="badge badge-pill badge-info"><%= play_msg %></span></div>
+					</div>
+					
+					<div class="card mb-3">
+						<div class="card-header">
+							<i class="fas fa-dice-six"></i> &nbsp; Add Play
+						</div>
+						<form method="post" action="/add_play">
+							<div class="card-body">
+								<div class="form-group row">
+									<label for="username" class="col-sm-2 col-form-label"><b>Meeple ID:</b></label>
+									<div class="col-sm-10">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+									</div>
+								</div>
+								<div class="form-group row">
+									<label for="gamename" class="col-sm-2 col-form-label"><b>Game:</b></label>
+									<div class="col-sm-10">
+										<input type="text" required="required" class="form-control" id="gamename" placeholder="Game Name" name="gamename" value="">
+									</div>
+								</div>
+								<div class="form-group row">
+									<label for="player1" class="col-sm-2 col-form-label"><b>P1:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="player1" placeholder="Player 1" name="player1" value="<%= user %>">
+									</div>
+									<label for="player2" class="col-sm-2 col-form-label"><b>P2:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" class="form-control" id="player2" placeholder="Player 2" name="player2" value="">
+									</div>
+								</div>
+								<div class="form-group row">
+									<label for="player1" class="col-sm-2 col-form-label"><b>Winner:</b></label>
+									<div class="col-sm-4">
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="gridRadios" id="p1win" value="option1" name="p1win" checked>
+											<label class="form-check-label" for="gridRadios1">P1</label>
+											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+											<input class="form-check-input" type="radio" name="gridRadios" id="p2win" value="option2" name="p2win">
+											<label class="form-check-label" for="gridRadios2">
+												P2
+											</label>
+										</div>
+									</div>
+									<div class="col-sm-6">
+										<input type="text" readonly class="form-control" id="winner" value="<%= user %>" name="winner">
+									</div>
+								</div>
+							</div>
+							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Add Play</button></div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<%- include bottomscript.ejs %>
+  </body>
+</html>

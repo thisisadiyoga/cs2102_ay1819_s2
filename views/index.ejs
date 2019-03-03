@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>Meeple World</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+		<!-- Custom styles for this template-->
+		<link href="stylesheets/index.css" rel="stylesheet">
+  </head>
+	<body id="page-top">
+		<%- include navbar.ejs %>
+		
+		<div id="wrapper">
+			<% if(!auth) { %>
+				<%- include loginsidebar.ejs %>
+			<% } else { %>
+				<%- include sidebar.ejs %>
+			<% } %>
+			
+			<div id="content-wrapper">
+				<div class="container-fluid">
+					<div class="card mb-3">
+						<div class="card-header">
+							<i class="fas fa-dice"></i> &nbsp; All Games @ Meeple World
+						</div>
+						<div class="card-body">
+							<div class="table-responsive">
+								<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+									<thead>
+										<tr>
+											<th>Rank</th>
+											<th>Game Name</th>
+											<th>Rating</th>
+										</tr>
+									</thead>
+									<tfoot>
+										<th colspan="2">Total:</th>
+										<th><i><%= ctx %></i></th>
+									</tfoot>
+									<tbody>
+										<% for(var i=0; i<tbl.length; i++) { %>
+										<tr>
+											<td><%= tbl[i].ranking%></td>
+											<td><%= tbl[i].gamename%></td>
+											<td><%= tbl[i].rating%></td>
+										</tr>
+										<% } %>
+									</tbody>
+								</table>
+							</div>
+							<nav aria-label="...">
+								<ul class="pagination">
+									<% if(p == 1) { %>
+										<li class="page-item">
+											<a class="page-link" href="/" tabindex="-1">First</a>
+										</li>
+										<li class="page-item active">
+											<a class="page-link" href="/?p=1">1 <span class="sr-only">(current)</span></a>
+										</li>
+										<li class="page-item"><a class="page-link" href="/?p=2">2</a></li>
+										<li class="page-item"><a class="page-link" href="/?p=3">3</a></li>
+										<li class="page-item">
+											<a class="page-link" href="/?p=<%= Number(t) %>">Last</a>
+										</li>
+									<% } else if(p == Number(t)) { %>
+										<li class="page-item">
+											<a class="page-link" href="/" tabindex="-1">First</a>
+										</li>
+										<li class="page-item"><a class="page-link" href="/?p=<%= Number(t)-2 %>"><%= Number(t)-2 %></a></li>
+										<li class="page-item"><a class="page-link" href="/?p=<%= Number(t)-1 %>"><%= Number(t)-1 %></a></li>
+										<li class="page-item active">
+											<a class="page-link" href="/?p=<%= Number(t) %>"><%= Number(t) %> <span class="sr-only">(current)</span></a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="/?p=<%= Number(t) %>">Last</a>
+										</li>
+									<% } else { %>
+										<li class="page-item">
+											<a class="page-link" href="/" tabindex="-1">First</a>
+										</li>
+										<li class="page-item"><a class="page-link" href="/?p=<%= Number(p)-1 %>"><%= Number(p)-1 %></a></li>
+										<li class="page-item active">
+											<a class="page-link" href="/?p=<%= Number(p) %>"><%= Number(p) %> <span class="sr-only">(current)</span></a>
+										</li>
+										<li class="page-item"><a class="page-link" href="/?p=<%= Number(p)+1 %>"><%= Number(p)+1 %></a></li>
+										<li class="page-item">
+											<a class="page-link" href="/?p=<%= Number(t) %>">Last</a>
+										</li>
+									<% } %>
+								</ul>
+							</nav>
+						</div>
+						<div class="card-footer small text-muted">CS2102 Database Project</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<%- include bottomscript.ejs %>
+  </body>
+</html>

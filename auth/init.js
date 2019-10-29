@@ -14,7 +14,7 @@ const pool = new Pool({
   //ssl: true
 });
 
-function findUser (username, callback) {
+function findUser(username, callback) {
 	pool.query(sql_query.query.userpass, [username], (err, data) => {
 		if(err) {
 			console.error("Cannot find user");
@@ -47,7 +47,7 @@ passport.deserializeUser(function (username, cb) {
   findUser(username, cb);
 })
 
-function initPassport () {
+function initPassport() {
   passport.use(new LocalStrategy(
     (username, password, done) => {
       findUser(username, (err, user) => {

@@ -7,7 +7,7 @@
 		<meta name="description" content="">
 		<meta name="author" content="">
 
-		<title>Meeple World</title>
+		<title>Carpooling</title>
 
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
@@ -32,9 +32,9 @@
 						<form method="post" action="/update_info">
 							<div class="card-body">
 								<div class="form-group row">
-									<label for="username" class="col-sm-2 col-form-label"><b>Meeple ID:</b></label>
+									<label for="username" class="col-sm-2 col-form-label"><b>Email Address</b></label>
 									<div class="col-sm-4">
-										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+										<input type="email" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
 									</div>
 									<label for="status" class="col-sm-2 col-form-label"><b>Type:</b></label>
 									<div class="col-sm-4">
@@ -63,9 +63,9 @@
 						<form method="post" action="/update_pass">
 							<div class="card-body">
 								<div class="form-group row">
-									<label for="username" class="col-sm-2 col-form-label"><b>Meeple ID:</b></label>
+									<label for="username" class="col-sm-2 col-form-label"><b>Email Address</b></label>
 									<div class="col-sm-4">
-										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+										<input type="email" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
 									</div>
 									<label for="status" class="col-sm-2 col-form-label"><b>Type:</b></label>
 									<div class="col-sm-4">

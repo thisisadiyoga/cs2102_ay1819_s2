@@ -16,14 +16,13 @@ sql.query = {
 	// Insertion
 	add_game: 'INSERT INTO user_games (username, gamename) VALUES($1,$2)',
 	add_play: 'INSERT INTO game_plays (user1, user2, gamename, winner) VALUES($1,$2,$3,$4)',
-	add_user: 'INSERT INTO username_password (username, password, status, first_name, last_name) VALUES ($1,$2,\'Bronze\',$3,$4)',
-	
+	add_user: 'INSERT INTO cp_user (email, account_creation_time, dob, gender, firstname, lastname, password) VALUES ($1, CURRENT_TIMESTAMP, \'1999-01-01\', \'m\', $2, $3, $4)',
 	// Login
-	userpass: 'SELECT * FROM username_password WHERE username=$1',
+	userpass: 'SELECT email, password, firstname, lastname FROM cp_user WHERE email=$1',
 	
 	// Update
-	update_info: 'UPDATE username_password SET first_name=$2, last_name=$3 WHERE username=$1',
-	update_pass: 'UPDATE username_password SET password=$2 WHERE username=$1',
+	update_info: 'UPDATE cp_user SET firstname=$2, lastname=$3 WHERE email=$1',
+	update_pass: 'UPDATE cp_user SET password=$2 WHERE email=$1',
 	
 	// Search
 	search_game: 'SELECT * FROM game_list WHERE lower(gamename) LIKE $1',

@@ -60,8 +60,7 @@ function basic(req, res, page, other) {
 		page: page,
 		user: req.user.username,
 		firstname: req.user.firstname,
-		lastname : req.user.lastname,
-		status   : req.user.status,
+		lastname : req.user.lastname
 	};
 	if(other) {
 		for(var fld in other) {
@@ -242,7 +241,7 @@ function reg_user(req, res, next) {
 	var password  = bcrypt.hashSync(req.body.password, salt);
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
-	pool.query(sql_query.query.add_user, [username,password,firstname,lastname], (err, data) => {
+	pool.query(sql_query.query.add_user, [username,firstname,lastname, password], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
@@ -251,8 +250,7 @@ function reg_user(req, res, next) {
 				username    : username,
 				passwordHash: password,
 				firstname   : firstname,
-				lastname    : lastname,
-				status      : 'Bronze'
+				lastname    : lastname
 			}, function(err) {
 				if(err) {
 					return res.redirect('/register?reg=fail');

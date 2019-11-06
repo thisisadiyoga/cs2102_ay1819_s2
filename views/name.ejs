@@ -1,6 +1,11 @@
 <ol class="breadcrumb">
 	<li class="breadcrumb-item">
 		<i class="fas fa-chess-king fa-fw"></i>
-		<%= firstname %> <%= lastname %> <%= is_driver %> <%= is_passenger %>
+		<%= firstname %> <%= lastname %>
+		<% if (is_driver) { %>
+			<span class="badge badge-secondary">Driver</span>
+		<% } if (is_passenger){ %>
+			<span class="badge badge-secondary">Passenger</span>
+		<% } %>
 	</li>
 </ol>

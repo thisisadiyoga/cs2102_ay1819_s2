@@ -25,34 +25,34 @@ function findUser(email, callback) {
 			console.error("User does not exists?");
 			return callback(null)
 		} else if(data.rows.length == 1) {
-      let is_driver = false;
-      pool.query(sql_query.query.find_driver, [email], (err, data) => {
-        if (err || !data.rows || data.rows.length == 0) {
+      pool.query(sql_query.query.find_driver, [email], (err, data1) => {
+        let is_driver = false;
+        if (err || !data1.rows || data1.rows.length == 0) {
 
         } else {
-          if (data.rows.length == 1) {
+          if (data1.rows.length == 1) {
             is_driver = true;
           }
         }
-      });
-      let is_passenger = false;
-      pool.query(sql_query.query.find_passenger, [email], (err, data) => {
-        if (err || !data.rows || data.rows.length == 0) {
+        pool.query(sql_query.query.find_passenger, [email], (err, data2) => {
+          var is_passenger = false;
+          if (err || !data2.rows || data2.rows.length == 0) {
 
-        } else {
-          if (data.rows.length == 1) {
-            is_passenger = true;
+          } else {
+            if (data2.rows.length == 1) {
+              is_passenger = true;
+            }
           }
-        }
+          return callback(null, {
+            email       : data.rows[0].email,
+            passwordHash: data.rows[0].password,
+            firstname   : data.rows[0].firstname,
+            lastname    : data.rows[0].lastname,
+            is_driver   : is_driver,
+            is_passenger: is_passenger,
+          });
+        });
       });
-			return callback(null, {
-				email       : data.rows[0].email,
-				passwordHash: data.rows[0].password,
-				firstname   : data.rows[0].firstname,
-				lastname    : data.rows[0].lastname,
-        is_driver   : is_driver,
-        is_passenger: is_passenger,
-			});
 		} else {
 			console.error("More than one user?");
 			return callback(null);

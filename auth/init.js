@@ -14,8 +14,8 @@ const pool = new Pool({
   //ssl: true
 });
 
-function findUser(username, callback) {
-	pool.query(sql_query.query.userpass, [username], (err, data) => {
+function findUser(email, callback) {
+	pool.query(sql_query.query.userpass, [email], (err, data) => {
 		if(err) {
 			console.error("Cannot find user");
 			return callback(null);
@@ -25,11 +25,33 @@ function findUser(username, callback) {
 			console.error("User does not exists?");
 			return callback(null)
 		} else if(data.rows.length == 1) {
+      let is_driver = false;
+      pool.query(sql_query.query.find_driver, [email], (err, data) => {
+        if (err || !data.rows || data.rows.length == 0) {
+
+        } else {
+          if (data.rows.length == 1) {
+            is_driver = true;
+          }
+        }
+      });
+      let is_passenger = false;
+      pool.query(sql_query.query.find_passenger, [email], (err, data) => {
+        if (err || !data.rows || data.rows.length == 0) {
+
+        } else {
+          if (data.rows.length == 1) {
+            is_passenger = true;
+          }
+        }
+      });
 			return callback(null, {
-				username    : data.rows[0].email,
+				email       : data.rows[0].email,
 				passwordHash: data.rows[0].password,
 				firstname   : data.rows[0].firstname,
-				lastname    : data.rows[0].lastname
+				lastname    : data.rows[0].lastname,
+        is_driver   : is_driver,
+        is_passenger: is_passenger,
 			});
 		} else {
 			console.error("More than one user?");
@@ -39,11 +61,11 @@ function findUser(username, callback) {
 }
 
 passport.serializeUser(function (user, cb) {
-  cb(null, user.username);
+  cb(null, user.email);
 })
 
-passport.deserializeUser(function (username, cb) {
-  findUser(username, cb);
+passport.deserializeUser(function (email, cb) {
+  findUser(email, cb);
 })
 
 function initPassport() {

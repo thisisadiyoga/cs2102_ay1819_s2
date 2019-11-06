@@ -58,9 +58,11 @@ function initRouter(app) {
 function basic(req, res, page, other) {
 	var info = {
 		page: page,
-		user: req.user.username,
+		user: req.user.email,
 		firstname: req.user.firstname,
-		lastname : req.user.lastname
+		lastname : req.user.lastname,
+		is_driver: req.user.is_driver,
+		is_passenger: req.user.is_passenger,
 	};
 	if(other) {
 		for(var fld in other) {
@@ -237,17 +239,23 @@ function add_play(req, res, next) {
 }
 
 function reg_user(req, res, next) {
-	var username  = req.body.username;
+	var email  = req.body.email;
 	var password  = bcrypt.hashSync(req.body.password, salt);
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
-	pool.query(sql_query.query.add_user, [username,firstname,lastname, password], (err, data) => {
+	pool.query(sql_query.query.add_user, [email,firstname,lastname, password], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
+			if (req.body.user_type == "1") {
+				pool.query(sql_query.query.add_driver, [email], (err, data) => {});
+			} else {
+				pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
+			}
+
 			req.login({
-				username    : username,
+				email       : email,
 				passwordHash: password,
 				firstname   : firstname,
 				lastname    : lastname

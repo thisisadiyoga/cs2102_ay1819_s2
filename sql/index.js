@@ -17,6 +17,7 @@ sql.query = {
 	add_game: 'INSERT INTO user_games (username, gamename) VALUES($1,$2)',
 	add_play: 'INSERT INTO game_plays (user1, user2, gamename, winner) VALUES($1,$2,$3,$4)',
 	add_user: 'INSERT INTO cp_user (email, account_creation_time, dob, gender, firstname, lastname, password) VALUES ($1, CURRENT_TIMESTAMP, \'1999-01-01\', \'m\', $2, $3, $4)',
+
 	// Login
 	userpass: 'SELECT email, password, firstname, lastname FROM cp_user WHERE email=$1',
 	

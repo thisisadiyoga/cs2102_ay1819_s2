@@ -76,6 +76,7 @@ CREATE TABLE  cp_advertised_journey (
 );
 
 /*Requested journey entity put up by the passengers looking for a driver*/
+/*
 CREATE TABLE cp_requested_journey (
     email TEXT NOT NULL,
     no_of_passengers INTEGER NOT NULL,
@@ -98,6 +99,7 @@ CREATE TABLE cp_requested_journey (
     CHECK (pick_up_address <> drop_off_address), --ensure pick up and drop off is not the same
     CHECK (no_of_passengers < 8) --idk max 7 passengers makes sense
 );
+*/
 
 /*table that stores the bids that the passengers make on the driver bids*/
 -- allowed to make multiple bids 
@@ -119,6 +121,7 @@ CREATE TABLE cp_passenger_bid (
 );
 
 /*table that stores the bids that the drivers make on the passenger requests*/
+/*
 CREATE TABLE cp_driver_bid (
     driver_email TEXT NOT NULL,
     car_plate_no TEXT NOT NULL,
@@ -133,8 +136,9 @@ CREATE TABLE cp_driver_bid (
 
     CHECK (passenger_email <> driver_email) --driver cannot bid for own job request
 );
+*/
 /*
-/*once a driver bid or passenger bid is accepted, it is added to this table
+--once a driver bid or passenger bid is accepted, it is added to this table
 CREATE TABLE cp_source (
     type TEXT NOT NULL,
     journey_id NOT NULL, --unforunate but necessary to index each journey without referencing everything
@@ -211,8 +215,8 @@ AS $$
     DECLARE car_exists BOOLEAN;
     DECLARE account_creation_time TIMESTAMP;
     DECLARE driver_requests_overlap BOOLEAN;
-    DECLARE passenger_requests_overlap BOOLEAN;
-    DECLARE driver_bid_overlap BOOLEAN;
+    --DECLARE passenger_requests_overlap BOOLEAN;
+    --DECLARE driver_bid_overlap BOOLEAN;
     DECLARE passenger_bid_overlap BOOLEAN;
 BEGIN
     --check for car validity
@@ -243,7 +247,7 @@ BEGIN
                 OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
                 OR a.pick_up_time = NEW.pick_up_time)
         );
-
+    /*
     passenger_requests_overlap := EXISTS(
             SELECT * FROM cp_requested_journey a
             WHERE a.email = NEW.email
@@ -251,7 +255,7 @@ BEGIN
                 OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
                 OR a.pick_up_time = NEW.pick_up_time)
         );
-
+    
     driver_bid_overlap := EXISTS(
             SELECT * FROM cp_driver_bid a
             WHERE a.driver_email = NEW.email
@@ -259,6 +263,7 @@ BEGIN
                 OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
                 OR a.pick_up_time = NEW.pick_up_time)
         );
+    */
 
     passenger_bid_overlap := EXISTS(
             SELECT * FROM cp_passenger_bid a
@@ -268,7 +273,7 @@ BEGIN
                 OR a.pick_up_time = NEW.pick_up_time)
         );
 
-    IF driver_requests_overlap OR passenger_requests_overlap OR driver_bid_overlap OR passenger_bid_overlap THEN
+    IF driver_requests_overlap OR passenger_bid_overlap THEN
         RAISE NOTICE 'OVERLAP IN TIMINGS';
         RETURN NULL;
     END IF;
@@ -288,13 +293,14 @@ FOR EACH ROW EXECUTE PROCEDURE f_check_cp_advertised_journey();
 -- passenger can only be picked up 10 mins after the pick up time of the previous requested ride
 -- if passenger is also a driver, it must be ensured that he cannot put up a pick up request until 10 minutes after his ride as a driver ends 
 -- or 10 mins before another ride as a passenger
+/*
 CREATE OR REPLACE FUNCTION f_check_cp_requested_journey()
 RETURNS TRIGGER
 AS $$
     DECLARE account_creation_time TIMESTAMP;
     DECLARE driver_requests_overlap BOOLEAN;
-    DECLARE passenger_requests_overlap BOOLEAN;
-    DECLARE driver_bid_overlap BOOLEAN;
+    --DECLARE passenger_requests_overlap BOOLEAN;
+    --DECLARE driver_bid_overlap BOOLEAN;
     DECLARE passenger_bid_overlap BOOLEAN;
 BEGIN
     --check for bid start time validity
@@ -316,6 +322,7 @@ BEGIN
                 OR a.pick_up_time = NEW.pick_up_time)
         );
 
+    
     passenger_requests_overlap := EXISTS(
             SELECT * FROM cp_requested_journey a
             WHERE a.email = NEW.email
@@ -331,7 +338,7 @@ BEGIN
                 OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
                 OR a.pick_up_time = NEW.pick_up_time)
         );
-
+    
 
     passenger_bid_overlap := EXISTS(
             SELECT * FROM cp_passenger_bid a
@@ -341,7 +348,7 @@ BEGIN
                 OR a.pick_up_time = NEW.pick_up_time)
         );
 
-    IF driver_requests_overlap OR passenger_requests_overlap OR driver_bid_overlap OR passenger_bid_overlap THEN
+    IF driver_requests_overlap OR passenger_bid_overlap THEN
         RAISE NOTICE 'OVERLAP IN TIMINGS';
         RETURN NULL;
     END IF;
@@ -354,6 +361,7 @@ LANGUAGE plpgsql;
 CREATE TRIGGER t_check_cp_requested_journey
 BEFORE INSERT OR UPDATE ON cp_requested_journey
 FOR EACH ROW EXECUTE PROCEDURE f_check_cp_requested_journey();
+*/
 
 
 /*trigger for passenger bids*/
@@ -420,6 +428,7 @@ BEGIN
         OR a.pick_up_time = NEW.pick_up_time)
     );
 
+    /*
     passenger_requests_overlap := EXISTS(
         SELECT * FROM cp_requested_journey a
         WHERE a.email = NEW.passenger_email
@@ -427,6 +436,7 @@ BEGIN
         OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
+    */
 
     --bids can be placed at any time, even with overlaps
     /*
@@ -448,7 +458,7 @@ BEGIN
     );
     */
 
-    IF driver_requests_overlap OR passenger_requests_overlap /*OR driver_bid_overlap OR passenger_bid_overlap*/ THEN
+    IF driver_requests_overlap /*OR driver_bid_overlap OR passenger_bid_overlap*/ THEN
         RAISE NOTICE 'OVERLAP IN TIMINGS';
         RETURN NULL;
     END IF;
@@ -462,8 +472,8 @@ CREATE TRIGGER t_check_passenger_bid
 BEFORE INSERT OR UPDATE ON cp_passenger_bid
 FOR EACH ROW EXECUTE PROCEDURE f_check_passenger_bid();
 
-
-/*trigger for driver bids*/
+/*
+--trigger for driver bids
 -- the bid time must be before the bid time ends and after the bid time starts
 -- bid time must be after the account was created
 -- check that the bid price is smaller than the maximum bid
@@ -476,8 +486,8 @@ AS $$
     DECLARE maximum_bid FLOAT;
     DECLARE account_creation_time TIMESTAMP;
     DECLARE driver_requests_overlap BOOLEAN;
-    DECLARE passenger_requests_overlap BOOLEAN;
-    DECLARE driver_bid_overlap BOOLEAN;
+    --DECLARE passenger_requests_overlap BOOLEAN;
+    --DECLARE driver_bid_overlap BOOLEAN;
     DECLARE passenger_bid_overlap BOOLEAN;
 BEGIN
     -- check for valid bid time
@@ -525,7 +535,7 @@ BEGIN
         OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
-
+    
     passenger_requests_overlap := EXISTS(
         SELECT * FROM cp_requested_journey a
         WHERE a.email = NEW.driver_email
@@ -533,8 +543,8 @@ BEGIN
         OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
-
-    /*
+    
+    
     driver_bid_overlap := EXISTS(
         SELECT * FROM cp_driver_bid a 
         WHERE a.driver_email = NEW.driver_email
@@ -551,9 +561,9 @@ BEGIN
         OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time) 
         OR a.pick_up_time = NEW.pick_up_time)
     );
-    */
+    
 
-    IF driver_requests_overlap OR passenger_requests_overlap /*OR driver_bid_overlap OR passenger_bid_overlap*/ THEN
+    IF driver_requests_overlap OR driver_bid_overlap OR passenger_bid_overlap THEN
         RAISE NOTICE 'OVERLAP IN TIMINGS';
         RETURN NULL;
     END IF;
@@ -566,3 +576,4 @@ LANGUAGE plpgsql;
 CREATE TRIGGER t_check_driver_bid
 BEFORE INSERT OR UPDATE ON cp_driver_bid
 FOR EACH ROW EXECUTE PROCEDURE f_check_driver_bid();
+*/

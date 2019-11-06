@@ -1,6 +1,7 @@
 const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
+const fs = require('fs')
 
 // Postgres SQL Connection
 const { Pool } = require('pg');
@@ -26,33 +27,33 @@ function initRouter(app) {
 	/* GET */
 	app.get('/'      , index );
 	app.get('/search', search);
-	
+
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/games'    , passport.authMiddleware(), games    );
 	app.get('/plays'    , passport.authMiddleware(), plays    );
-	
+
 	app.get('/register' , passport.antiMiddleware(), register );
+	app.get('/login'		, passport.antiMiddleware(), login);
 	app.get('/password' , passport.antiMiddleware(), retrieve );
-	
+
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/add_game'   , passport.authMiddleware(), add_game   );
 	app.post('/add_play'   , passport.authMiddleware(), add_play   );
-	
-	app.post('/reg_user'   , passport.antiMiddleware(), reg_user   );
+
+	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('local', {
 		successRedirect: '/dashboard',
 		failureRedirect: '/'
 	}));
-	
+
 	/* LOGOUT */
 	app.get('/logout', passport.authMiddleware(), logout);
 }
-
 
 // Render Function
 function basic(req, res, page, other) {
@@ -69,9 +70,11 @@ function basic(req, res, page, other) {
 	}
 	res.render(page, info);
 }
+
 function query(req, fld) {
 	return req.query[fld] ? req.query[fld] : '';
 }
+
 function msg(req, fld, pass, fail) {
 	var info = query(req, fld);
 	return info ? (info=='pass' ? pass : fail) : '';
@@ -105,6 +108,11 @@ function index(req, res, next) {
 		});
 	});
 }
+
+function login(req, res, next) {
+	res.render('login', { page: 'login', auth: false });
+}
+
 function search(req, res, next) {
 	var ctx  = 0, avg = 0, tbl;
 	var game = "%" + req.query.gamename.toLowerCase() + "%";
@@ -123,9 +131,11 @@ function search(req, res, next) {
 		}
 	});
 }
+
 function dashboard(req, res, next) {
 	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
+
 function games(req, res, next) {
 	var ctx = 0, avg = 0, tbl;
 	pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
@@ -146,6 +156,7 @@ function games(req, res, next) {
 		});
 	});
 }
+
 function plays(req, res, next) {
 	var win = 0, avg = 0, ctx = 0, tbl;
 	pool.query(sql_query.query.count_wins, [req.user.username], (err, data) => {
@@ -177,7 +188,7 @@ function retrieve(req, res, next) {
 }
 
 
-// POST 
+// POST
 function update_info(req, res, next) {
 	var username  = req.user.username;
 	var firstname = req.body.firstname;
@@ -237,20 +248,24 @@ function add_play(req, res, next) {
 }
 
 function reg_user(req, res, next) {
-	var username  = req.body.username;
+	var email  = req.body.email;
 	var password  = bcrypt.hashSync(req.body.password, salt);
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
-	pool.query(sql_query.query.add_user, [username,firstname,lastname, password], (err, data) => {
+	var dob = req.body.dob;
+	var gender = req.body.gender === 2 ? 'F' : 'M';
+	pool.query(sql_query.query.add_user, [email, dob, gender, firstname, lastname, password], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
 			req.login({
-				username    : username,
+				email		    : email,
 				passwordHash: password,
 				firstname   : firstname,
-				lastname    : lastname
+				lastname    : lastname,
+				dob 				: dob,
+				gender			: gender
 			}, function(err) {
 				if(err) {
 					return res.redirect('/register?reg=fail');

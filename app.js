@@ -10,6 +10,7 @@ const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const passport = require('passport')
+const fs = require('fs')
 
 const app = express();
 
@@ -57,6 +58,30 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+// Postgres SQL Connection
+const { Pool } = require('pg');
+const pool = new Pool({
+	connectionString: process.env.DATABASE_URL,
+  //ssl: true
+});
+
+console.log('Initializing Tables!')
+// var drop_tables = fs.readFileSync('sql/drop_table.sql').toString();
+// pool.query(drop_tables, function(err, result){
+//     if(err){
+//         console.log('error: ', err);
+//         process.exit(1);
+//     }
+// });
+
+var create_table = fs.readFileSync('sql/create_table.sql').toString();
+pool.query(create_table, function(err, result){
+    if(err){
+        console.log('error: ', err);
+        process.exit(1);
+    }
 });
 
 module.exports = app;

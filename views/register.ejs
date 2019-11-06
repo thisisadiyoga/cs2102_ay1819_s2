@@ -23,10 +23,10 @@
 					<form action="/reg_user" method="post">
 						<div class="form-group">
 							<div class="form-label-group">
-								<input type="email" id="email" class="form-control" placeholder="Email address" required="required" autofocus="autofocus" name="username">
+								<input type="email" id="email" class="form-control" placeholder="Email address" required="required" autofocus="autofocus" name="email">
 								<label for="email">Email Address</label>
 							</div>
-						</div>		
+						</div>
 						<div class="form-group">
 							<div class="form-row">
 								<div class="col-md-6">
@@ -43,6 +43,24 @@
 								</div>
 							</div>
 						</div>
+            <div class="form-group">
+              <div class="form-row">
+                <div class="col-md-6">
+                  <div class="form-label-group">
+                    <input class="form-control" type="date" placeholder="DOB in YY/MM/DD" id="dob" name="dob">
+                    <label for="dob">Date of Birth (YY-MM-dd)</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <select class="custom-select mb-2 mr-sm-2" id="inlineFormCustomSelect" name="gender">
+                    <option selected>Gender</option>
+                    <option value="1">Male</option>
+                    <option value="2">Female</option>
+                  </select>
+                  <!-- <labelfor="inlineFormCustomSelect">Gender</label> -->
+                </div>
+              </div>
+            </div>
 						<div class="form-group">
 							<div class="form-row">
 								<div class="col-md-12">
@@ -53,8 +71,7 @@
 								</div>
 							</div>
 						</div>
-						<button class="btn btn-primary btn-block" type="submit">Register as Driver</button>
-						<button class="btn btn-primary btn-block" type="submit">Register as Passenger</button>
+						<button class="btn btn-primary btn-block" type="submit">Register</button>
 					</form>
 					<div class="text-center">
 						<a class="d-block small mt-3" href="/">Back to home</a>

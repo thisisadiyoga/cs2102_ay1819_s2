@@ -14,22 +14,25 @@ const pool = new Pool({
   //ssl: true
 });
 
-function findUser(username, callback) {
-	pool.query(sql_query.query.userpass, [username], (err, data) => {
+function findUser(email, callback) {
+  console.log('finding!')
+	pool.query(sql_query.query.userpass, [email], (err, data) => {
 		if(err) {
 			console.error("Cannot find user");
 			return callback(null);
 		}
-		
+
 		if(data.rows.length == 0) {
 			console.error("User does not exists?");
 			return callback(null)
 		} else if(data.rows.length == 1) {
 			return callback(null, {
-				username    : data.rows[0].email,
+				email       : data.rows[0].email,
 				passwordHash: data.rows[0].password,
 				firstname   : data.rows[0].firstname,
-				lastname    : data.rows[0].lastname
+				lastname    : data.rows[0].lastname,
+        dob         : data.rows[0].dob,
+        gender      : data.rows[0].gender
 			});
 		} else {
 			console.error("More than one user?");
@@ -39,17 +42,17 @@ function findUser(username, callback) {
 }
 
 passport.serializeUser(function (user, cb) {
-  cb(null, user.username);
+  cb(null, user.email);
 })
 
-passport.deserializeUser(function (username, cb) {
-  findUser(username, cb);
+passport.deserializeUser(function (email, cb) {
+  findUser(email, cb);
 })
 
 function initPassport() {
   passport.use(new LocalStrategy(
-    (username, password, done) => {
-      findUser(username, (err, user) => {
+    (email, password, done) => {
+      findUser(email, (err, user) => {
         if (err) {
           return done(err);
         }

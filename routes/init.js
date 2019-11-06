@@ -29,7 +29,6 @@ function initRouter(app) {
 	
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
-	app.get('/advertised-rides', passport.authMiddlewre(), advertised_rides);
 	app.get('/games'    , passport.authMiddleware(), games    );
 	app.get('/plays'    , passport.authMiddleware(), plays    );
 	

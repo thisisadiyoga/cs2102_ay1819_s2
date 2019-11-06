@@ -53,7 +53,6 @@ CREATE TABLE cp_driver_drives (
     CHECK (max_passengers < 8) --this isn't a bus service
 );
 
-
 /*Advertised journey entity put up by the driver*/
 CREATE TABLE  cp_advertised_journey (
     email TEXT NOT NULL,
@@ -105,7 +104,7 @@ CREATE TABLE cp_requested_journey (
 CREATE TABLE cp_passenger_bid (
     passenger_email TEXT NOT NULL,
     driver_email TEXT NOT NULL,
-    car_plate_no TEXT NOT NULL,
+    car_plate_no TEXT NOT NULL, /*NEED TO CHECK IF CAR CAN FIT EVERYONE*/
     pick_up_time TIMESTAMP NOT NULL,
     pick_up_address TEXT NOT NULL, --input when bid is made --need check to ensure in pick up area
     drop_off_address TEXT NOT NULL, --input when bid is made --need check to ensure in drop off area
@@ -122,16 +121,24 @@ CREATE TABLE cp_passenger_bid (
 /*table that stores the bids that the drivers make on the passenger requests*/
 CREATE TABLE cp_driver_bid (
     driver_email TEXT NOT NULL,
+    car_plate_no TEXT NOT NULL,
     passenger_email TEXT NOT NULL,
-    pick_up_time TIMESTAMP NOT NULL, 
+    pick_up_time TIMESTAMP NOT NULL,
     bid_time TIMESTAMP NOT NULL, --input when bid is made
     bid_price FLOAT NOT NULL, --input when bid is made
 
-    PRIMARY KEY (driver_email, passenger_email, pick_up_time),
-    FOREIGN KEY (driver_email) REFERENCES cp_driver ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY (driver_email, car_plate_no, passenger_email, pick_up_time),
+    FOREIGN KEY (driver_email, car_plate_no) REFERENCES cp_driver_drives ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (passenger_email, pick_up_time) REFERENCES cp_requested_journey ON DELETE CASCADE ON UPDATE CASCADE,
 
     CHECK (passenger_email <> driver_email) --driver cannot bid for own job request
+);
+/*
+/*once a driver bid or passenger bid is accepted, it is added to this table
+CREATE TABLE cp_source (
+    type TEXT NOT NULL,
+    journey_id NOT NULL, --unforunate but necessary to index each journey without referencing everything
+    PRIMARY KEY (type, journey_id)
 );
 
 CREATE TABLE cp_passenger_bid_journey (
@@ -186,7 +193,7 @@ CREATE TABLE cp_passenger_rates (
     FOREIGN KEY (journey_id) REFERENCES cp_journey,
     FOREIGN KEY (passenger_email) REFERENCES cp_passenger ON UPDATE CASCADE --if email changes the email should change but if account is deleted rating should stay
 );
-
+*/
 
 /******************TRIGGERS******************/
 

@@ -77,7 +77,7 @@ function initPassport() {
 
   passport.authMiddleware = authMiddleware;
   passport.antiMiddleware = antiMiddleware;
-	passport.findUser = findUser;
+  passport.findUser = findUser;
 }
 
 module.exports = initPassport;

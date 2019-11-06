@@ -2,7 +2,7 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
 
-// Postgre SQL Connection
+// Postgres SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
@@ -13,12 +13,23 @@ const round = 10;
 const salt  = bcrypt.genSaltSync(round);
 
 function initRouter(app) {
+	/*
+	Routes needed:
+	- profile page (update)
+	- advertised rides (Create, Read, Update?, Delete)
+	- requested rides (Create, Read, Update?, Delete)
+	- confirmed rides (Read, Update?, Delete)
+	- completed rides (Read)
+	- individual ride page (Create, Read, Update?, Delete)
+	 */
+
 	/* GET */
 	app.get('/'      , index );
 	app.get('/search', search);
 	
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
+	app.get('/advertised-rides', passport.authMiddlewre(), advertised_rides);
 	app.get('/games'    , passport.authMiddleware(), games    );
 	app.get('/plays'    , passport.authMiddleware(), plays    );
 	

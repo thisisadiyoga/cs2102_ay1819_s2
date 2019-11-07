@@ -59,9 +59,11 @@ function initRouter(app) {
 function basic(req, res, page, other) {
 	var info = {
 		page: page,
-		user: req.user.username,
+		user: req.user.email,
 		firstname: req.user.firstname,
-		lastname : req.user.lastname
+		lastname : req.user.lastname,
+		is_driver: req.user.is_driver,
+		is_passenger: req.user.is_passenger,
 	};
 	if(other) {
 		for(var fld in other) {
@@ -259,8 +261,14 @@ function reg_user(req, res, next) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
+			if (req.body.user_type == "1") {
+				pool.query(sql_query.query.add_driver, [email], (err, data) => {});
+			} else {
+				pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
+			}
+
 			req.login({
-				email		    : email,
+				email       : email,
 				passwordHash: password,
 				firstname   : firstname,
 				lastname    : lastname,

@@ -260,9 +260,9 @@ function reg_user(req, res, next) {
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
 	var dob = req.body.dob;
-	var gender = req.body.gender === 2 ? 'F' : 'M';
+	var gender = req.body.gender === "2" ? 'F' : 'M';
+	console.log(gender, dob)
 	pool.query(sql_query.query.add_user, [email, dob, gender, firstname, lastname, password], (err, data) => {
-		console.log(dob, gender)
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');

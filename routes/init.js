@@ -183,10 +183,10 @@ function retrieve(req, res, next) {
 
 // POST 
 function update_info(req, res, next) {
-	var username  = req.user.username;
+	var email  = req.user.email;
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
-	pool.query(sql_query.query.update_info, [username, firstname, lastname], (err, data) => {
+	pool.query(sql_query.query.update_info, [email, firstname, lastname], (err, data) => {
 		if(err) {
 			console.error("Error in update info");
 			res.redirect('/dashboard?info=fail');
@@ -196,9 +196,9 @@ function update_info(req, res, next) {
 	});
 }
 function update_pass(req, res, next) {
-	var username = req.user.username;
+	var email = req.user.email;
 	var password = bcrypt.hashSync(req.body.password, salt);
-	pool.query(sql_query.query.update_pass, [username, password], (err, data) => {
+	pool.query(sql_query.query.update_pass, [email, password], (err, data) => {
 		if(err) {
 			console.error("Error in update pass");
 			res.redirect('/dashboard?pass=fail');

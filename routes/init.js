@@ -30,8 +30,8 @@ function initRouter(app) {
 
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
-	app.get('/games'    , passport.authMiddleware(), games    );
-	app.get('/plays'    , passport.authMiddleware(), plays    );
+	app.get('/cars'    	, passport.authMiddleware(), cars);
+	app.get('/plays'    , passport.authMiddleware(), plays);
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/login'		, passport.antiMiddleware(), login);
@@ -40,8 +40,9 @@ function initRouter(app) {
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
-	app.post('/add_game'   , passport.authMiddleware(), add_game   );
-	app.post('/add_play'   , passport.authMiddleware(), add_play   );
+	app.post('/add_car'    , passport.authMiddleware(), add_car);
+	app.post('/add_play'   , passport.authMiddleware(), add_play);
+	app.post('/del_car'    , passport.authMiddleware(), del_car);
 
 	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
 
@@ -142,7 +143,7 @@ function dashboard(req, res, next) {
 	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
 
-function games(req, res, next) {
+function cars(req, res, next) {
 	var ctx = 0, avg = 0, tbl;
 	pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
@@ -150,7 +151,7 @@ function games(req, res, next) {
 		} else {
 			avg = data.rows[0].avg;
 		}
-		pool.query(sql_query.query.all_games, [req.user.username], (err, data) => {
+		pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
 			if(err || !data.rows || data.rows.length == 0) {
 				ctx = 0;
 				tbl = [];
@@ -158,8 +159,45 @@ function games(req, res, next) {
 				ctx = data.rows.length;
 				tbl = data.rows;
 			}
-			basic(req, res, 'games', { ctx: ctx, avg: avg, tbl: tbl, game_msg: msg(req, 'add', 'Game added successfully', 'Game does not exist'), auth: true });
+			basic(req, res, 'cars', { ctx: ctx, avg: avg, tbl: tbl, car_msg: msg(req, 'add', 'Car added successfully', 'Car does not exist'), auth: true });
 		});
+	});
+}
+
+function update_car(req, res, next) {
+	let carplate = req.body.car
+	var ctx = 0, avg = 0, tbl = [];
+
+
+
+}
+
+function del_car(req, res, next) {
+	let carplate = req.body.car
+	var ctx = 0, avg = 0, tbl = [];
+	// pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
+	// 	if(err || !data.rows || data.rows.length == 0) {
+	// 		avg = 0;
+	// 	} else {
+	// 		avg = data.rows[0].avg;
+	// 	}
+		pool.query(sql_query.query.del_car, [req.user.email, carplate], (err, data) => {
+			if(err) {
+				console.log(err)
+			} else {
+				console.log('Success!')
+				pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
+					if(err || !data.rows || data.rows.length == 0) {
+						console.log(err)
+						ctx = 0;
+						tbl = [];
+					} else {
+						ctx = data.rows.length;
+						tbl = data.rows;
+						}
+					basic(req, res, 'cars', { ctx: ctx, avg: avg, tbl: tbl, car_msg: msg(req, 'delete', 'Car deleted successfully', 'Car does not exist'), auth: true });
+				});
+			}
 	});
 }
 
@@ -221,16 +259,18 @@ function update_pass(req, res, next) {
 	});
 }
 
-function add_game(req, res, next) {
-	var username = req.user.username;
-	var gamename = req.body.gamename;
+function add_car(req, res, next) {
+	var email = req.user.email;
+	var carplate = req.body.carplate;
+	var car_model = req.body.carmodel;
+	var max_pass = req.body.carmaxpass;
 
-	pool.query(sql_query.query.add_game, [username, gamename], (err, data) => {
+	pool.query(sql_query.query.add_car, [carplate, car_model, max_pass, email], (err, data) => {
 		if(err) {
-			console.error("Error in adding game");
-			res.redirect('/games?add=fail');
+			console.error("Error in adding car");
+			res.redirect('/cars?add=fail');
 		} else {
-			res.redirect('/games?add=pass');
+			res.redirect('/cars?add=pass');
 		}
 	});
 }

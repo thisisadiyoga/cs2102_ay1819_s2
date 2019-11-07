@@ -14,13 +14,17 @@ sql.query = {
 	all_plays: 'SELECT gamename AS game, user1, user2, winner FROM game_plays WHERE user1=$1 OR user2=$1',
 	
 	// Insertion
-	add_game: 'INSERT INTO user_games (username, gamename) VALUES($1,$2)',
-	add_play: 'INSERT INTO game_plays (user1, user2, gamename, winner) VALUES($1,$2,$3,$4)',
-	add_user: 'INSERT INTO cp_user (email, account_creation_time, dob, gender, firstname, lastname, password) VALUES ($1, CURRENT_TIMESTAMP, \'1999-01-01\', \'m\', $2, $3, $4)',
+	add_game: 		'INSERT INTO user_games (username, gamename) VALUES($1,$2)',
+	add_play: 		'INSERT INTO game_plays (user1, user2, gamename, winner) VALUES($1,$2,$3,$4)',
+	add_user: 		'INSERT INTO cp_user (email, account_creation_time, dob, gender, firstname, lastname, password) VALUES ($1, CURRENT_TIMESTAMP, \'1999-01-01\', \'m\', $2, $3, $4)',
+	add_driver:		'INSERT INTO cp_driver (email) VALUES ($1)',
+	add_passenger:	'INSERT INTO cp_passenger (email, home_address, work_address) VALUES ($1, \'\', \'\')',
 
 	// Login
-	userpass: 'SELECT email, password, firstname, lastname FROM cp_user WHERE email=$1',
-	
+	userpass: 'SELECT email, password, firstname, lastname, dob, gender FROM cp_user WHERE email=$1',
+	find_driver:'SELECT * FROM cp_driver WHERE email=$1',
+	find_passenger: 'SELECT * FROM cp_passenger WHERE email=$1',
+
 	// Update
 	update_info: 'UPDATE cp_user SET firstname=$2, lastname=$3 WHERE email=$1',
 	update_pass: 'UPDATE cp_user SET password=$2 WHERE email=$1',

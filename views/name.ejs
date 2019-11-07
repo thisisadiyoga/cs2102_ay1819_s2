@@ -2,5 +2,12 @@
 	<li class="breadcrumb-item">
 		<i class="fas fa-chess-king fa-fw"></i>
 		<%= firstname %> <%= lastname %>
+		<% if (is_driver) { %>
+			<span class="badge badge-secondary">Driver</span>
+		<% } if (is_passenger){ %>
+			<span class="badge badge-secondary">Passenger</span>
+		<% } %>
+		<span class="badge badge-secondary"><%= age==null ? 0 : age %></span>
+		<span class="badge badge-secondary"><%= gender %></span>
 	</li>
 </ol>

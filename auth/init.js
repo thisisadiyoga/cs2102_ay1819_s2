@@ -48,6 +48,8 @@ function findUser(email, callback) {
             passwordHash: data.rows[0].password,
             firstname   : data.rows[0].firstname,
             lastname    : data.rows[0].lastname,
+            age         : data.rows[0].age,
+            gender      : data.rows[0].gender,
             is_driver   : is_driver,
             is_passenger: is_passenger,
           });

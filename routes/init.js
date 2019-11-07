@@ -61,6 +61,8 @@ function basic(req, res, page, other) {
 		user: req.user.email,
 		firstname: req.user.firstname,
 		lastname : req.user.lastname,
+		age			 : req.user.age,
+		gender   : req.user.gender,
 		is_driver: req.user.is_driver,
 		is_passenger: req.user.is_passenger,
 	};

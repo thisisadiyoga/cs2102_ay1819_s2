@@ -23,7 +23,7 @@ function findUser(email, callback) {
 		}
 
 		if(data.rows.length == 0) {
-			console.error("User does not exists?");
+			console.error("User does not exist?");
 			return callback(null)
 		} else if(data.rows.length == 1) {
 			return callback(null, {

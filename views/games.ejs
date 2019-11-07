@@ -1,33 +1,10 @@
-<!DOCTYPE html>
-<html>
-  <head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<meta name="description" content="">
-		<meta name="author" content="">
 
-		<title>Meeple World</title>
-
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
-
-		<!-- Custom styles for this template-->
-		<link href="stylesheets/index.css" rel="stylesheet">
-  </head>
-	<body id="page-top">
-		<%- include navbar.ejs %>
-		
-		<div id="wrapper">
-			<%- include sidebar.ejs %>
-			
-			<div id="content-wrapper">
-				<div class="container-fluid">
-					<%- include name.ejs %>
-					
+<%- include partials/profile.ejs %>
+<h1 class="h2">Cars</h1>
+</div>
 					<div class="card mb-3">
 						<div class="card-header">
-							<i class="fas fa-dice"></i> &nbsp; Game List
+							<i class="fas fa-dice"></i> &nbsp; Car List
 						</div>
 						<div class="card-body">
 							<div class="table-responsive">
@@ -57,33 +34,35 @@
 						</div>
 						<div class="card-footer small text-muted"><span class="badge badge-pill badge-info"><%= game_msg %></span></div>
 					</div>
-					
+
 					<div class="card mb-3">
 						<div class="card-header">
-							<i class="fas fa-dice-d20"></i> &nbsp; Add Game
+							<i class="fas fa-dice-d20"></i> &nbsp; Add Car
 						</div>
 						<form method="post" action="/add_game">
 							<div class="card-body">
 								<div class="form-group row">
-									<label for="username" class="col-sm-3 col-form-label"><b>Meeple ID:</b></label>
+									<label for="email" class="col-sm-3 col-form-label"><b>User Email:</b></label>
 									<div class="col-sm-9">
 										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
 									</div>
 								</div>
 								<div class="form-group row">
-									<label for="gamename" class="col-sm-3 col-form-label"><b>Game Name:</b></label>
+									<label for="gamename" class="col-sm-3 col-form-label"><b>Car License Plate:</b></label>
 									<div class="col-sm-9">
 										<input type="text" required="required" class="form-control" id="gamename" placeholder="Game Name" name="gamename" value="">
 									</div>
 								</div>
 							</div>
-							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Add Game</button></div>
+							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Add New Car</button></div>
 						</form>
 					</div>
 				</div>
 			</div>
 		</div>
-		
+  </main>
+</div>
+</div>
 		<%- include bottomscript.ejs %>
   </body>
 </html>

@@ -64,6 +64,8 @@ function basic(req, res, page, other) {
 		lastname : req.user.lastname,
 		is_driver: req.user.is_driver,
 		is_passenger: req.user.is_passenger,
+		dob			 : req.user.dob,
+		gender	 : req.user.gender
 	};
 	if(other) {
 		for(var fld in other) {
@@ -230,6 +232,7 @@ function add_game(req, res, next) {
 		}
 	});
 }
+
 function add_play(req, res, next) {
 	var username = req.user.username;
 	var player1  = req.body.player1;
@@ -257,15 +260,16 @@ function reg_user(req, res, next) {
 	var dob = req.body.dob;
 	var gender = req.body.gender === 2 ? 'F' : 'M';
 	pool.query(sql_query.query.add_user, [email, dob, gender, firstname, lastname, password], (err, data) => {
+		console.log(dob, gender)
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
-			if (req.body.user_type == "1") {
-				pool.query(sql_query.query.add_driver, [email], (err, data) => {});
-			} else {
-				pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
-			}
+			// if (req.body.user_type == "1") {
+			// 	pool.query(sql_query.query.add_driver, [email], (err, data) => {});
+			// } else {
+			// 	pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
+			// }
 
 			req.login({
 				email       : email,

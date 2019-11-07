@@ -24,6 +24,7 @@ sql.query = {
 	userpass: 'SELECT email, password, firstname, lastname FROM cp_user WHERE email=$1',
 	find_driver:'SELECT * FROM cp_driver WHERE email=$1',
 	find_passenger: 'SELECT * FROM cp_passenger WHERE email=$1',
+	
 	// Update
 	update_info: 'UPDATE cp_user SET firstname=$2, lastname=$3 WHERE email=$1',
 	update_pass: 'UPDATE cp_user SET password=$2 WHERE email=$1',

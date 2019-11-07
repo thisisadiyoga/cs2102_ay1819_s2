@@ -267,11 +267,11 @@ function reg_user(req, res, next) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
-			// if (req.body.user_type == "1") {
-			// 	pool.query(sql_query.query.add_driver, [email], (err, data) => {});
-			// } else {
-			// 	pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
-			// }
+			if (req.body.user_type == "1") {
+				pool.query(sql_query.query.add_driver, [email], (err, data) => {});
+			} else {
+				pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
+			}
 
 			req.login({
 				email       : email,

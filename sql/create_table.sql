@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS cp_passenger_bid (
     --3. check that the bid_price is greater than the min_bid
     --4. check that the number_of_passengers is less than the max_passengers
     --5. check that the bid occurs after the advertisement was put up and before it ends
+    --6. CHECK that same journeys only 1 is set to true
 
     --BONUS--
     --1. check that pick up address is actually in pick up area

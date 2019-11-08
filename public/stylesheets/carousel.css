@@ -20,6 +20,7 @@ body {
 .carousel-caption {
   bottom: 3rem;
   z-index: 10;
+  font-family: Avenir;
 }
 
 /* Declare heights because of positioning of img element */
@@ -44,25 +45,12 @@ body {
 }
 .marketing h2 {
   font-weight: 400;
+  font-family: Avenir;
 }
 .marketing .col-lg-4 p {
   margin-right: .75rem;
   margin-left: .75rem;
-}
-
-
-/* Featurettes
-------------------------- */
-
-.featurette-divider {
-  margin: 5rem 0; /* Space out the Bootstrap <hr> more */
-}
-
-/* Thin out the marketing headings */
-.featurette-heading {
-  font-weight: 300;
-  line-height: 1;
-  letter-spacing: -.05rem;
+  font-family: Avenir;
 }
 
 
@@ -75,10 +63,12 @@ body {
     margin-bottom: 1.25rem;
     font-size: 1.25rem;
     line-height: 1.4;
+    font-family: Avenir;
   }
 
   .featurette-heading {
     font-size: 50px;
+    font-family: Avenir;
   }
 }
 

@@ -14,9 +14,9 @@
 <%- include name.ejs %>
             <div class="card mb-3">
   						<div class="card-header">
-  							<i class="fas fa-address-card"></i> &nbsp; Basic Information
+  							<i class="fas fa-address-card"></i> &nbsp; Payment Method
   						</div>
-  						<form method="post" action="/update_payment_info">
+  						<form method="post" action="/add_payment">
   							<div class="card-body">
   								<div class="form-group row">
   									<label for="username" class="col-sm-2 col-form-label"><b>Email Address</b></label>
@@ -25,54 +25,31 @@
   									</div>
   								</div>
   								<div class="form-group row">
-  									<label for="firstname" class="col-sm-2 col-form-label"><b>First:</b></label>
+                    <label for="cardnumber" class="col-sm-2 col-form-label"><b>Name on Card</b></label>
+                    <div class="col-sm-4">
+                      <input type="text" required="required" class="form-control" id="cardholder_name" class='form-control card-number' size='16' placeholder="Name on Card" name="cardholder_name" value="<%= cardholder_name %>">
+                    </div>
+  									<label for="cardnumber" class="col-sm-2 col-form-label"><b>Card Number</b></label>
   									<div class="col-sm-4">
-  										<input type="text" required="required" class="form-control" id="firstname" placeholder="First Name" name="firstname" value="<%= firstname %>">
-  									</div>
-  									<label for="lastname" class="col-sm-2 col-form-label"><b>Last:</b></label>
-  									<div class="col-sm-4">
-  										<input type="text" required="required" class="form-control" id="lastname" placeholder="Last Name" name="lastname" value="<%= lastname %>">
+  										<input type="text" required="required" class="form-control" id="card_number" class='form-control card-number' size='16' placeholder="1234 4567 8901 1111" name="card_number" value="%= card_number %>">
   									</div>
   								</div>
                   <div class="form-group row">
-  									<label for="firstname" class="col-sm-2 col-form-label"><b>Home Address:</b></label>
+  									<label for="cvv" class="col-sm-2 col-form-label"><b>CVC</b></label>
   									<div class="col-sm-4">
-  										<input type="text" required="required" class="form-control" id="homeaddress" placeholder="Home Address" name="homeaddress" value="<%= firstname %>">
+  										<input type="text" required="required" class="form-control" id="cvv" placeholder="ex. 311" name="cvv" value="%= cvv %>">
   									</div>
-  									<label for="lastname" class="col-sm-2 col-form-label"><b>Work Address:</b></label>
+  									<label for="lastname" class="col-sm-2 col-form-label"><b>Expiration</b></label>
   									<div class="col-sm-4">
-  										<input type="text" required="required" class="form-control" id="workaddress" placeholder="Work Address" name="workaddress" value="<%= lastname %>">
+  										<input type="text" required="required" class="form-control" id="expiry_date" placeholder='YYYY/MM' name="expiry_date" value="%= expiry_date %>">
   									</div>
   								</div>
   							</div>
-  							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Info</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= info_msg %></span></div>
+							  <div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Payment Method</button></div>
   						</form>
   					</div>
-
-  					<div class="card mb-3">
-  						<div class="card-header">
-  							<i class="fas fa-key"></i> &nbsp; Password: <i>must be at least 8 characters</i>
-  						</div>
-  						<form method="post" action="/update_pass">
-  							<div class="card-body">
-  								<div class="form-group row">
-  									<label for="username" class="col-sm-2 col-form-label"><b>Email Address</b></label>
-  									<div class="col-sm-4">
-  										<input type="email" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
-  									</div>
-  								</div>
-  								<div class="form-group row">
-  									<label for="password" class="col-sm-2 col-form-label"><b>Password:</b></label>
-  									<div class="col-sm-10">
-  										<input type="password" required="required" class="form-control" id="password" placeholder="Your new password" name="password" pattern=".{8,}" />
-  									</div>
-  								</div>
-  							</div>
-  							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Password</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= pass_msg %></span></div>
-  						</form>
-  					</div>
+            
             <%- include partials/footer.ejs %>
-
           </main>
         </div>
       </div>

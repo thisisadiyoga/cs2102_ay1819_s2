@@ -1,0 +1,39 @@
+<%- include partials/profile.ejs %>
+<h1 class="h2">Payment Information</h1>
+<div class="btn-toolbar mb-2 mb-md-0">
+</div>
+</div>
+<%- include name.ejs %>
+            <div class="card mb-3">
+              <div class="card-header">
+                <i class="fas fa-address-card"></i> &nbsp; Driver Information
+              </div>
+              <form method="post" action="/add_driver_info">
+                <div class="card-body">
+                  <div class="form-group row">
+                    <label for="username" class="col-sm-2 col-form-label"><b>Email Address</b></label>
+                    <div class="col-sm-4">
+                      <input type="email" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="cardnumber" class="col-sm-2 col-form-label"><b>License Number</b></label>
+                    <div class="col-sm-4">
+                      <input type="text" required="required" class="form-control" id="cardholder_name" class='form-control card-number' placeholder="License Number" name="license_no" value="">
+                    </div>
+                    <label for="cardnumber" class="col-sm-2 col-form-label"><b>Bank Account Number</b></label>
+                    <div class="col-sm-4">
+                      <input type="text" required="required" class="form-control" id="card_number" class='form-control card-number' size='16' placeholder="Bank Account Number" name="bank_account_no" value="">
+                    </div>
+                  </div>
+                <div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Driver Information</button></div>
+              </form>
+            </div>
+
+            <%- include partials/footer.ejs %>
+          </main>
+        </div>
+      </div>
+    <%- include bottomscript.ejs %>
+  </body>
+</html>

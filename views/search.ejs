@@ -17,14 +17,14 @@
   </head>
 	<body id="page-top">
 		<%- include navbar.ejs %>
-		
+
 		<div id="wrapper">
 			<% if(!auth) { %>
 				<%- include loginsidebar.ejs %>
 			<% } else { %>
 				<%- include sidebar.ejs %>
 			<% } %>
-			
+
 			<div id="content-wrapper">
 				<div class="container-fluid">
 					<div class="card mb-3">
@@ -58,7 +58,8 @@
 				</div>
 			</div>
 		</div>
-		
+
+    <%- include partials/footer.ejs %>
 		<%- include bottomscript.ejs %>
   </body>
 </html>

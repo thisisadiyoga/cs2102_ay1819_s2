@@ -1,6 +1,7 @@
 const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
+const fs = require('fs')
 
 // Postgres SQL Connection
 const { Pool } = require('pg');
@@ -26,33 +27,34 @@ function initRouter(app) {
 	/* GET */
 	app.get('/'      , index );
 	app.get('/search', search);
-	
+
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
-	app.get('/games'    , passport.authMiddleware(), games    );
-	app.get('/plays'    , passport.authMiddleware(), plays    );
-	
+	app.get('/cars'    	, passport.authMiddleware(), cars);
+	app.get('/journeys'    , passport.authMiddleware(), journeys);
+
 	app.get('/register' , passport.antiMiddleware(), register );
+	app.get('/login'		, passport.antiMiddleware(), login);
 	app.get('/password' , passport.antiMiddleware(), retrieve );
-	
+
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
-	app.post('/add_game'   , passport.authMiddleware(), add_game   );
-	app.post('/add_play'   , passport.authMiddleware(), add_play   );
-	
-	app.post('/reg_user'   , passport.antiMiddleware(), reg_user   );
+	app.post('/add_car'    , passport.authMiddleware(), add_car);
+	app.post('/add_play'   , passport.authMiddleware(), add_play);
+	app.post('/del_car'    , passport.authMiddleware(), del_car);
+
+	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('local', {
 		successRedirect: '/dashboard',
 		failureRedirect: '/'
 	}));
-	
+
 	/* LOGOUT */
 	app.get('/logout', passport.authMiddleware(), logout);
 }
-
 
 // Render Function
 function basic(req, res, page, other) {
@@ -65,6 +67,8 @@ function basic(req, res, page, other) {
 		gender   : req.user.gender,
 		is_driver: req.user.is_driver,
 		is_passenger: req.user.is_passenger,
+		dob			 : req.user.dob,
+		gender	 : req.user.gender
 	};
 	if(other) {
 		for(var fld in other) {
@@ -73,9 +77,11 @@ function basic(req, res, page, other) {
 	}
 	res.render(page, info);
 }
+
 function query(req, fld) {
 	return req.query[fld] ? req.query[fld] : '';
 }
+
 function msg(req, fld, pass, fail) {
 	var info = query(req, fld);
 	return info ? (info=='pass' ? pass : fail) : '';
@@ -109,6 +115,11 @@ function index(req, res, next) {
 		});
 	});
 }
+
+function login(req, res, next) {
+	res.render('login', { page: 'login', auth: false });
+}
+
 function search(req, res, next) {
 	var ctx  = 0, avg = 0, tbl;
 	var game = "%" + req.query.gamename.toLowerCase() + "%";
@@ -127,10 +138,12 @@ function search(req, res, next) {
 		}
 	});
 }
+
 function dashboard(req, res, next) {
 	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
-function games(req, res, next) {
+
+function cars(req, res, next) {
 	var ctx = 0, avg = 0, tbl;
 	pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
@@ -138,7 +151,7 @@ function games(req, res, next) {
 		} else {
 			avg = data.rows[0].avg;
 		}
-		pool.query(sql_query.query.all_games, [req.user.username], (err, data) => {
+		pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
 			if(err || !data.rows || data.rows.length == 0) {
 				ctx = 0;
 				tbl = [];
@@ -146,12 +159,50 @@ function games(req, res, next) {
 				ctx = data.rows.length;
 				tbl = data.rows;
 			}
-			basic(req, res, 'games', { ctx: ctx, avg: avg, tbl: tbl, game_msg: msg(req, 'add', 'Game added successfully', 'Game does not exist'), auth: true });
+			basic(req, res, 'cars', { ctx: ctx, avg: avg, tbl: tbl, car_msg: msg(req, 'add', 'Car added successfully', 'Car does not exist'), auth: true });
 		});
 	});
 }
-function plays(req, res, next) {
-	var win = 0, avg = 0, ctx = 0, tbl;
+
+function update_car(req, res, next) {
+	let carplate = req.body.car
+	var ctx = 0, avg = 0, tbl = [];
+
+
+
+}
+
+function del_car(req, res, next) {
+	let carplate = req.body.car
+	var ctx = 0, avg = 0, tbl = [];
+	// pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
+	// 	if(err || !data.rows || data.rows.length == 0) {
+	// 		avg = 0;
+	// 	} else {
+	// 		avg = data.rows[0].avg;
+	// 	}
+		pool.query(sql_query.query.del_car, [req.user.email, carplate], (err, data) => {
+			if(err) {
+				console.log(err)
+			} else {
+				console.log('Success!')
+				pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
+					if(err || !data.rows || data.rows.length == 0) {
+						console.log(err)
+						ctx = 0;
+						tbl = [];
+					} else {
+						ctx = data.rows.length;
+						tbl = data.rows;
+						}
+					basic(req, res, 'cars', { ctx: ctx, avg: avg, tbl: tbl, car_msg: msg(req, 'delete', 'Car deleted successfully', 'Car does not exist'), auth: true });
+				});
+			}
+	});
+}
+
+function journeys(req, res, next) {
+	var win = 0, avg = 0, ctx = 0, tbl, ctx_cars = 0, cars;
 	pool.query(sql_query.query.count_wins, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			win = 0;
@@ -168,7 +219,16 @@ function plays(req, res, next) {
 				avg = win == 0 ? 0 : win/ctx;
 				tbl = data.rows;
 			}
-			basic(req, res, 'plays', { win: win, ctx: ctx, avg: avg, tbl: tbl, play_msg: msg(req, 'add', 'Play added successfully', 'Invalid parameter in play'), auth: true });
+			pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
+				if(err || !data.rows || data.rows.length == 0) {
+					ctx_cars = 0;
+					cars = [];
+				} else {
+					ctx_cars = data.rows.length;
+					cars = data.rows;
+				}
+				basic(req, res, 'journeys', { win: win, ctx: ctx, avg: avg, tbl: tbl, ctx_cars: ctx_cars, cars: cars, journey_msg: msg(req, 'add', 'Journey added successfully', 'Invalid parameter in journey'), auth: true });
+			});
 		});
 	});
 }
@@ -181,7 +241,7 @@ function retrieve(req, res, next) {
 }
 
 
-// POST 
+// POST
 function update_info(req, res, next) {
 	var email  = req.user.email;
 	var firstname = req.body.firstname;
@@ -208,19 +268,22 @@ function update_pass(req, res, next) {
 	});
 }
 
-function add_game(req, res, next) {
-	var username = req.user.username;
-	var gamename = req.body.gamename;
+function add_car(req, res, next) {
+	var email = req.user.email;
+	var carplate = req.body.carplate;
+	var car_model = req.body.carmodel;
+	var max_pass = req.body.carmaxpass;
 
-	pool.query(sql_query.query.add_game, [username, gamename], (err, data) => {
+	pool.query(sql_query.query.add_car, [carplate, car_model, max_pass, email], (err, data) => {
 		if(err) {
-			console.error("Error in adding game");
-			res.redirect('/games?add=fail');
+			console.error("Error in adding car");
+			res.redirect('/cars?add=fail');
 		} else {
-			res.redirect('/games?add=pass');
+			res.redirect('/cars?add=pass');
 		}
 	});
 }
+
 function add_play(req, res, next) {
 	var username = req.user.username;
 	var player1  = req.body.player1;
@@ -228,14 +291,14 @@ function add_play(req, res, next) {
 	var gamename = req.body.gamename;
 	var winner   = req.body.winner;
 	if(username != player1 || player1 == player2 || (winner != player1 && winner != player2)) {
-		res.redirect('/plays?add=fail');
+		res.redirect('/journeys?add=fail');
 	}
 	pool.query(sql_query.query.add_play, [player1, player2, gamename, winner], (err, data) => {
 		if(err) {
 			console.error("Error in adding play");
-			res.redirect('/plays?add=fail');
+			res.redirect('/jouruneys?add=fail');
 		} else {
-			res.redirect('/plays?add=pass');
+			res.redirect('/journeys?add=pass');
 		}
 	});
 }
@@ -245,7 +308,10 @@ function reg_user(req, res, next) {
 	var password  = bcrypt.hashSync(req.body.password, salt);
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
-	pool.query(sql_query.query.add_user, [email,firstname,lastname, password], (err, data) => {
+	var dob = req.body.dob;
+	var gender = req.body.gender === "2" ? 'F' : 'M';
+	console.log(gender, dob)
+	pool.query(sql_query.query.add_user, [email, dob, gender, firstname, lastname, password], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
@@ -260,7 +326,9 @@ function reg_user(req, res, next) {
 				email       : email,
 				passwordHash: password,
 				firstname   : firstname,
-				lastname    : lastname
+				lastname    : lastname,
+				dob 				: dob,
+				gender			: gender
 			}, function(err) {
 				if(err) {
 					return res.redirect('/register?reg=fail');

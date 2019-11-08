@@ -63,7 +63,7 @@ CREATE TABLE  cp_advertised_journey (
     min_bid FLOAT NOT NULL,
     bid_start_time TIMESTAMP NOT NULL,
     bid_end_time TIMESTAMP NOT NULL,
-    pick_up_time TIMESTAMP NOT NULL, 
+    pick_up_time TIMESTAMP NOT NULL,
     --include estimated price (query)
 
     PRIMARY KEY (email, car_plate_no, pick_up_time),
@@ -102,11 +102,19 @@ CREATE TABLE cp_requested_journey (
 */
 
 /*table that stores the bids that the passengers make on the driver bids*/
--- allowed to make multiple bids 
+-- allowed to make multiple bids
 CREATE TABLE cp_passenger_bid (
     passenger_email TEXT NOT NULL,
     driver_email TEXT NOT NULL,
+<<<<<<< HEAD
+    pick_up_area TEXT NOT NULL, -- in an ideal world this will not be here but otherwise will be unable to map address to area
+    destination_area TEXT NOT NULL, -- in an ideal world this will not be here but otherwise will be unable to map address to area
+    pick_up_address TEXT NOT NULL,
+    drop_off_address TEXT NOT NULL,
+    bid_time TIMESTAMP NOT NULL,
+=======
     car_plate_no TEXT NOT NULL, /*NEED TO CHECK IF CAR CAN FIT EVERYONE*/
+>>>>>>> dev-xinming
     pick_up_time TIMESTAMP NOT NULL,
     pick_up_address TEXT NOT NULL, --input when bid is made --need check to ensure in pick up area
     drop_off_address TEXT NOT NULL, --input when bid is made --need check to ensure in drop off area
@@ -206,7 +214,7 @@ CREATE TABLE cp_passenger_rates (
 -- number of passengers specified must be less than or equal to the maximum number of passengers
 -- the time the bid is put up must be after the account was created
 -- the driver can only pick up the next customer TEN MINUTES after the pick up time (rationale is that if driver puts up a request before he can complete his earlier journey then he gets a lower rating)
--- if driver is also a passenger, it must be ensured that he cannot put up a drive request until 10 minutes after his ride as a passenger ends 
+-- if driver is also a passenger, it must be ensured that he cannot put up a drive request until 10 minutes after his ride as a passenger ends
 -- or 10 mins before another ride as a passenger
 -- check cp_advertised_journey, cp_requested_journey, passenger_bid, driver_bid to check that there is no request or bid for a pick up time within 30 mins
 CREATE OR REPLACE FUNCTION f_check_cp_advertised_journey()
@@ -255,7 +263,7 @@ BEGIN
                 OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
                 OR a.pick_up_time = NEW.pick_up_time)
         );
-    
+
     driver_bid_overlap := EXISTS(
             SELECT * FROM cp_driver_bid a
             WHERE a.driver_email = NEW.email
@@ -291,7 +299,7 @@ FOR EACH ROW EXECUTE PROCEDURE f_check_cp_advertised_journey();
 /*Trigger that checks whether the passennger can request a ride*/
 -- the time the bid is put up must be after the account was created
 -- passenger can only be picked up 10 mins after the pick up time of the previous requested ride
--- if passenger is also a driver, it must be ensured that he cannot put up a pick up request until 10 minutes after his ride as a driver ends 
+-- if passenger is also a driver, it must be ensured that he cannot put up a pick up request until 10 minutes after his ride as a driver ends
 -- or 10 mins before another ride as a passenger
 /*
 CREATE OR REPLACE FUNCTION f_check_cp_requested_journey()
@@ -322,7 +330,7 @@ BEGIN
                 OR a.pick_up_time = NEW.pick_up_time)
         );
 
-    
+
     passenger_requests_overlap := EXISTS(
             SELECT * FROM cp_requested_journey a
             WHERE a.email = NEW.email
@@ -338,7 +346,7 @@ BEGIN
                 OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
                 OR a.pick_up_time = NEW.pick_up_time)
         );
-    
+
 
     passenger_bid_overlap := EXISTS(
             SELECT * FROM cp_passenger_bid a
@@ -441,19 +449,19 @@ BEGIN
     --bids can be placed at any time, even with overlaps
     /*
     driver_bid_overlap := EXISTS(
-        SELECT * FROM cp_driver_bid a 
+        SELECT * FROM cp_driver_bid a
         WHERE a.driver_email = NEW.passenger_email
         AND (((a.pick_up_time + (30 * interval '1 minute')) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
-        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time) 
+        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
 
 
     passenger_bid_overlap := EXISTS(
-        SELECT * FROM cp_passenger_bid a 
+        SELECT * FROM cp_passenger_bid a
         WHERE a.passenger_email = NEW.passenger_email
         AND (((a.pick_up_time + (30 * interval '1 minute')) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
-        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time) 
+        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
     */
@@ -477,7 +485,7 @@ FOR EACH ROW EXECUTE PROCEDURE f_check_passenger_bid();
 -- the bid time must be before the bid time ends and after the bid time starts
 -- bid time must be after the account was created
 -- check that the bid price is smaller than the maximum bid
--- cannot bid on 
+-- cannot bid on
 CREATE OR REPLACE FUNCTION f_check_driver_bid()
 RETURNS TRIGGER
 AS $$
@@ -535,7 +543,7 @@ BEGIN
         OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
-    
+
     passenger_requests_overlap := EXISTS(
         SELECT * FROM cp_requested_journey a
         WHERE a.email = NEW.driver_email
@@ -543,25 +551,25 @@ BEGIN
         OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
-    
-    
+
+
     driver_bid_overlap := EXISTS(
-        SELECT * FROM cp_driver_bid a 
+        SELECT * FROM cp_driver_bid a
         WHERE a.driver_email = NEW.driver_email
         AND (((a.pick_up_time + (30 * interval '1 minute')) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
-        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time) 
+        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
 
 
     passenger_bid_overlap := EXISTS(
-        SELECT * FROM cp_passenger_bid a 
+        SELECT * FROM cp_passenger_bid a
         WHERE a.passenger_email = NEW.driver_email
         AND (((a.pick_up_time + (30 * interval '1 minute')) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
-        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time) 
+        OR ((a.pick_up_time - (30 * interval '1 minute')) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
         OR a.pick_up_time = NEW.pick_up_time)
     );
-    
+
 
     IF driver_requests_overlap OR driver_bid_overlap OR passenger_bid_overlap THEN
         RAISE NOTICE 'OVERLAP IN TIMINGS';

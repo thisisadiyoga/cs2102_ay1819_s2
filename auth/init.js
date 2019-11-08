@@ -20,12 +20,13 @@ function findUser(email, callback) {
 			console.error("Cannot find user");
 			return callback(null);
 		}
-		
+
 		if(data.rows.length == 0) {
-			console.error("User does not exists?");
+			console.error("User does not exist?");
 			return callback(null)
 		} else if(data.rows.length == 1) {
       pool.query(sql_query.query.find_driver, [email], (err, data1) => {
+        console.log('finding!')
         let is_driver = false;
         if (err || !data1.rows || data1.rows.length == 0) {
 
@@ -48,7 +49,7 @@ function findUser(email, callback) {
             passwordHash: data.rows[0].password,
             firstname   : data.rows[0].firstname,
             lastname    : data.rows[0].lastname,
-            age         : data.rows[0].age,
+            dob         : data.rows[0].dob,
             gender      : data.rows[0].gender,
             is_driver   : is_driver,
             is_passenger: is_passenger,
@@ -72,8 +73,8 @@ passport.deserializeUser(function (email, cb) {
 
 function initPassport() {
   passport.use(new LocalStrategy(
-    (username, password, done) => {
-      findUser(username, (err, user) => {
+    (email, password, done) => {
+      findUser(email, (err, user) => {
         if (err) {
           return done(err);
         }

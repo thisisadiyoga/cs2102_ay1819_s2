@@ -1,0 +1,85 @@
+
+<%- include partials/profile.ejs %>
+<h1 class="h2">Cars</h1>
+</div>
+<div class="card mb-3">
+	<div class="card-header">
+		<i class="fas fa-dice-d20"></i> &nbsp; Add Car
+	</div>
+	<form method="post" action="/add_car">
+		<div class="card-body">
+			<div class="form-group row">
+				<label for="email" class="col-sm-3 col-form-label"><b>User Email:</b></label>
+				<div class="col-sm-9">
+					<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="carplate" class="col-sm-3 col-form-label"><b>Car License Plate:</b></label>
+				<div class="col-sm-4">
+					<input type="text" required="required" class="form-control" id="carplate" placeholder="Car Plate" name="carplate" value="">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="carmaxpass" class="col-sm-3 col-form-label"><b>Max Passengers:</b></label>
+				<div class="col-sm-4">
+					<input type="number" min="1" step="1" required="required" class="form-control" id="carmaxpass" placeholder="Maximum Passengers" name="carmaxpass" value="">
+				</div>
+		</div>
+			<div class="form-group row">
+				<label for="carmodel" class="col-sm-3 col-form-label"><b>Car Model:</b></label>
+				<div class="col-sm-9">
+					<input type="text" required="required" class="form-control" id="carmodel" placeholder="Car Model" name="carmodel" value="">
+				</div>
+			</div>
+		</div>
+		<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Add New Car</button></div>
+	</form>
+</div>
+					<div class="card mb-3">
+						<div class="card-header">
+							<i class="fas fa-dice"></i> &nbsp; Car List
+						</div>
+						<div class="card-body">
+							<div class="table-responsive">
+								<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+									<thead>
+										<tr>
+											<th>Car Plate</th>
+											<th>Model</th>
+											<th>Maximum Passengers</th>
+										</tr>
+									</thead>
+									<tfoot>
+										<th colspan="2">Total: <i><%= ctx %></i></th>
+										<th>Avg: <i><%= avg ? avg.toFixed(3) : 0.000 %></i></th>
+									</tfoot>
+									<tbody>
+										<% for(var i=0; i<tbl.length; i++) { %>
+										<tr>
+											<td><%= tbl[i].car_plate_no%></td>
+											<td><%= tbl[i].car_model%></td>
+											<td>
+												<%= tbl[i].max_passengers%>
+												<form style="display: inline;" action="/del_car" method="post">
+													<button type="submit" style="display: inline;" name="car" value="<%= tbl[i].car_plate_no%>" class="btn btn-danger float-right">Delete</button>
+												</form>
+												<form action="/update_car" style="display: inline;" method="post">
+													<button type="submit" style="display: inline;" name="car" value="<%= tbl[i] %>" class="btn btn-info float-right">Update</button>
+												</form>
+											</td>
+										</tr>
+										<% } %>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="card-footer small text-muted"><span class="badge badge-pill badge-info"><%= car_msg %></span></div>
+					</div>
+					<%- include partials/footer.ejs %>
+  </main>
+</div>
+</div>
+		<%- include bottomscript.ejs %>
+  </body>
+</html>

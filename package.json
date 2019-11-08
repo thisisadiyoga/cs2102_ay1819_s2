@@ -6,9 +6,11 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.8.0",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
+    "datetimepicker": "^0.1.39",
     "debug": "~2.6.9",
     "dotenv": "^6.2.0",
     "ejs": "~2.5.7",

@@ -31,7 +31,7 @@ function initRouter(app) {
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/cars'    	, passport.authMiddleware(), cars);
-	app.get('/plays'    , passport.authMiddleware(), plays);
+	app.get('/journeys'    , passport.authMiddleware(), journeys);
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/login'		, passport.antiMiddleware(), login);
@@ -201,8 +201,8 @@ function del_car(req, res, next) {
 	});
 }
 
-function plays(req, res, next) {
-	var win = 0, avg = 0, ctx = 0, tbl;
+function journeys(req, res, next) {
+	var win = 0, avg = 0, ctx = 0, tbl, ctx_cars = 0, cars;
 	pool.query(sql_query.query.count_wins, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			win = 0;
@@ -219,7 +219,16 @@ function plays(req, res, next) {
 				avg = win == 0 ? 0 : win/ctx;
 				tbl = data.rows;
 			}
-			basic(req, res, 'plays', { win: win, ctx: ctx, avg: avg, tbl: tbl, play_msg: msg(req, 'add', 'Play added successfully', 'Invalid parameter in play'), auth: true });
+			pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
+				if(err || !data.rows || data.rows.length == 0) {
+					ctx_cars = 0;
+					cars = [];
+				} else {
+					ctx_cars = data.rows.length;
+					cars = data.rows;
+				}
+				basic(req, res, 'journeys', { win: win, ctx: ctx, avg: avg, tbl: tbl, ctx_cars: ctx_cars, cars: cars, journey_msg: msg(req, 'add', 'Journey added successfully', 'Invalid parameter in journey'), auth: true });
+			});
 		});
 	});
 }
@@ -282,14 +291,14 @@ function add_play(req, res, next) {
 	var gamename = req.body.gamename;
 	var winner   = req.body.winner;
 	if(username != player1 || player1 == player2 || (winner != player1 && winner != player2)) {
-		res.redirect('/plays?add=fail');
+		res.redirect('/journeys?add=fail');
 	}
 	pool.query(sql_query.query.add_play, [player1, player2, gamename, winner], (err, data) => {
 		if(err) {
 			console.error("Error in adding play");
-			res.redirect('/plays?add=fail');
+			res.redirect('/jouruneys?add=fail');
 		} else {
-			res.redirect('/plays?add=pass');
+			res.redirect('/journeys?add=pass');
 		}
 	});
 }

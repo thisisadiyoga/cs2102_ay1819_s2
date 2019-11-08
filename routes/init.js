@@ -48,6 +48,9 @@ function initRouter(app) {
 
 	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
 
+	app.post('/add_payment', passport.authMiddleware(), add_payment);
+	app.post('/add_driver_info', passport.authMiddleware(), add_driver_info);
+
 	/* LOGIN */
 	app.post('/login', passport.authenticate('local', {
 		successRedirect: '/dashboard',
@@ -151,6 +154,38 @@ function search(req, res, next) {
 
 function dashboard(req, res, next) {
 	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+}
+
+function add_payment(req, res, next) {
+	var cardholder_name = req.body.cardholder_name;
+	var cvv = req.body.cvv;
+	var expiry_date = req.body.expiry_date;
+	var card_number = req.body.card_number;
+	var email = req.user.email;
+
+	pool.query(sql_query.query.add_payment, ['t', cardholder_name, cvv, expiry_date, card_number, email]), (err, data) => {
+		if (err) {
+			console.log(err);
+		} else {
+			console.log("Payment mode added.");
+			basic(req, res, 'payment_info', {info_msg: msg('info', 'Payment mode added', 'Error in adding payment'), auth: true});
+		}
+	}
+}
+
+function add_driver_info(req, res, next) {
+	var bank_account_no = req.body.bank_account_no;
+	var license_no = req.body.license_no;
+	var email = req.user.email;
+
+	pool.query(sql_query.query.add_driver_info, [bank_account_no, license_no, email]), (err, data) => {
+		if (err) {
+			console.log(err);
+		} else {
+			console.log("Driver info updated.");
+			basic(req, res, 'driver_info', {info_msg: msg('info', 'Driver information updated', 'Error in updating driver information'), auth: true});
+		}
+	}
 }
 
 function cars(req, res, next) {
@@ -346,6 +381,8 @@ function reg_user(req, res, next) {
 
 			if (req.body.user_type == "2" || req.body.user_type == "3") {
 				pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
+				//ADD DEFUALT PAYMENT METHOD AS CASH
+				pool.query(sql_query.query.add_cash_payment, [email], (err, data) => {});
 			}
 
 			req.login({

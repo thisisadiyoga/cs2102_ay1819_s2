@@ -21,6 +21,10 @@ sql.query = {
 	add_driver:		'INSERT INTO cp_driver (email) VALUES ($1)',
  	add_passenger:	'INSERT INTO cp_passenger (email, home_address, work_address) VALUES ($1, \'\', \'\')',
 	add_bid: '',
+	
+	add_cash_payment: 'INSERT INTO cp_payment_method (have_card, email) VALUES (\'f\', $1)',
+	add_payment: 'INSERT INTO cp_payment_method (have_card, cardholder_name, cvv, expiry_date, card_number, email) VALUES ($1, $2, $3, $4, $5, $6)',
+	add_driver_info: 'UPDATE cp_driver SET bank_account_no=$1, license_no=$2 WHERE email=$3',
 
 	// Login
 	userpass: 'SELECT email, password, firstname, lastname FROM cp_user WHERE email=$1',

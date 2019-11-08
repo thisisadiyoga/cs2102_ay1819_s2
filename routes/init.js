@@ -2,6 +2,7 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
 const fs = require('fs')
+const moment = require('moment')
 
 // Postgres SQL Connection
 const { Pool } = require('pg');
@@ -32,7 +33,7 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/cars'    	, passport.authMiddleware(), cars);
 	app.get('/journeys'    , passport.authMiddleware(), journeys);
-	app.get('/payment'    	, passport.authMiddleware(), payment);
+	app.get('/payment'  , passport.authMiddleware(), payment);
 	app.get('/bids'    	, passport.authMiddleware(), bids);
 
 	app.get('/register' , passport.antiMiddleware(), register );
@@ -123,11 +124,11 @@ function login(req, res, next) {
 }
 
 function payment(req, res, next) {
-	res.render('payment_info', { page: 'payment', auth: false });
+	basic(req, res, 'payment', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
 
 function bids(req, res, next) {
-	res.render('bids', { page: 'bids', auth: false });
+	basic(req, res, 'bids', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
 
 function search(req, res, next) {
@@ -297,20 +298,25 @@ function add_car(req, res, next) {
 function add_journey(req, res, next) {
 	var email = req.user.email;
 	var carplate = req.body.carname.split("-")[1].trim();
-	var maxPassengers = req.body.carmaxpass;
+	var maxPassengers = int(req.body.carmaxpass);
 	var pickupArea  = req.body.pickuparea;
 	var dropoffArea  = req.body.dropoffarea;
-	var pickuptime = req.body.pickuptime;
+	var pickuptime = req.body.pickuptime.toString();
 	var dropofftime   = req.body.dropofftime;
 	var bidStart = req.body.bidstart;
 	var bidEnd = req.body.bidend;
+	// var pickuptime = moment(req.body.pickuptime, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+	// var dropofftime   = moment(req.body.dropofftime, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:MM:SS');
+	// var bidStart = moment(req.body.bidstart, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+	// var bidEnd = moment(req.body.bidend, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
 
-	if (bidEnd < bidStart || dropofftime < pickuptime) {
-		res.redirect('/jouruneys?add=fail');
-	}
+	// if (bidEnd < bidStart || dropofftime < pickuptime) {
+	// 	res.redirect('/jouruneys?add=fail');
+	// }
 
-	pool.query(sql_query.query.advertise_journey, [email, carplate, maxPassengers, pickupArea, dropoffArea, 0, bidStart, bidEnd], (err, data) => {
+	pool.query(sql_query.query.advertise_journey, [email, carplate, maxPassengers, pickupArea, dropoffArea, 3.0, bidStart, bidEnd, pickuptime], (err, data) => {
 		if(err) {
+			console.log(err)
 			console.error("Error in adding journey");
 			res.redirect('/jouruneys?add=fail');
 		} else {

@@ -23,7 +23,7 @@ sql.query = {
 	add_bid: '',
 	
 	add_cash_payment: 'INSERT INTO cp_payment_method (have_card, email) VALUES (\'f\', $1)',
-	add_payment: 'INSERT INTO cp_payment_method (have_card, cardholder_name, cvv, expiry_date, card_number, email) VALUES ($1, $2, $3, $4, $5, $6)',
+	add_payment: 'UPDATE cp_payment_method SET have_card=$1, cardholder_name=$2, cvv=$3, expiry_date=$4, card_number=$5, email=$6',
 	add_driver_info: 'UPDATE cp_driver SET bank_account_no=$1, license_no=$2 WHERE email=$3',
 
 	// Login

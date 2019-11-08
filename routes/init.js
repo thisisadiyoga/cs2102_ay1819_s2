@@ -35,8 +35,9 @@ function initRouter(app) {
 	app.get('/journeys'    , passport.authMiddleware(), journeys);
 	app.get('/payment'  , passport.authMiddleware(), payment);
 	app.get('/bids'    	, passport.authMiddleware(), bids);
+	app.get('/driverinfo', passport.authMiddleware(), driverinfo);
 
-	app.get('/rides', passport.authMiddleware(), rides);
+	//app.get('/rides', passport.authMiddleware(), rides);
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/login'		, passport.antiMiddleware(), login);
@@ -136,6 +137,10 @@ function bids(req, res, next) {
 	basic(req, res, 'bids', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
 
+function driverinfo(req, res, next) {
+	basic(req, res, 'driverinfo', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+}
+
 function search(req, res, next) {
 	var ctx  = 0, avg = 0, tbl;
 	var game = "%" + req.query.gamename.toLowerCase() + "%";
@@ -160,6 +165,7 @@ function dashboard(req, res, next) {
 	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
 
+//view cars 
 function cars(req, res, next) {
 	var ctx = 0, avg = 0, tbl;
 	pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
@@ -181,13 +187,13 @@ function cars(req, res, next) {
 	});
 }
 
-function update_car(req, res, next) {
-	let carplate = req.body.car
-	var ctx = 0, avg = 0, tbl = [];
+// function update_car(req, res, next) {
+// 	let carp	late = req.body.car
+// 	var ctx = 0, avg = 0, tbl = [];
 
 
 
-}
+// }
 
 function del_car(req, res, next) {
 	let carplate = req.body.car
@@ -338,29 +344,37 @@ function add_payment(req, res, next) {
 	var card_number = req.body.card_number;
 	var email = req.user.email;
 
-	pool.query(sql_query.query.add_payment, ['t', cardholder_name, cvv, expiry_date, card_number, email]), (err, data) => {
+	pool.query(sql_query.query.add_payment, ['t', cardholder_name, cvv, expiry_date, card_number, email], (err, data) => {
+		console.log("OK");
 		if (err) {
 			console.log(err);
+			res.redirect('/payment?add=fail');
 		} else {
 			console.log("Payment mode added.");
-			basic(req, res, 'payment', {info_msg: msg(req, 'info', 'Payment mode added', 'Error in adding payment'), auth: true});
+			res.redirect('/dashboard');
 		}
-	}
+	});
 }
 
 function add_driver_info(req, res, next) {
+	console.log("AAAA");
 	var bank_account_no = req.body.bank_account_no;
 	var license_no = req.body.license_no;
 	var email = req.user.email;
 
-	pool.query(sql_query.query.add_driver_info, [bank_account_no, license_no, email]), (err, data) => {
+	console.log(bank_account_no);
+	console.log(license_no);
+	console.log(email);
+
+	pool.query(sql_query.query.add_driver_info, [bank_account_no, license_no, email], (err, data) => {
 		if (err) {
 			console.log(err);
+			res.redirect('/driverinfo?add=fail');
 		} else {
 			console.log("Driver info updated.");
-			basic(req, res, 'driver_info', {info_msg: msg(req, 'info', 'Driver information updated', 'Error in updating driver information'), auth: true});
+			res.redirect('/dashboard');
 		}
-	}
+	});
 }
 
 function reg_user(req, res, next) {

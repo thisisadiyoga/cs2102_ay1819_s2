@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS cp_payment_method (
     cardholder_name TEXT,
     cvv INTEGER,
     expiry_date DATE,
-    card_number INTEGER,
+    card_number TEXT,
     email TEXT NOT NULL,
 
     PRIMARY KEY (email, have_card),

@@ -34,9 +34,12 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/cars'    	, passport.authMiddleware(), cars);
 	app.get('/journeys' , passport.authMiddleware(), journeys);
+	app.get('/ride-details', passport.authMiddleware(), ride_details)
+	app.get('/available-rides', passport.authMiddleware(), available_rides);
 	app.get('/payment'  , passport.authMiddleware(), payment);
 	app.get('/bids'    	, passport.authMiddleware(), bids);
 	app.get('/driverinfo', passport.authMiddleware(), driverinfo);
+	app.get('/')
 
 	//app.get('/rides', passport.authMiddleware(), rides);
 
@@ -51,6 +54,7 @@ function initRouter(app) {
 	app.post('/add_journey', passport.authMiddleware(), add_journey);
 	app.post('/del_car'    , passport.authMiddleware(), del_car);
 	app.post('/del_journey', passport.authMiddleware(), del_journey);
+	app.post('/add_bid', passport.authMiddleware(), add_bid);
 
 	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
 
@@ -243,7 +247,7 @@ function del_car(req, res, next) {
 }
 
 function journeys(req, res, next) {
-	var win = 0, avg = 0, ctx = 0, tbl, ctx_cars = 0, cars;
+	var avg = 0, ctx = 0, tbl, ctx_cars = 0, cars;
 	pool.query(sql_query.query.count_wins, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			win = 0;
@@ -475,6 +479,79 @@ function reg_user(req, res, next) {
 			});
 		}
 	});
+}
+
+function advertisedJourneys(req, res, next) {
+	basic(req, res, 'advertisedJourneys', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+}
+
+function ride_details(req, res, next) {
+	var email = req.query['email'];
+	var pick_up_time = req.query['pick_up_time'];
+	var car_plate_no = req.query['car_plate_no'];
+
+	pool.query(sql_query.query.find_advertised_ride, [email, pick_up_time, car_plate_no], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			ctx = 0;
+			tbl = [];
+		} else {
+			ctx = data.rows.length;
+			tbl = data.rows;
+		}
+		if (!req.isAuthenticated()) {
+			res.render('ride_details', {page: 'ride_details', auth: false, tbl: tbl, ctx: ctx});
+		} else {
+			basic(req, res, 'ride_details', {page: 'ride_details', auth: true, tbl:tbl, ctx: ctx, pass_msg: ''});
+		}
+	});
+}
+
+function available_rides(req, res, next) {
+	var tbl, ctx = 0;
+	pool.query(sql_query.query.all_available_journeys, [], (err,data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			ctx = 0;
+			tbl = [];
+		} else {
+			ctx = data.rows.length;
+			tbl = data.rows;
+		}
+		if (!req.isAuthenticated()) {
+			res.render('available_rides', {page: 'available_rides', auth: false, tbl: tbl, ctx: ctx});
+		} else {
+			basic(req, res, 'available_rides', {page: 'available_rides', auth: true, tbl:tbl, ctx: ctx});
+		}
+	});
+}
+
+function add_bid(req, res, next) {
+	let passenger_email = req.user.email;
+	let driver_email = req.body.driver_email;
+	let car_plate_no = req.body.car_plate_no;
+	let pick_up_time = req.body.pick_up_time;
+	let pick_up_address = req.body.pick_up_address;
+	let drop_off_address = req.body.drop_off_address;
+	let bid_time = (new Date()).toISOString().slice(0, 19).replace('T', ' ');
+	let bid_price = req.body.bid_price;
+	let passenger_no = req.body.number_of_passengers;
+
+	var tbl, ctx = 0;
+	pool.query(sql_query.query.add_bid, [passenger_email, driver_email, car_plate_no, pick_up_time, pick_up_address,
+		drop_off_address, bid_time, bid_price, passenger_no], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			ctx = 0;
+			tbl = [];
+		} else {
+			ctx = data.rows.length;
+			tbl = data.rows;
+		}
+		if (!req.isAuthenticated()) {
+			res.render('available_rides', {page: 'available_rides', auth: false, tbl: tbl, ctx: ctx});
+		} else {
+			basic(req, res, 'available_rides', {page: 'available_rides', auth: true, tbl:tbl, ctx: ctx});
+		}
+	});
+
 }
 
 

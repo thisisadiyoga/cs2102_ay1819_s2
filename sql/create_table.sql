@@ -1,5 +1,5 @@
 -- DROP TRIGGER IF EXISTS t_check_cp_advertised_journey ON cp_advertised_journey;
--- DROP TRIGGER IF EXISTS t_check_passenger_bid ON cp_passenger_bid;
+DROP TRIGGER IF EXISTS t_check_passenger_bid ON cp_passenger_bid;
 -- DROP TRIGGER IF EXISTS t_check_journey_occurs ON cp_journey_occurs;
 -- DROP TRIGGER IF EXISTS t_check_driver_rates ON cp_driver_rates;
 -- DROP TRIGGER IF EXISTS t_check_passenger_rates ON cp_passenger_rates;

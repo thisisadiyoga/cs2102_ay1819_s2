@@ -1,0 +1,58 @@
+<%- include partials/profile.ejs %>
+<h1 class="h2">Advertised Journeys</h1>
+</div>
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-trophy"></i> &nbsp; Journey List
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                <tr>
+                    <th>Car</th>
+                    <th>Max Passengers</th>
+                    <th>Pickup Area</th>
+                    <th>Pickup Time</th>
+                    <th>Dropoff</th>
+                    <th>Min Bid</th>
+                    <th>Bid Start</th>
+                    <th>Bid End</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <th>Total: <i><%= ctx %></i></th>
+                </tfoot>
+                <tbody>
+                <% for(var i = 0; i < tbl.length; i++) { %>
+                    <tr>
+                        <td align="center"><%= tbl[i].car_plate_no %></td>
+                        <td align="center"><%= tbl[i].max_passengers %></td>
+                        <td align="center"> <%= tbl[i].pick_up_area %> </td>
+                        <td align="center"> <%= tbl[i].pick_up_time %> </td>
+                        <td align="center"><%= tbl[i].drop_off_area %></td>
+                        <td align="center"><%= tbl[i].min_bid %></td>
+                        <td align="center"><%= tbl[i].bid_start_time.toDateString() %>
+                            <br> <%= tbl[i].bid_start_time.toLocaleTimeString() %></td>
+                        <td align="center"><%= tbl[i].bid_end_time.toDateString() %>
+                            <br> <%= tbl[i].bid_end_time.toLocaleTimeString() %></td>
+                        <td align="center">
+                            <a class="btn btn-info btn-sm float-right"
+                               href="../ride-details?email=<%= tbl[i].email %>&pick_up_time=<%= tbl[i].pick_up_time %>&car_plate_no=<%= tbl[i].car_plate_no %>"/>
+                        </td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<%- include partials/footer.ejs %>
+</main>
+</div>
+</div>
+
+<%- include bottomscript.ejs %>
+</body>
+</html>

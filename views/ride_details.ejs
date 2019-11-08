@@ -1,0 +1,128 @@
+<%- include partials/profile.ejs %>
+<h1 class="h2">Bid for Advertised Journey</h1>
+<div class="btn-toolbar mb-2 mb-md-0">
+</div>
+</div>
+<% ride = tbl[0]; %>
+<div class="card border-light mb-3">
+    <div class="row no-gutters">
+        <div class="col-md-4">
+            <img src="https://image.flaticon.com/icons/svg/171/171240.svg" class="card-img" width="200">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">Journey Information</h5>
+                <div class="form-row">
+                    <label for="driver_name" class="col-sm-3 col-form-label"><b>Driver's Name:</b></label>
+                    <div class="col-md-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="drivername"
+                               value="<%= ride.firstname + " " + ride.lastname %>">
+                    </div>
+                    <label for="driver_gender" class="col-sm-3 col-form-label"><b>Driver's Gender:</b></label>
+                    <div class="col-md-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="gender"
+                               value="<%= ride.gender %>">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="car_plate_no" class="col-sm-3 col-form-label"><b>Car Plate Number:</b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="car_plate_no"
+                               value="<%= ride.car_plate_no %>">
+                    </div>
+                    <label for="car_model" class="col-sm-3 col-form-label"><b>Car Model:</b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="car_model"
+                               value="<%= ride.car_model %>">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="pick_up_area" class="col-sm-3 col-form-label"><b>Pick-Up Area:</b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="pick_up_area"
+                               value="<%= ride.pick_up_area %>">
+                    </div>
+                    <label for="drop_off_area" class="col-sm-3 col-form-label"><b>Drop-Off Area:</b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="drop_off_area"
+                               value="<%= ride.drop_off_area %>">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="max_passengers" class="col-sm-3 col-form-label"><b>Max Passengers:</b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="max_passengers"
+                               value="<%= ride.max_passengers %>">
+                    </div>
+                    <label for="bid_price" class="col-sm-3 col-form-label"><b>Starting Bid: </b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="bid_price"
+                               value="<%= ride.min_bid %>">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="bid_end_time" class="col-sm-3 col-form-label"><b>Bid End Time:</b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="bid_end_time"
+                               value="<%= ride.bid_end_time %>">
+                    </div>
+                    <label for="driver_gender" class="col-sm-3 col-form-label"><b>Pick-up Time: </b></label>
+                    <div class="col-sm-2">
+                        <input type="text" required="required" readonly class="form-control-plaintext" id="gender"
+                               value="<%= ride.pick_up_time %>">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-coins"></i> &nbsp; Start Your Bid</i>
+    </div>
+    <form method="post" action="/add_bid">
+        <div class="card-body">
+            <div class="form-group row">
+                <label for="pick_up_address" class="col-sm-2 col-form-label"><b>Pick-Up Address</b></label>
+                <div class="col-sm-4">
+                    <input type="text" required="required" class="form-control" id="pick_up_address"
+                           placeholder="36 College Ave E, Singapore 138600" name="pick_up_address" value=""/>
+                </div>
+                <label for="drop_off_address" class="col-sm-2 col-form-label"><b>Drop-off Address</b></label>
+                <div class="col-sm-4">
+                    <input type="text" required="required" class="form-control" id="drop_off_address"
+                           placeholder="36 College Ave E, Singapore 138600" name="drop_off_address" value=""/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="bid_price" class="col-sm-2 col-form-label"><b>Bidding Price</b></label>
+                <div class="col-sm-4">
+                    <input type="number" min="0" step="0.01" required="required" class="form-control" id="bid_price"
+                           placeholder="Bidding price" name="bid_price" value="">
+                </div>
+                <label for="number_of_passengers" class="col-sm-2 col-form-label"><b>Number of Passengers</b></label>
+                <div class="col-sm-4">
+                    <input type="number" min="1" step="1" max="7" required="required" class="form-control"
+                           id="number_of_passengers" placeholder="Number of Passengers" name="number_of_passengers"
+                           value="">
+                </div>
+            </div>
+        </div>
+        <div class="card-footer small text-muted">
+            <button type="submit" class="btn btn-secondary">Bid</button>
+            <span class="badge badge-pill badge-info"><%= pass_msg %></span>
+        </div>
+        <input type="hidden" id="driver_email" name="driver_email" value="<%= ride.email %>" />
+        <input type="hidden" id="pick_up_time" name="pick_up_time" value="<%= ride.pick_up_time %>" />
+        <input type="hidden" id="car_plate_no" name="car_plate_no" value="<%= ride.car_plate_no %>" />
+    </form>
+</div>
+<%- include partials/footer.ejs %>
+
+</main>
+</div>
+</div>
+<%- include bottomscript.ejs %>
+</body>
+</html>

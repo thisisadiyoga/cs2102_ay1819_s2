@@ -75,24 +75,24 @@
 							<div class="table-responsive">
 								<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
 									<thead>
-										<tr>
-											<th>Car</th>
-											<th>Max Passengers</th>
-											<th>Pickup Area</th>
-											<th>Pickup Time</th>
-											<th>Dropoff</th>
-											<th>Min Bid</th>
-											<th>Bid Start</th>
-											<th>Bid End</th>
-										</tr>
+									<tr>
+										<th>Car</th>
+										<th>Max Passengers</th>
+										<th>Pickup Area</th>
+										<th>Pickup Time</th>
+										<th>Dropoff</th>
+										<th>Min Bid</th>
+										<th>Bid Start</th>
+										<th>Bid End</th>
+									</tr>
 									</thead>
 									<tfoot>
-										<th>Total: <i><%= ctx %></i></th>
-										<!-- <th>Win: <i></i></th> -->
-										<!-- <th>Avg: <i></i></th> -->
+									<th>Total: <i><%= ctx %></i></th>
+									<!-- <th>Win: <i></i></th> -->
+									<!-- <th>Avg: <i></i></th> -->
 									</tfoot>
 									<tbody>
-										<% for(var i=0; i<tbl.length; i++) { %>
+									<% for(var i=0; i<tbl.length; i++) { %>
 										<tr>
 											<td align="center"><%= tbl[i].car_plate_no %></td>
 											<td align="center"><%= tbl[i].max_passengers %></td>
@@ -111,7 +111,7 @@
 												</form>
 											</td>
 										</tr>
-										<% } %>
+									<% } %>
 									</tbody>
 								</table>
 							</div>

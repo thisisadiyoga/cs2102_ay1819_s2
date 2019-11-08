@@ -12,11 +12,12 @@ sql.query = {
 	ctx_games: 'SELECT COUNT(*) FROM game_list',
 	all_games: 'SELECT ranking,game_list.gamename AS game,rating FROM user_games INNER JOIN game_list ON user_games.gamename=game_list.gamename WHERE username=$1 ORDER BY ranking ASC',
 	all_cars:  'SELECT * FROM cp_driver_drives WHERE email=$1',
-	all_plays: 'SELECT gamename AS game, user1, user2, winner FROM game_plays WHERE user1=$1 OR user2=$1',
+	all_journeys: 'SELECT car_plate_no, max_passengers, pick_up_area, drop_off_area, min_bid, bid_start_time, bid_end_time, pick_up_time FROM cp_advertised_journey WHERE email=$1',
+	valid_journeys: 'SELECT car_plate_no, max_passengers, pick_up_area, drop_off_area, min_bid, bid_start_time, bid_end_time, pick_up_time FROM cp_advertised_journey WHERE bid_end_time > NOW()::timestamp',
 
 	// Insertion
 	add_car: 'INSERT INTO cp_driver_drives (car_plate_no, car_model, max_passengers, email) VALUES($1, $2, $3, $4)',
-	advertise_journey: 'INSERT INTO cp_advertised_journey (email, car_plate_no, max_passengers, pick_up_area, drop_off_area, min_bid, bid_start_time, bid_end_time, pick_up_time) VALUES($1,$2,$3,$4,$5,%6,$7,$8,$9)',
+	advertise_journey: 'INSERT INTO cp_advertised_journey (email, car_plate_no, max_passengers, pick_up_area, drop_off_area, min_bid, bid_start_time, bid_end_time, pick_up_time) VALUES ($1, $2, $8, $3, $4, $9, $5, $6, $7)',
 	add_user: 'INSERT INTO cp_user (email, account_creation_time, dob, gender, firstname, lastname, password) VALUES ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, $6)',
 	add_driver:		'INSERT INTO cp_driver (email) VALUES ($1)',
  	add_passenger:	'INSERT INTO cp_passenger (email, home_address, work_address) VALUES ($1, \'\', \'\')',
@@ -36,6 +37,7 @@ sql.query = {
 
 	// Deletion
 	del_car: 'DELETE FROM cp_driver_drives WHERE email=$1 AND car_plate_no=$2',
+	del_journey: 'DELETE FROM cp_advertised_journey WHERE email=$1 AND car_plate_no=$2 AND pick_up_time=$3',
 
 	// Search
 	search_game: 'SELECT * FROM game_list WHERE lower(gamename) LIKE $1',

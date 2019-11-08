@@ -26,7 +26,6 @@ function findUser(email, callback) {
 			return callback(null)
 		} else if(data.rows.length == 1) {
       pool.query(sql_query.query.find_driver, [email], (err, data1) => {
-        console.log('finding!')
         let is_driver = false;
         if (err || !data1.rows || data1.rows.length == 0) {
 

@@ -28,11 +28,12 @@ function initRouter(app) {
 	/* GET */
 	app.get('/'      , index );
 	app.get('/search', search);
+	app.get('/ridelist', ridelist);
 
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/cars'    	, passport.authMiddleware(), cars);
-	app.get('/journeys'    , passport.authMiddleware(), journeys);
+	app.get('/journeys' , passport.authMiddleware(), journeys);
 	app.get('/payment'  , passport.authMiddleware(), payment);
 	app.get('/bids'    	, passport.authMiddleware(), bids);
 
@@ -46,6 +47,7 @@ function initRouter(app) {
 	app.post('/add_car'    , passport.authMiddleware(), add_car);
 	app.post('/add_journey', passport.authMiddleware(), add_journey);
 	app.post('/del_car'    , passport.authMiddleware(), del_car);
+	app.post('/del_journey', passport.authMiddleware(), del_journey);
 
 	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
 
@@ -131,6 +133,23 @@ function bids(req, res, next) {
 	basic(req, res, 'bids', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
 
+function ridelist(req, res, next) {
+	pool.query(sql_query.query.valid_journeys, [], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			ctx = 0;
+			tbl = [];
+		} else {
+			ctx = data.rows.length;
+			tbl = data.rows;
+		}
+		if(!req.isAuthenticated()) {
+			res.render('ridelist', { page: 'ridelist', auth: false, tbl: tbl, ctx: ctx });
+		} else {
+			basic(req, res, 'ridelist', { page: 'ridelist', auth: true, tbl: tbl, ctx: ctx });
+		}
+	});
+}
+
 function search(req, res, next) {
 	var ctx  = 0, avg = 0, tbl;
 	var game = "%" + req.query.gamename.toLowerCase() + "%";
@@ -196,7 +215,6 @@ function del_car(req, res, next) {
 			if(err) {
 				console.log(err)
 			} else {
-				console.log('Success!')
 				pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
 					if(err || !data.rows || data.rows.length == 0) {
 						console.log(err)
@@ -220,7 +238,7 @@ function journeys(req, res, next) {
 		} else {
 			win = data.rows[0].count;
 		}
-		pool.query(sql_query.query.all_plays, [req.user.username], (err, data) => {
+		pool.query(sql_query.query.all_journeys, [req.user.email], (err, data) => {
 			if(err || !data.rows || data.rows.length == 0) {
 				ctx = 0;
 				avg = 0;
@@ -298,30 +316,62 @@ function add_car(req, res, next) {
 function add_journey(req, res, next) {
 	var email = req.user.email;
 	var carplate = req.body.carname.split("-")[1].trim();
-	var maxPassengers = int(req.body.carmaxpass);
+	var maxPassengers = parseInt(req.body.carmaxpass);
 	var pickupArea  = req.body.pickuparea;
 	var dropoffArea  = req.body.dropoffarea;
 	var pickuptime = req.body.pickuptime.toString();
 	var dropofftime   = req.body.dropofftime;
 	var bidStart = req.body.bidstart;
 	var bidEnd = req.body.bidend;
-	// var pickuptime = moment(req.body.pickuptime, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-	// var dropofftime   = moment(req.body.dropofftime, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:MM:SS');
-	// var bidStart = moment(req.body.bidstart, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-	// var bidEnd = moment(req.body.bidend, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+	var minBid = parseFloat(req.body.minbid);
 
-	// if (bidEnd < bidStart || dropofftime < pickuptime) {
-	// 	res.redirect('/jouruneys?add=fail');
-	// }
-
-	pool.query(sql_query.query.advertise_journey, [email, carplate, maxPassengers, pickupArea, dropoffArea, 3.0, bidStart, bidEnd, pickuptime], (err, data) => {
+	pool.query(sql_query.query.advertise_journey, [email, carplate, pickupArea, dropoffArea, bidStart, bidEnd, pickuptime, maxPassengers, minBid], (err, data) => {
 		if(err) {
 			console.log(err)
 			console.error("Error in adding journey");
-			res.redirect('/jouruneys?add=fail');
+			res.redirect('/journeys?add=fail');
 		} else {
+			console.log(data)
 			res.redirect('/journeys?add=pass');
 		}
+	});
+}
+
+function del_journey(req, res, next) {
+	let carplate = req.body.journey.split(",")[0].trim()
+	let pickuptime = req.body.journey.split(",")[1].trim().replace("T", " ").replace("Z", "").split(".")[0]
+
+	var ctx = 0, avg = 0, tbl = [], ctx_cars = 0, cars=[];
+	// pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
+	// 	if(err || !data.rows || data.rows.length == 0) {
+	// 		avg = 0;
+	// 	} else {
+	// 		avg = data.rows[0].avg;
+	// 	}
+		pool.query(sql_query.query.del_journey, [req.user.email, carplate, pickuptime], (err, data) => {
+			if(err) {
+				console.log(err)
+			} else {}
+				pool.query(sql_query.query.all_journeys, [req.user.email], (err, data) => {
+					if(err || !data.rows || data.rows.length == 0) {
+						ctx = 0;
+						avg = 0;
+						tbl = [];
+					} else {
+						ctx = data.rows.length;
+						tbl = data.rows;
+					}
+					pool.query(sql_query.query.all_cars, [req.user.email], (err, data) => {
+						if(err || !data.rows || data.rows.length == 0) {
+							ctx_cars = 0;
+							cars = [];
+						} else {
+							ctx_cars = data.rows.length;
+							cars = data.rows;
+						}
+						basic(req, res, 'journeys', {ctx: ctx, avg: avg, tbl: tbl, ctx_cars: ctx_cars, cars: cars, journey_msg: msg(req, 'add', 'Journey added successfully', 'Invalid parameter in journey'), auth: true });
+					});
+				});
 	});
 }
 

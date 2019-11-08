@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS cp_advertised_journey (
     --2. check to ensure the pick_up_time is not 30 mins within the pick_up_time of a bid made by the driver using a passenger account
     --3. ensure that the max_passenger is less than the actual max_passenger of the car
     --4. ensure that the bid starts after the account has been created
+    --5. check that the driver has put in his license number and bank account number
 );
 
 --Passenger bids made by passengers

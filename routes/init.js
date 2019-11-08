@@ -41,7 +41,7 @@ function initRouter(app) {
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/add_car'    , passport.authMiddleware(), add_car);
-	app.post('/add_play'   , passport.authMiddleware(), add_play);
+	app.post('/add_journey', passport.authMiddleware(), add_journey);
 	app.post('/del_car'    , passport.authMiddleware(), del_car);
 
 	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
@@ -284,16 +284,21 @@ function add_car(req, res, next) {
 	});
 }
 
-function add_play(req, res, next) {
-	var username = req.user.username;
-	var player1  = req.body.player1;
-	var player2  = req.body.player2;
-	var gamename = req.body.gamename;
-	var winner   = req.body.winner;
+function add_journey(req, res, next) {
+	var email = req.user.email;
+	var carplate = req.body.carname.split("-")[1].trim();
+	var maxPassengers = req.body.carmaxpass;
+	var pickupAddress  = req.body.pickuparea;
+	var dropoffAddress  = req.body.dropoffarea;
+	var pickuptime = req.body.pickuptime;
+	var dropofftime   = req.body.dropofftime;
+	var bidStart = req.body.bidstart;
+	var bidEnd = req.body.bidend;
+
 	if(username != player1 || player1 == player2 || (winner != player1 && winner != player2)) {
 		res.redirect('/journeys?add=fail');
 	}
-	pool.query(sql_query.query.add_play, [player1, player2, gamename, winner], (err, data) => {
+	pool.query(sql_query.query.advertise_journey, [player1, player2, gamename, winner], (err, data) => {
 		if(err) {
 			console.error("Error in adding play");
 			res.redirect('/jouruneys?add=fail');

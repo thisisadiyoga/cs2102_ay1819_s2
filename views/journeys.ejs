@@ -6,7 +6,7 @@
 	<div class="card-header">
 		<i class="fas fa-dice-six"></i> &nbsp; New Journey
 	</div>
-	<form method="post" action="/add_play">
+	<form method="post" action="/add_journey">
 		<div class="card-body">
 			<div class="form-group row">
 				<label for="username" class="col-sm-2 col-form-label"><b>User Email:</b></label>
@@ -17,42 +17,49 @@
 			<div class="form-group row">
 				<label for="carname" class="col-sm-2 col-form-label"><b>Car:</b></label>
 				<div class="col-sm-4">
-					<div class="dropdown">
-					  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					    Select Car
-					  </button>
-					  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+						<select class="form-control" id="carname" name="carname">
 							<% for(var i=0; i<cars.length; i++) { %>
-								<a class="dropdown-item" href="#"><%= cars[i].car_model %> - <%= cars[i].car_plate_no %></a>
+								<option name="carname" class="dropdown-item" href="#"><%= cars[i].car_model %> - <%= cars[i].car_plate_no %></option>
 							<% } %>
-					  </div>
-					</div>
+						</select>
 					<!-- <input type="text" required="required" class="form-control" id="carname" placeholder="Car" name="carname" value=""> -->
 				</div>
 				<label for="carmaxpass" class="col-sm-2 col-form-label"><b>Max Passengers:</b></label>
 				<div class="col-sm-4">
-					<input type="number" min="1" step="1" required="required" class="form-control" id="carmaxpass" placeholder="Max Passengers" name="carmaxpass" value="">
+					<input type="number" min="1" step="1" max="7" required="required" class="form-control" id="carmaxpass" placeholder="Max Passengers" name="carmaxpass">
 				</div>
 			</div>
 			<div class="form-group row">
-				<label for="player1" class="col-sm-2 col-form-label"><b>Pickup Address:</b></label>
+				<label for="pickuparea" class="col-sm-2 col-form-label"><b>Pickup Area:</b></label>
 				<div class="col-sm-4">
-					<input type="text" required="required" class="form-control" id="player1" placeholder="Pickup Address" name="player1" value="">
+					<input type="text" required="required" class="form-control" id="pickuparea" placeholder="Pickup Area" name="pickuparea" value="">
 				</div>
-				<label for="player2" class="col-sm-2 col-form-label"><b>Dropoff Address:</b></label>
+				<label for="dropoffarea" class="col-sm-2 col-form-label"><b>Dropoff Area:</b></label>
 				<div class="col-sm-4">
-					<input type="text" required="required" class="form-control" id="player2" placeholder="Dropoff Address" name="player2" value="">
+					<input type="text" required="required" class="form-control" id="dropoffarea" placeholder="Dropoff Area" name="dropoffarea" value="">
 				</div>
 			</div>
 			<div class="form-group row">
-				<label for="player1" class="col-sm-2 col-form-label"><b>Pickup Time:</b></label>
+				<label for="pickuptime" class="col-sm-2 col-form-label"><b>Pickup Time:</b></label>
 				<div class="col-sm-4">
-					<input type="text" data-field="datetime" readonly>
+					<input id="pickuptime" name="pickuptime" type="text" data-field="datetime" readonly>
 					<div id="dtBox"></div>
 				</div>
-				<label for="player2" class="col-sm-2 col-form-label"><b>Dropoff Time:</b></label>
+				<label for="dropofftime" class="col-sm-2 col-form-label"><b>Dropoff Time:</b></label>
 				<div class="col-sm-4">
-					<input type="text" data-field="datetime" readonly>
+					<input id="dropofftime" name="dropofftime" type="text" data-field="datetime" readonly>
+					<div id="dtBox"></div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="bidstart" class="col-sm-2 col-form-label"><b>Bid Start:</b></label>
+				<div class="col-sm-4">
+					<input id="bidstart" name="bidstart" type="text" data-field="datetime" readonly>
+					<div id="dtBox"></div>
+				</div>
+				<label for="bidend" class="col-sm-2 col-form-label"><b>Bid End:</b></label>
+				<div class="col-sm-4">
+					<input id="bidend" name="bidend" type="text" data-field="datetime" readonly>
 					<div id="dtBox"></div>
 				</div>
 			</div>

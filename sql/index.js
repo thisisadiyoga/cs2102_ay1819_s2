@@ -82,7 +82,7 @@ sql.query = {
 	// WHERE 
 
 
-	
+	/*
 	//For our last complex query maybe we can do a recommendation of sorts for new journeys to the passenger based on old ride timings, destinations and drivers etc.
 	WITH journey_info AS (
 	SELECT pick_up_area, drop_off_area, pick_up_time, EXTRACT(HOUR FROM DATE_TRUNC('hour', pick_up_time + interval '30 minute')) AS hour
@@ -101,6 +101,7 @@ sql.query = {
 	SELECT DISTINCT pick_up_area, drop_off_area, pick_up_time
 	FROM x
 	WHERE frequent_pick_up_area = 1;
+	*/
 	
 
 	//

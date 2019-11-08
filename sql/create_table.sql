@@ -1,9 +1,9 @@
--- DROP TRIGGER IF EXISTS t_check_cp_advertised_journey ON cp_advertised_journey;
+DROP TRIGGER IF EXISTS t_check_cp_advertised_journey ON cp_advertised_journey;
 DROP TRIGGER IF EXISTS t_check_passenger_bid ON cp_passenger_bid;
--- DROP TRIGGER IF EXISTS t_check_journey_occurs ON cp_journey_occurs;
--- DROP TRIGGER IF EXISTS t_check_driver_rates ON cp_driver_rates;
--- DROP TRIGGER IF EXISTS t_check_passenger_rates ON cp_passenger_rates;
--- DROP TRIGGER IF EXISTS t_check_payment ON cp_payment;
+DROP TRIGGER IF EXISTS t_check_journey_occurs ON cp_journey_occurs;
+DROP TRIGGER IF EXISTS t_check_driver_rates ON cp_driver_rates;
+DROP TRIGGER IF EXISTS t_check_passenger_rates ON cp_passenger_rates;
+DROP TRIGGER IF EXISTS t_check_payment ON cp_payment;
 
 --General User information
 --User information is added when account is created
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS cp_passenger_bid (
     --3. check that the bid_price is greater than the min_bid
     --4. check that the number_of_passengers is less than the max_passengers
     --5. check that the bid occurs after the advertisement was put up and before it ends
-    --6. CHECK that same journeys only 1 is set to true
+    --6. CHECK that for the same journeys only 1 is set to true
 
     --BONUS--
     --1. check that pick up address is actually in pick up area
@@ -207,266 +207,282 @@ CREATE TABLE IF NOT EXISTS cp_payment (
 
 
 
--- ----------TRIGGER FOR cp_advertised_journey----------
--- CREATE OR REPLACE FUNCTION f_check_cp_advertised_journey()
--- RETURNS TRIGGER
--- AS $$
---     DECLARE check_car_max_passenger BOOLEAN;
---     DECLARE check_correct_bid_time BOOLEAN;
---     DECLARE check_driver_requests_overlap BOOLEAN;
---     DECLARE check_passenger_bid_overlap BOOLEAN;
--- BEGIN
---     --check for correct max passengers
---     check_car_max_passenger := EXISTS (
---             SELECT * FROM cp_driver_drives d
---             WHERE d.email = NEW.email
---             AND d.car_plate_no = NEW.car_plate_no
---             AND d.max_passengers >= NEW.max_passengers
---     );
---     IF NOT check_car_max_passenger THEN
---         RAISE NOTICE 'CAR CANNOT HOLD THAT MANY PASSENGERS';
---         RETURN NULL;
---     END IF;
---
---     --check for bid start time validity
---     check_correct_bid_time := EXISTS (
---         SELECT * FROM cp_user g
---         WHERE g.email = NEW.email
---         AND g.account_creation_time < NEW.bid_start_time
---     );
---     IF NOT check_correct_bid_time THEN
---         RAISE NOTICE 'BID WAS PUT UP BEFORE ACCOUNT CREATION';
---         RETURN NULL;
---     END IF;
---
---     --check for overlaps with other driver requests
---     check_driver_requests_overlap := EXISTS(
---         SELECT * FROM cp_advertised_journey a
---         WHERE a.email = NEW.email
---         AND (((a.pick_up_time + '30 minute'::interval) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
---         OR ((a.pick_up_time - '30 minute'::interval) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
---         OR a.pick_up_time = NEW.pick_up_time)
---     );
---     IF check_driver_requests_overlap AND check_driver_requests_overlap IS NOT NULL THEN
---         RAISE NOTICE 'OVERLAP WITH OTHER REQUESTS';
---         RETURN NULL;
---     END IF;
---
---     --check for overlaps with passenger bids
---     check_passenger_bid_overlap := EXISTS(
---         SELECT * FROM cp_passenger_bid a
---         WHERE a.passenger_email = NEW.email
---         AND ((a.pick_up_time + '30 minute'::interval > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
---         OR (a.pick_up_time - '30 minute'::interval < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
---         OR a.pick_up_time = NEW.pick_up_time)
---     );
---
---     IF check_passenger_bid_overlap AND check_passenger_bid_overlap IS NOT NULL THEN
---         RAISE NOTICE 'OVERLAP WITH OTHER BIDS';
---         RETURN NULL;
---     END IF;
---
---     RETURN NEW;
--- END;
--- $$
--- LANGUAGE plpgsql;
---
--- CREATE TRIGGER t_check_cp_advertised_journey
--- BEFORE INSERT OR UPDATE ON cp_advertised_journey
--- FOR EACH ROW EXECUTE PROCEDURE f_check_cp_advertised_journey();
---
---
--- ----------TRIGGER FOR cp_passenger_bid----------
--- CREATE OR REPLACE FUNCTION f_check_passenger_bid()
--- RETURNS TRIGGER
--- AS $$
---     DECLARE check_advertised_ride_bid_start BOOLEAN;
---     DECLARE check_advertised_ride_bid_end BOOLEAN;
---     DECLARE check_enough_seats BOOLEAN;
---     DECLARE check_minimum_bid BOOLEAN;
---     DECLARE check_correct_bid_time BOOLEAN;
---     DECLARE check_driver_requests_overlap BOOLEAN;
--- BEGIN
---     --check that bid occurs after it was put up
---     check_advertised_ride_bid_start := EXISTS (
---         SELECT * FROM cp_advertised_journey a
---         WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
---         AND a.bid_start_time <= NEW.bid_time
---     );
---
---     IF NOT check_advertised_ride_bid_start THEN
---         RAISE NOTICE 'BID OCCURS BEFORE IT WAS PUT UP';
---         RETURN NULL;
---     END IF;
---
---     --check that bid occurs before it ends
---     check_advertised_ride_bid_end := EXISTS (
---         SELECT * FROM cp_advertised_journey a
---         WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
---         AND a.bid_end_time >= NEW.bid_time
---     );
---
---     IF NOT check_advertised_ride_bid_end THEN
---         RAISE NOTICE 'BID OCCURS AFTER IT WAS PUT UP';
---         RETURN NULL;
---     END IF;
---
---     --check to ensure there are enough seats
---     check_enough_seats := EXISTS (
---         SELECT * FROM cp_advertised_journey a
---         WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
---         AND a.max_passengers >= NEW.number_of_passengers
---     );
---
---     IF NOT check_enough_seats THEN
---         RAISE NOTICE 'NOT ENOUGH SEATS';
---         RETURN NULL;
---     END IF;
---
---     -- check to ensure bid is more than the minimum
---     check_minimum_bid := EXISTS (
---         SELECT * FROM cp_advertised_journey a
---         WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
---         AND a.min_bid <= NEW.bid_price
---     );
---
---     IF NOT check_minimum_bid THEN
---         RAISE NOTICE 'BELOW MINIMUM BID';
---         RETURN NULL;
---     END IF;
---
---     --check for bid_time is after account was created
---     check_correct_bid_time := EXISTS (
---         SELECT * FROM cp_user g
---         WHERE g.email = NEW.passenger_email
---         AND g.account_creation_time < NEW.bid_time
---     );
---     IF NOT check_correct_bid_time THEN
---         RAISE NOTICE 'BID WAS PUT UP BEFORE ACCOUNT CREATION';
---         RETURN NULL;
---     END IF;
---
---     --check for overlaps with advertised journies
---     check_driver_requests_overlap := EXISTS(
---         SELECT * FROM cp_advertised_journey a
---         WHERE a.email = NEW.passenger_email
---         AND (((a.pick_up_time + '30 minute'::interval) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
---         OR ((a.pick_up_time - '30 minute'::interval) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
---         OR a.pick_up_time = NEW.pick_up_time)
---     );
---
---     IF check_driver_requests_overlap AND check_driver_requests_overlap IS NOT NULL THEN
---         RAISE NOTICE 'OVERLAP WITH ADVERTISED JOURNIES';
---         RETURN NULL;
---     END IF;
---
---     RETURN NEW;
--- END;
--- $$
--- LANGUAGE plpgsql;
---
--- CREATE TRIGGER t_check_passenger_bid
--- BEFORE INSERT OR UPDATE ON cp_passenger_bid
--- FOR EACH ROW EXECUTE PROCEDURE f_check_passenger_bid();
---
--- --TRIGGER FOR cp_journey_occurs--
--- CREATE OR REPLACE FUNCTION f_check_journey_occurs()
--- RETURNS TRIGGER
--- AS $$
---     DECLARE check_won_bid BOOLEAN;
--- BEGIN
---     check_won_bid := EXISTS(
---         SELECT * FROM cp_passenger_bid b
---         WHERE b.passenger_email = NEW.passenger_email
---         AND b.driver_email = NEW.driver_email
---         AND b.car_plate_no = NEW.car_plate_no
---         AND b.pick_up_time = NEW.pick_up_time
---         AND b.bid_won = TRUE
---     );
---     IF NOT check_won_bid THEN
---         RAISE NOTICE 'BID NOT WON YET';
---         RETURN NULL;
---     END IF;
---     RETURN NEW;
--- END;
--- $$
--- LANGUAGE plpgsql;
---
--- CREATE TRIGGER t_check_journey_occurs
--- BEFORE INSERT OR UPDATE ON cp_journey_occurs
--- FOR EACH ROW EXECUTE PROCEDURE f_check_journey_occurs();
---
--- --TRIGGER FOR cp_driver_rates--
--- CREATE OR REPLACE FUNCTION f_check_driver_rates()
--- RETURNS TRIGGER
--- AS $$
---     DECLARE check_journey_over BOOLEAN;
--- BEGIN
---     check_journey_over := EXISTS(
---         SELECT * FROM cp_journey_occurs j
---         WHERE j.driver_email = NEW.driver_email
---         AND j.journey_start_time = NEW.journey_start_time
---         AND j.journey_end_time IS NOT NULL
---     );
---     IF NOT check_journey_over THEN
---         RAISE NOTICE 'JOURNEY NOT OVER YET';
---         RETURN NULL;
---     END IF;
---     RETURN NEW;
--- END;
--- $$
--- LANGUAGE plpgsql;
---
--- CREATE TRIGGER t_check_driver_rates
--- BEFORE INSERT OR UPDATE ON cp_driver_rates
--- FOR EACH ROW EXECUTE PROCEDURE f_check_driver_rates();
---
--- --TRIGGER FOR cp_passenger_rates--
--- CREATE OR REPLACE FUNCTION f_check_passenger_rates()
--- RETURNS TRIGGER
--- AS $$
---     DECLARE check_journey_over BOOLEAN;
--- BEGIN
---     check_journey_over := EXISTS(
---         SELECT * FROM cp_journey_occurs j
---         WHERE j.passenger_email = NEW.passenger_email
---         AND j.journey_start_time = NEW.journey_start_time
---         AND j.journey_end_time IS NOT NULL
---     );
---     IF NOT check_journey_over THEN
---         RAISE NOTICE 'JOURNEY NOT OVER YET';
---         RETURN NULL;
---     END IF;
---     RETURN NEW;
--- END;
--- $$
--- LANGUAGE plpgsql;
---
--- CREATE TRIGGER t_check_passenger_rates
--- BEFORE INSERT OR UPDATE ON cp_passenger_rates
--- FOR EACH ROW EXECUTE PROCEDURE f_check_passenger_rates();
---
--- --TRIGGER FOR cp_payment--
--- CREATE OR REPLACE FUNCTION f_check_payment()
--- RETURNS TRIGGER
--- AS $$
---     DECLARE check_journey_over BOOLEAN;
--- BEGIN
---     check_journey_over := EXISTS(
---         SELECT * FROM cp_journey_occurs j
---         WHERE j.passenger_email = NEW.passenger_email
---         AND j.journey_start_time = NEW.journey_start_time
---         AND j.journey_end_time IS NOT NULL
---     );
---     IF NOT check_journey_over THEN
---         RAISE NOTICE 'JOURNEY NOT OVER YET';
---         RETURN NULL;
---     END IF;
---     RETURN NEW;
--- END;
--- $$
--- LANGUAGE plpgsql;
---
--- CREATE TRIGGER t_check_payment
--- BEFORE INSERT OR UPDATE ON cp_payment
--- FOR EACH ROW EXECUTE PROCEDURE f_check_payment();
+----------TRIGGER FOR cp_advertised_journey----------
+CREATE OR REPLACE FUNCTION f_check_cp_advertised_journey()
+RETURNS TRIGGER
+AS $$
+    DECLARE check_car_max_passenger BOOLEAN;
+    DECLARE check_correct_bid_time BOOLEAN;
+    DECLARE check_driver_requests_overlap BOOLEAN;
+    DECLARE check_passenger_bid_overlap BOOLEAN;
+BEGIN
+    --check for correct max passengers
+    check_car_max_passenger := EXISTS (
+            SELECT * FROM cp_driver_drives d
+            WHERE d.email = NEW.email
+            AND d.car_plate_no = NEW.car_plate_no
+            AND d.max_passengers >= NEW.max_passengers
+    );
+    IF NOT check_car_max_passenger THEN
+        RAISE EXCEPTION 'CAR CANNOT HOLD THAT MANY PASSENGERS';
+        RETURN NULL;
+    END IF;
+
+    --check for bid start time validity
+    check_correct_bid_time := EXISTS (
+        SELECT * FROM cp_user g
+        WHERE g.email = NEW.email
+        AND g.account_creation_time < NEW.bid_start_time
+    );
+    IF NOT check_correct_bid_time THEN
+        RAISE EXCEPTION 'BID WAS PUT UP BEFORE ACCOUNT CREATION';
+        RETURN NULL;
+    END IF;
+
+    --check for overlaps with other driver requests
+    check_driver_requests_overlap := EXISTS(
+        SELECT * FROM cp_advertised_journey a
+        WHERE a.email = NEW.email
+        AND (((a.pick_up_time + '30 minute'::interval) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
+        OR ((a.pick_up_time - '30 minute'::interval) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
+        OR a.pick_up_time = NEW.pick_up_time)
+    );
+    IF check_driver_requests_overlap AND check_driver_requests_overlap IS NOT NULL THEN
+        RAISE EXCEPTION 'OVERLAP WITH OTHER REQUESTS';
+        RETURN NULL;
+    END IF;
+
+    --check for overlaps with passenger bids
+    check_passenger_bid_overlap := EXISTS(
+        SELECT * FROM cp_passenger_bid a
+        WHERE a.passenger_email = NEW.email
+        AND ((a.pick_up_time + '30 minute'::interval > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
+        OR (a.pick_up_time - '30 minute'::interval < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
+        OR a.pick_up_time = NEW.pick_up_time)
+    );
+
+    IF check_passenger_bid_overlap AND check_passenger_bid_overlap IS NOT NULL THEN
+        RAISE EXCEPTION 'OVERLAP WITH OTHER BIDS';
+        RETURN NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER t_check_cp_advertised_journey
+BEFORE INSERT OR UPDATE ON cp_advertised_journey
+FOR EACH ROW EXECUTE PROCEDURE f_check_cp_advertised_journey();
+
+
+----------TRIGGER FOR cp_passenger_bid----------
+CREATE OR REPLACE FUNCTION f_check_passenger_bid()
+RETURNS TRIGGER
+AS $$
+    DECLARE check_advertised_ride_bid_start BOOLEAN;
+    DECLARE check_advertised_ride_bid_end BOOLEAN;
+    DECLARE check_enough_seats BOOLEAN;
+    DECLARE check_minimum_bid BOOLEAN;
+    DECLARE check_correct_bid_time BOOLEAN;
+    DECLARE check_driver_requests_overlap BOOLEAN;
+    --DECLARE check_winning_bid INTEGER;
+    --DECLARE check_losing_bid INTEGER;
+BEGIN
+    --check that bid occurs after it was put up
+    check_advertised_ride_bid_start := EXISTS (
+        SELECT * FROM cp_advertised_journey a
+        WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
+        AND a.bid_start_time <= NEW.bid_time
+    );
+
+    IF NOT check_advertised_ride_bid_start THEN
+        RAISE EXCEPTION 'BID OCCURS BEFORE IT WAS PUT UP';
+        RETURN NULL;
+    END IF;
+
+    --check that bid occurs before it ends
+    check_advertised_ride_bid_end := EXISTS (
+        SELECT * FROM cp_advertised_journey a
+        WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
+        AND a.bid_end_time >= NEW.bid_time
+    );
+
+    IF NOT check_advertised_ride_bid_end THEN
+        RAISE EXCEPTION 'BID OCCURS AFTER IT WAS PUT UP';
+        RETURN NULL;
+    END IF;
+
+    --check to ensure there are enough seats
+    check_enough_seats := EXISTS (
+        SELECT * FROM cp_advertised_journey a
+        WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
+        AND a.max_passengers >= NEW.number_of_passengers
+    );
+
+    IF NOT check_enough_seats THEN
+        RAISE EXCEPTION 'NOT ENOUGH SEATS';
+        RETURN NULL;
+    END IF;
+
+    -- check to ensure bid is more than the minimum
+    check_minimum_bid := EXISTS (
+        SELECT * FROM cp_advertised_journey a
+        WHERE a.email = NEW.driver_email AND a.pick_up_time = NEW.pick_up_time
+        AND a.min_bid <= NEW.bid_price
+    );
+
+    IF NOT check_minimum_bid THEN
+        RAISE EXCEPTION 'BELOW MINIMUM BID';
+        RETURN NULL;
+    END IF;
+
+    --check for bid_time is after account was created
+    check_correct_bid_time := EXISTS (
+        SELECT * FROM cp_user g
+        WHERE g.email = NEW.passenger_email
+        AND g.account_creation_time < NEW.bid_time
+    );
+    IF NOT check_correct_bid_time THEN
+        RAISE EXCEPTION 'BID WAS PUT UP BEFORE ACCOUNT CREATION';
+        RETURN NULL;
+    END IF;
+
+    --check for overlaps with advertised journies
+    check_driver_requests_overlap := EXISTS(
+        SELECT * FROM cp_advertised_journey a
+        WHERE a.email = NEW.passenger_email
+        AND (((a.pick_up_time + '30 minute'::interval) > NEW.pick_up_time AND a.pick_up_time < NEW.pick_up_time)
+        OR ((a.pick_up_time - '30 minute'::interval) < NEW.pick_up_time AND a.pick_up_time > NEW.pick_up_time)
+        OR a.pick_up_time = NEW.pick_up_time)
+    );
+
+    IF check_driver_requests_overlap AND check_driver_requests_overlap IS NOT NULL THEN
+        RAISE EXCEPTION 'OVERLAP WITH ADVERTISED JOURNIES';
+        RETURN NULL;
+    END IF;
+
+    -- check_winning_bid := (
+    --     SELECT COUNT(*) FROM cp_passenger_bid a
+    --     WHERE a.passenger_email = NEW.passenger_email
+    --     AND a.driver_email = NEW.driver_email
+    --     AND a.pick_up_time = NEW.pick_up_time
+    --     AND bid_won = TRUE
+    -- );
+
+    -- check_losing_bid := (
+
+    -- );
+
+    -- IF NOT(check_winning_bid = 0 OR check_winning_bid = 1) 
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER t_check_passenger_bid
+BEFORE INSERT OR UPDATE ON cp_passenger_bid
+FOR EACH ROW EXECUTE PROCEDURE f_check_passenger_bid();
+
+--TRIGGER FOR cp_journey_occurs--
+CREATE OR REPLACE FUNCTION f_check_journey_occurs()
+RETURNS TRIGGER
+AS $$
+    DECLARE check_won_bid BOOLEAN;
+BEGIN
+    check_won_bid := EXISTS(
+        SELECT * FROM cp_passenger_bid b
+        WHERE b.passenger_email = NEW.passenger_email
+        AND b.driver_email = NEW.driver_email
+        AND b.car_plate_no = NEW.car_plate_no
+        AND b.pick_up_time = NEW.pick_up_time
+        AND b.bid_won = TRUE
+    );
+    IF NOT check_won_bid THEN
+        RAISE EXCEPTION 'BID NOT WON YET';
+        RETURN NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER t_check_journey_occurs
+BEFORE INSERT OR UPDATE ON cp_journey_occurs
+FOR EACH ROW EXECUTE PROCEDURE f_check_journey_occurs();
+
+--TRIGGER FOR cp_driver_rates--
+CREATE OR REPLACE FUNCTION f_check_driver_rates()
+RETURNS TRIGGER
+AS $$
+    DECLARE check_journey_over BOOLEAN;
+BEGIN
+    check_journey_over := EXISTS(
+        SELECT * FROM cp_journey_occurs j
+        WHERE j.driver_email = NEW.driver_email
+        AND j.journey_start_time = NEW.journey_start_time
+        AND j.journey_end_time IS NOT NULL
+    );
+    IF NOT check_journey_over THEN
+        RAISE EXCEPTION 'JOURNEY NOT OVER YET';
+        RETURN NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER t_check_driver_rates
+BEFORE INSERT OR UPDATE ON cp_driver_rates
+FOR EACH ROW EXECUTE PROCEDURE f_check_driver_rates();
+
+--TRIGGER FOR cp_passenger_rates--
+CREATE OR REPLACE FUNCTION f_check_passenger_rates()
+RETURNS TRIGGER
+AS $$
+    DECLARE check_journey_over BOOLEAN;
+BEGIN
+    check_journey_over := EXISTS(
+        SELECT * FROM cp_journey_occurs j
+        WHERE j.passenger_email = NEW.passenger_email
+        AND j.journey_start_time = NEW.journey_start_time
+        AND j.journey_end_time IS NOT NULL
+    );
+    IF NOT check_journey_over THEN
+        RAISE EXCEPTION 'JOURNEY NOT OVER YET';
+        RETURN NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER t_check_passenger_rates
+BEFORE INSERT OR UPDATE ON cp_passenger_rates
+FOR EACH ROW EXECUTE PROCEDURE f_check_passenger_rates();
+
+--TRIGGER FOR cp_payment--
+CREATE OR REPLACE FUNCTION f_check_payment()
+RETURNS TRIGGER
+AS $$
+    DECLARE check_journey_over BOOLEAN;
+BEGIN
+    check_journey_over := EXISTS(
+        SELECT * FROM cp_journey_occurs j
+        WHERE j.passenger_email = NEW.passenger_email
+        AND j.journey_start_time = NEW.journey_start_time
+        AND j.journey_end_time IS NOT NULL
+    );
+    IF NOT check_journey_over THEN
+        RAISE EXCEPTION 'JOURNEY NOT OVER YET';
+        RETURN NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER t_check_payment
+BEFORE INSERT OR UPDATE ON cp_payment
+FOR EACH ROW EXECUTE PROCEDURE f_check_payment();

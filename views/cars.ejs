@@ -4,7 +4,7 @@
 </div>
 <div class="card mb-3">
 	<div class="card-header">
-		<i class="fas fa-dice-d20"></i> &nbsp; Add Car
+		<i class="fas fa-car"></i> &nbsp; Add Car
 	</div>
 	<form method="post" action="/add_car">
 		<div class="card-body">
@@ -23,7 +23,7 @@
 			<div class="form-group row">
 				<label for="carmaxpass" class="col-sm-3 col-form-label"><b>Max Passengers:</b></label>
 				<div class="col-sm-4">
-					<input type="number" min="1" step="1" required="required" class="form-control" id="carmaxpass" placeholder="Maximum Passengers" name="carmaxpass" value="">
+					<input type="number" min="1" step="1" max="7" required="required" class="form-control" id="carmaxpass" placeholder="Maximum Passengers" name="carmaxpass" value="">
 				</div>
 		</div>
 			<div class="form-group row">
@@ -38,7 +38,7 @@
 </div>
 					<div class="card mb-3">
 						<div class="card-header">
-							<i class="fas fa-dice"></i> &nbsp; Car List
+							<i class="fas fa-car-side"></i> &nbsp; Car List
 						</div>
 						<div class="card-body">
 							<div class="table-responsive">

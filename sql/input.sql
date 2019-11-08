@@ -1,35 +1,41 @@
-INSERT INTO cp_user VALUES ('daniels@gmail.com', '2019-11-03 00:00:00', '1990-12-23', 'm', 'Charlie', 'Daniels', '12345678');
-INSERT INTO cp_user VALUES ('rico41@gmail.com', '2019-11-03 01:00:00', '1990-01-14', 'm', 'Sergio', 'Rico', '12345678');
-INSERT INTO cp_user VALUES ('wilsontheKING@gmail.com', '2019-11-03 02:00:00', '1990-02-21', 'm', 'Callum', 'Wilson', '12345678');
-INSERT INTO cp_user VALUES ('howecoach@gmail.com', '2019-11-03 03:00:00', '1990-09-21', 'm', 'Eddie', 'Howe', '12345678');
+INSERT INTO cp_user VALUES ('aaa@gmail.com', '2019-11-07 00:00:00', '2000-01-01','m', 'bob', 'jones', '1234');
+INSERT INTO cp_user VALUES ('bbb@gmail.com', '2019-11-07 00:00:00', '2000-01-01','m', 'bob', 'jones', '1234');
+INSERT INTO cp_user VALUES ('ccc@gmail.com', '2019-11-07 00:00:00', '2000-01-01','m', 'bob', 'jones', '1234');
+INSERT INTO cp_user VALUES ('ddd@gmail.com', '2019-11-07 00:00:00', '2000-01-01','m', 'bob', 'jones', '1234');
 
-INSERT INTO cp_driver VALUES ('daniels@gmail.com');
-INSERT INTO cp_driver VALUES ('wilsontheKING@gmail.com');
-INSERT INTO cp_driver VALUES ('rico41@gmail.com');
+INSERT INTO cp_driver VALUES ('aaa@gmail.com', '0123456789', 'license01');
+INSERT INTO cp_driver VALUES ('bbb@gmail.com', '0123456789', 'license02');
 
-INSERT INTO cp_passenger VALUES ('rico41@gmail.com');
-INSERT INTO cp_passenger VALUES ('daniels@gmail.com');
+INSERT INTO cp_driver_drives VALUES ('A123A', 'Audi R8', 3, 'aaa@gmail.com');
+INSERT INTO cp_driver_drives VALUES ('B123B', 'Audi R8', 3, 'aaa@gmail.com');
+INSERT INTO cp_driver_drives VALUES ('C123C', 'Audi R8', 3, 'aaa@gmail.com');
+INSERT INTO cp_driver_drives VALUES ('A123A', 'Audi R8', 3, 'bbb@gmail.com');
 
-INSERT INTO cp_driver_drives VALUES ('SJZ1234U', 'Audi R8', '3', 'daniels@gmail.com');
-INSERT INTO cp_driver_drives VALUES ('SKL4321U', 'Honda Civic', '3', 'daniels@gmail.com');
-INSERT INTO cp_driver_drives VALUES ('EK45I', 'Toyota Camry', '3', 'wilsontheKING@gmail.com');
-INSERT INTO cp_driver_drives VALUES ('AAA', 'Toyota Camry', '3', 'rico41@gmail.com');
+INSERT INTO cp_passenger VALUES ('aaa@gmail.com', NULL, NULL);
+INSERT INTO cp_passenger VALUES ('ccc@gmail.com', NULL, NULL);
+INSERT INTO cp_passenger VALUES ('ddd@gmail.com', NULL, NULL);
 
-
---INSERT INTO Advertised_Journey_Driver VALUES ('EK45I', 3, 'Chinatown', 'Woodlands', 5.5, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 06:00:00', 'wilsontheKING@gmail.com');
-
-INSERT INTO cp_advertised_journey VALUES ('SJZ1234U', 3, 'Woodlands', 'Chinatown', 5.5, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 03:00:00', 'daniels@gmail.com'); 
-INSERT INTO cp_advertised_journey VALUES ('SJZ1234U', 3, 'Chinatown', 'Woodlands', 5.5, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 04:00:00', 'daniels@gmail.com');
-INSERT INTO cp_advertised_journey VALUES ('EK45I', 3, 'Chinatown', 'Woodlands', 5.5, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 06:00:00', 'wilsontheKING@gmail.com');
-INSERT INTO cp_advertised_journey VALUES ('EK45I', 3, 'Chinatown', 'Woodlands', 5.5, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 07:00:00', 'wilsontheKING@gmail.com');
-INSERT INTO cp_advertised_journey VALUES ('AAA', 3, 'Chinatown', 'Woodlands', 5.5, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 07:15:00', 'rico41@gmail.com');
+INSERT INTO cp_payment_method VALUES ('f', NULL, NULL, NULL, NULL, 'aaa@gmail.com');
+INSERT INTO cp_payment_method VALUES ('f', NULL, NULL, NULL, NULL, 'ccc@gmail.com');
+INSERT INTO cp_payment_method VALUES ('t', 'bob', '111', '2022-11-11', '000000000', 'ddd@gmail.com');
 
 
-INSERT INTO cp_requested_journey VALUES (3, '23 Dover Road', '78 Ubi Lane', 20.0, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 05:00:00', 'daniels@gmail.com');
-INSERT INTO cp_requested_journey VALUES (3, '23 Dover Road', '78 Ubi Lane', 20.0, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 06:00:00', 'daniels@gmail.com');
-INSERT INTO cp_requested_journey VALUES (3, '23 Dover Road', '78 Ubi Lane', 20.0, '2019-12-03 00:00:00', '2019-12-03 01:00:00', '2019-12-03 07:00:00', 'rico41@gmail.com');
+INSERT INTO cp_advertised_journey VALUES ('aaa@gmail.com', 'A123A', 3, 'clementi', 'orchard', 10, '2019-11-07 06:00:00', '2019-11-07 06:15:00', '2019-11-07 07:00:00');
+INSERT INTO cp_advertised_journey VALUES ('aaa@gmail.com', 'A123A', 3, 'clementi', 'orchard', 10, '2019-11-07 06:00:00', '2019-11-07 06:15:00', '2019-11-07 07:45:00');
+INSERT INTO cp_advertised_journey VALUES ('bbb@gmail.com', 'A123A', 3, 'clementi', 'orchard', 10, '2019-11-07 10:00:00', '2019-11-07 10:15:00', '2019-11-07 11:15:00');
+INSERT INTO cp_advertised_journey VALUES ('aaa@gmail.com', 'A123A', 3, 'clementi', 'orchard', 10, '2019-11-07 06:00:00', '2019-11-07 06:15:00', '2019-11-07 12:30:00');
 
+INSERT INTO cp_passenger_bid VALUES ('ccc@gmail.com', 'bbb@gmail.com', 'A123A', '2019-11-07 11:15:00', 'pickupAddress', 'dropoffAddress', '2019-11-07 10:10:00', 15, 3, NULL);
+INSERT INTO cp_passenger_bid VALUES ('aaa@gmail.com', 'bbb@gmail.com', 'A123A', '2019-11-07 11:15:00', 'pickupAddress', 'dropoffAddress', '2019-11-07 10:10:00', 15, 2, NULL);
 
-INSERT INTO cp_passenger_bid VALUES ('daniels@gmail.com', 'wilsontheKING@gmail.com', 'Chinatown', 'Woodlands', '23 Woodlands Ave 6', '86 Telok Ayer Street', '2019-12-03 01:00:00', '2019-12-03 06:00:00', 7);
-INSERT INTO cp_passenger_bid VALUES ('daniels@gmail.com', 'wilsontheKING@gmail.com', 'Chinatown', 'Woodlands', '23 Woodlands Ave 6', '86 Telok Ayer Street', '2019-12-03 01:00:00', '2019-12-03 07:00:00', 7);
-INSERT INTO cp_passenger_bid VALUES ('daniels@gmail.com', 'rico41@gmail.com', 'Chinatown', 'Woodlands', '23 Woodlands Ave 6', '86 Telok Ayer Street', '2019-12-03 01:00:00', '2019-12-03 07:15:00', 7);
+UPDATE cp_passenger_bid SET bid_won = TRUE WHERE passenger_email = 'ccc@gmail.com';
+
+INSERT INTO cp_journey_occurs VALUES ('ccc@gmail.com', 'bbb@gmail.com', 'A123A', '2019-11-07 11:15:00', '2019-11-07 10:10:00', NULL, NULL);
+
+UPDATE cp_journey_occurs SET journey_end_time = '2019-11-07 11:10:00' WHERE passenger_email = 'ccc@gmail.com';
+
+INSERT INTO cp_driver_rates VALUES ('2019-11-07 10:10:00', 'bbb@gmail.com', 3);
+
+INSERT INTO cp_passenger_rates VALUES ('2019-11-07 10:10:00', 'ccc@gmail.com', 3);
+
+INSERT INTO cp_payment VALUES ('2019-11-07 10:10:00', 'ccc@gmail.com', 'f', 'cash');

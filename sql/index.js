@@ -16,11 +16,15 @@ sql.query = {
 
 	// Insertion
 	add_car: 'INSERT INTO cp_driver_drives (car_plate_no, car_model, max_passengers, email) VALUES($1, $2, $3, $4)',
-	advertise_journey: 'INSERT INTO cp_advertised_journey (email, car_plate_no, max_passengers, pick_up_area, drop_off_area, min_bid, bid_start_time, bid_end_time) VALUES($1,$2,$3,$4,$5,%6,$7,$8,$9)',
+	advertise_journey: 'INSERT INTO cp_advertised_journey (email, car_plate_no, max_passengers, pick_up_area, drop_off_area, min_bid, bid_start_time, bid_end_time, pick_up_time) VALUES($1,$2,$3,$4,$5,%6,$7,$8,$9)',
 	add_user: 'INSERT INTO cp_user (email, account_creation_time, dob, gender, firstname, lastname, password) VALUES ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, $6)',
 	add_driver:		'INSERT INTO cp_driver (email) VALUES ($1)',
  	add_passenger:	'INSERT INTO cp_passenger (email, home_address, work_address) VALUES ($1, \'\', \'\')',
 	add_bid: '',
+	
+	add_cash_payment: 'INSERT INTO cp_payment_method (have_card, email) VALUES (\'f\', $1)',
+	add_payment: 'UPDATE cp_payment_method SET have_card=$1, cardholder_name=$2, cvv=$3, expiry_date=$4, card_number=$5, email=$6',
+	add_driver_info: 'UPDATE cp_driver SET bank_account_no=$1, license_no=$2 WHERE email=$3',
 
 	// Login
 	userpass: 'SELECT email, password, firstname, lastname FROM cp_user WHERE email=$1',

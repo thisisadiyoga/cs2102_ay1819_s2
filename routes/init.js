@@ -2,6 +2,7 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
 const fs = require('fs')
+const moment = require('moment')
 
 // Postgres SQL Connection
 const { Pool } = require('pg');
@@ -32,6 +33,11 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/cars'    	, passport.authMiddleware(), cars);
 	app.get('/journeys'    , passport.authMiddleware(), journeys);
+	app.get('/payment'  , passport.authMiddleware(), payment);
+	app.get('/bids'    	, passport.authMiddleware(), bids);
+	app.get('/driverinfo', passport.authMiddleware(), driverinfo);
+
+	//app.get('/rides', passport.authMiddleware(), rides);
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/login'		, passport.antiMiddleware(), login);
@@ -45,6 +51,9 @@ function initRouter(app) {
 	app.post('/del_car'    , passport.authMiddleware(), del_car);
 
 	app.post('/reg_user'   , passport.antiMiddleware(), reg_user);
+
+	app.post('/add_payment', passport.authMiddleware(), add_payment);
+	app.post('/add_driver_info', passport.authMiddleware(), add_driver_info);
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('local', {
@@ -120,6 +129,18 @@ function login(req, res, next) {
 	res.render('login', { page: 'login', auth: false });
 }
 
+function payment(req, res, next) {
+	basic(req, res, 'payment', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+}
+
+function bids(req, res, next) {
+	basic(req, res, 'bids', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+}
+
+function driverinfo(req, res, next) {
+	basic(req, res, 'driverinfo', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+}
+
 function search(req, res, next) {
 	var ctx  = 0, avg = 0, tbl;
 	var game = "%" + req.query.gamename.toLowerCase() + "%";
@@ -139,10 +160,12 @@ function search(req, res, next) {
 	});
 }
 
+
 function dashboard(req, res, next) {
 	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
 }
 
+//view cars 
 function cars(req, res, next) {
 	var ctx = 0, avg = 0, tbl;
 	pool.query(sql_query.query.avg_rating, [req.user.username], (err, data) => {
@@ -164,13 +187,13 @@ function cars(req, res, next) {
 	});
 }
 
-function update_car(req, res, next) {
-	let carplate = req.body.car
-	var ctx = 0, avg = 0, tbl = [];
+// function update_car(req, res, next) {
+// 	let carp	late = req.body.car
+// 	var ctx = 0, avg = 0, tbl = [];
 
 
 
-}
+// }
 
 function del_car(req, res, next) {
 	let carplate = req.body.car
@@ -287,23 +310,69 @@ function add_car(req, res, next) {
 function add_journey(req, res, next) {
 	var email = req.user.email;
 	var carplate = req.body.carname.split("-")[1].trim();
-	var maxPassengers = req.body.carmaxpass;
-	var pickupAddress  = req.body.pickuparea;
-	var dropoffAddress  = req.body.dropoffarea;
-	var pickuptime = req.body.pickuptime;
+	var maxPassengers = int(req.body.carmaxpass);
+	var pickupArea  = req.body.pickuparea;
+	var dropoffArea  = req.body.dropoffarea;
+	var pickuptime = req.body.pickuptime.toString();
 	var dropofftime   = req.body.dropofftime;
 	var bidStart = req.body.bidstart;
 	var bidEnd = req.body.bidend;
+	// var pickuptime = moment(req.body.pickuptime, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+	// var dropofftime   = moment(req.body.dropofftime, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:MM:SS');
+	// var bidStart = moment(req.body.bidstart, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+	// var bidEnd = moment(req.body.bidend, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
 
-	if(username != player1 || player1 == player2 || (winner != player1 && winner != player2)) {
-		res.redirect('/journeys?add=fail');
-	}
-	pool.query(sql_query.query.advertise_journey, [player1, player2, gamename, winner], (err, data) => {
+	// if (bidEnd < bidStart || dropofftime < pickuptime) {
+	// 	res.redirect('/jouruneys?add=fail');
+	// }
+
+	pool.query(sql_query.query.advertise_journey, [email, carplate, maxPassengers, pickupArea, dropoffArea, 3.0, bidStart, bidEnd, pickuptime], (err, data) => {
 		if(err) {
-			console.error("Error in adding play");
+			console.log(err)
+			console.error("Error in adding journey");
 			res.redirect('/jouruneys?add=fail');
 		} else {
 			res.redirect('/journeys?add=pass');
+		}
+	});
+}
+
+function add_payment(req, res, next) {
+	var cardholder_name = req.body.cardholder_name;
+	var cvv = req.body.cvv;
+	var expiry_date = req.body.expiry_date + "/01";
+	var card_number = req.body.card_number;
+	var email = req.user.email;
+
+	pool.query(sql_query.query.add_payment, ['t', cardholder_name, cvv, expiry_date, card_number, email], (err, data) => {
+		console.log("OK");
+		if (err) {
+			console.log(err);
+			res.redirect('/payment?add=fail');
+		} else {
+			console.log("Payment mode added.");
+			res.redirect('/dashboard');
+		}
+	});
+}
+
+function add_driver_info(req, res, next) {
+	console.log("AAAA");
+	var bank_account_no = req.body.bank_account_no;
+	var license_no = req.body.license_no;
+	var email = req.user.email;
+
+	console.log(bank_account_no);
+	console.log(license_no);
+	console.log(email);
+
+	pool.query(sql_query.query.add_driver_info, [bank_account_no, license_no, email], (err, data) => {
+		if (err) {
+			console.log(err);
+			res.redirect('/driverinfo?add=fail');
+		} else {
+			console.log("Driver info updated.");
+			res.redirect('/dashboard');
 		}
 	});
 }
@@ -314,17 +383,29 @@ function reg_user(req, res, next) {
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
 	var dob = req.body.dob;
-	var gender = req.body.gender === "2" ? 'F' : 'M';
+	console.log(req.body.user_type)
+	var gender = req.body.gender === "2" ? 'f' : 'm';
 	console.log(gender, dob)
 	pool.query(sql_query.query.add_user, [email, dob, gender, firstname, lastname, password], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
-			if (req.body.user_type == "1") {
-				pool.query(sql_query.query.add_driver, [email], (err, data) => {});
-			} else {
+			console.log(req.body.user_type)
+			if (req.body.user_type == "1" || req.body.user_type == "3") {
+				pool.query(sql_query.query.add_driver, [email], (err, data) => {
+					if(err) {
+						console.log(err)
+					} else {
+						console.log('Added as driver')
+					}
+				});
+			}
+
+			if (req.body.user_type == "2" || req.body.user_type == "3") {
 				pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
+				//ADD DEFUALT PAYMENT METHOD AS CASH
+				pool.query(sql_query.query.add_cash_payment, [email], (err, data) => {});
 			}
 
 			req.login({

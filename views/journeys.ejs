@@ -42,24 +42,24 @@
 			<div class="form-group row">
 				<label for="pickuptime" class="col-sm-2 col-form-label"><b>Pickup Time:</b></label>
 				<div class="col-sm-4">
-					<input id="pickuptime" name="pickuptime" type="text" data-field="datetime" readonly>
+					<input id="pickuptime" name="pickuptime" data-format="yyyy-MM-dd HH:mm:ss" type="text" data-field="datetime" readonly>
 					<div id="dtBox"></div>
 				</div>
 				<label for="dropofftime" class="col-sm-2 col-form-label"><b>Dropoff Time:</b></label>
 				<div class="col-sm-4">
-					<input id="dropofftime" name="dropofftime" type="text" data-field="datetime" readonly>
-					<div id="dtBox"></div>
+					<input id="dropofftime" name="dropofftime" data-format="yyyy-MM-dd HH:mm:ss" type="text" data-field="datetime" readonly>
+					<div id="dtBox" data-format="yyyy-MM-dd HH:mm:ss"></div>
 				</div>
 			</div>
 			<div class="form-group row">
 				<label for="bidstart" class="col-sm-2 col-form-label"><b>Bid Start:</b></label>
 				<div class="col-sm-4">
-					<input id="bidstart" name="bidstart" type="text" data-field="datetime" readonly>
-					<div id="dtBox"></div>
+					<input id="bidstart" name="bidstart" data-format="yyyy-MM-dd HH:mm:ss" type="text" data-field="datetime" readonly>
+					<div id="dtBox" data-format="yyyy-MM-dd HH:mm:ss"></div>
 				</div>
 				<label for="bidend" class="col-sm-2 col-form-label"><b>Bid End:</b></label>
 				<div class="col-sm-4">
-					<input id="bidend" name="bidend" type="text" data-field="datetime" readonly>
+					<input id="bidend" data-format="yyyy-MM-dd HH:mm:ss" name="bidend" type="text" data-field="datetime" readonly>
 					<div id="dtBox"></div>
 				</div>
 			</div>

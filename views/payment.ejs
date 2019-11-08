@@ -1,0 +1,58 @@
+<%- include partials/profile.ejs %>
+<h1 class="h2">Payment Information</h1>
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+  </div>
+  <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    This week
+  </button>
+</div>
+</div>
+<%- include name.ejs %>
+            <div class="card mb-3">
+  						<div class="card-header">
+  							<i class="fas fa-address-card"></i> &nbsp; Payment Method
+  						</div>
+  						<form method="post" action="/add_payment">
+  							<div class="card-body">
+  								<div class="form-group row">
+  									<label for="username" class="col-sm-2 col-form-label"><b>Email Address</b></label>
+  									<div class="col-sm-4">
+  										<input type="email" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+  									</div>
+  								</div>
+  								<div class="form-group row">
+                    <label for="cardnumber" class="col-sm-2 col-form-label"><b>Name on Card</b></label>
+                    <div class="col-sm-4">
+                      <input type="text" required="required" class="form-control" id="cardholder_name" class='form-control card-number' size='16' placeholder="Name on Card" name="cardholder_name" value="<%= cardholder_name %>">
+                    </div>
+  									<label for="cardnumber" class="col-sm-2 col-form-label"><b>Card Number</b></label>
+  									<div class="col-sm-4">
+  										<input type="text" required="required" class="form-control" id="card_number" class='form-control card-number' size='16' placeholder="1234 4567 8901 1111" name="card_number" value="%= card_number %>">
+  									</div>
+  								</div>
+                  <div class="form-group row">
+  									<label for="cvv" class="col-sm-2 col-form-label"><b>CVC</b></label>
+  									<div class="col-sm-4">
+  										<input type="text" required="required" class="form-control" id="cvv" placeholder="ex. 311" name="cvv" value="%= cvv %>">
+  									</div>
+  									<label for="lastname" class="col-sm-2 col-form-label"><b>Expiration</b></label>
+  									<div class="col-sm-4">
+  										<input type="text" required="required" class="form-control" id="expiry_date" placeholder='YYYY/MM' name="expiry_date" value="%= expiry_date %>">
+  									</div>
+  								</div>
+  							</div>
+							  <div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Payment Method</button></div>
+  						</form>
+  					</div>
+            
+            <%- include partials/footer.ejs %>
+          </main>
+        </div>
+      </div>
+		<%- include bottomscript.ejs %>
+  </body>
+</html>

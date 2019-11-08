@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS cp_user (
 -- Information is added when user specifies to be a driver
 CREATE TABLE IF NOT EXISTS cp_driver (
     email TEXT PRIMARY KEY REFERENCES cp_user ON DELETE CASCADE ON UPDATE CASCADE,
-    bank_account_no INTEGER NOT NULL, --must not be null for driver to receive money
-    license_no TEXT NOT NULL --driver must state license
+    bank_account_no INTEGER, --must not be null for driver to receive money
+    license_no TEXT --driver must state license
 );
 
 --Car is a weak entity of driver

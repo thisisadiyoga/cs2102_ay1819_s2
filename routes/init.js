@@ -298,8 +298,8 @@ function add_journey(req, res, next) {
 	var email = req.user.email;
 	var carplate = req.body.carname.split("-")[1].trim();
 	var maxPassengers = req.body.carmaxpass;
-	var pickupAddress  = req.body.pickuparea;
-	var dropoffAddress  = req.body.dropoffarea;
+	var pickupArea  = req.body.pickuparea;
+	var dropoffArea  = req.body.dropoffarea;
 	var pickuptime = req.body.pickuptime;
 	var dropofftime   = req.body.dropofftime;
 	var bidStart = req.body.bidstart;
@@ -309,7 +309,7 @@ function add_journey(req, res, next) {
 		res.redirect('/jouruneys?add=fail');
 	}
 
-	pool.query(sql_query.query.advertise_journey, [player1, player2, gamename, winner], (err, data) => {
+	pool.query(sql_query.query.advertise_journey, [email, carplate, maxPassengers, pickupArea, dropoffArea, 0, bidStart, bidEnd], (err, data) => {
 		if(err) {
 			console.error("Error in adding journey");
 			res.redirect('/jouruneys?add=fail');
@@ -326,15 +326,22 @@ function reg_user(req, res, next) {
 	var lastname  = req.body.lastname;
 	var dob = req.body.dob;
 	console.log(req.body.user_type)
-	var gender = req.body.gender === "2" ? 'F' : 'M';
+	var gender = req.body.gender === "2" ? 'f' : 'm';
 	console.log(gender, dob)
 	pool.query(sql_query.query.add_user, [email, dob, gender, firstname, lastname, password], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
+			console.log(req.body.user_type)
 			if (req.body.user_type == "1" || req.body.user_type == "3") {
-				pool.query(sql_query.query.add_driver, [email], (err, data) => {});
+				pool.query(sql_query.query.add_driver, [email], (err, data) => {
+					if(err) {
+						console.log(err)
+					} else {
+						console.log('Added as driver')
+					}
+				});
 			}
 
 			if (req.body.user_type == "2" || req.body.user_type == "3") {

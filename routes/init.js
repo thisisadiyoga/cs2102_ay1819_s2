@@ -32,6 +32,8 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/cars'    	, passport.authMiddleware(), cars);
 	app.get('/journeys'    , passport.authMiddleware(), journeys);
+	app.get('/payment'    	, passport.authMiddleware(), payment);
+	app.get('/bids'    	, passport.authMiddleware(), bids);
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/login'		, passport.antiMiddleware(), login);
@@ -118,6 +120,14 @@ function index(req, res, next) {
 
 function login(req, res, next) {
 	res.render('login', { page: 'login', auth: false });
+}
+
+function payment(req, res, next) {
+	res.render('payment_info', { page: 'payment', auth: false });
+}
+
+function bids(req, res, next) {
+	res.render('bids', { page: 'bids', auth: false });
 }
 
 function search(req, res, next) {
@@ -295,12 +305,13 @@ function add_journey(req, res, next) {
 	var bidStart = req.body.bidstart;
 	var bidEnd = req.body.bidend;
 
-	if(username != player1 || player1 == player2 || (winner != player1 && winner != player2)) {
-		res.redirect('/journeys?add=fail');
+	if (bidEnd < bidStart || dropofftime < pickuptime) {
+		res.redirect('/jouruneys?add=fail');
 	}
+
 	pool.query(sql_query.query.advertise_journey, [player1, player2, gamename, winner], (err, data) => {
 		if(err) {
-			console.error("Error in adding play");
+			console.error("Error in adding journey");
 			res.redirect('/jouruneys?add=fail');
 		} else {
 			res.redirect('/journeys?add=pass');
@@ -314,6 +325,7 @@ function reg_user(req, res, next) {
 	var firstname = req.body.firstname;
 	var lastname  = req.body.lastname;
 	var dob = req.body.dob;
+	console.log(req.body.user_type)
 	var gender = req.body.gender === "2" ? 'F' : 'M';
 	console.log(gender, dob)
 	pool.query(sql_query.query.add_user, [email, dob, gender, firstname, lastname, password], (err, data) => {
@@ -321,9 +333,11 @@ function reg_user(req, res, next) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
-			if (req.body.user_type == "1") {
+			if (req.body.user_type == "1" || req.body.user_type == "3") {
 				pool.query(sql_query.query.add_driver, [email], (err, data) => {});
-			} else {
+			}
+
+			if (req.body.user_type == "2" || req.body.user_type == "3") {
 				pool.query(sql_query.query.add_passenger, [email], (err, data) => {});
 			}
 

@@ -1,11 +1,11 @@
-﻿Constraints 
+Constraints 
 
 
 Preliminary constraints: constraints that cannot be captured by the ER diagram.
 
 
 Users
-* Users are identified by their username.[a]
+* Users are identified by their username.
 * A user must either be a caretaker or a pet owner (covering constraint). Since caretakers and pet owners can use the same account, a user can be both a caretaker and a pet owner (overlapping constraint).
 * Users have a username and a password for account authentication and profile management purposes.
 * Passwords must be hashed and salted for security purposes.
@@ -15,7 +15,7 @@ Users
 * Users have a registration date.
 * Users have an address which is used for pet pickup purposes. The address consists of the block number, street address, unit number, and postal code.
 * Users have a profile picture which is used for identity verification purposes during pet pickups.
-* Users must register bank details including full name on bank account, account number and bank name. This is for payment and salary transfer and payment purposes.[b]
+* Users must register bank details including full name on bank account, account number and bank name. This is for payment and salary transfer and payment purposes.
 * Bank details will be encrypted for security purposes.
 
 
@@ -191,18 +191,11 @@ Administrators
 Preliminary Constraints
 * Categories must be approved and added by the administrator when there is enough demand. (e.g. a snake category can be added if there are enough caretakers who can accommodate a snake and there is a high enough demand for it).
 * Administrators will take into account the daily base price and rating of full-time caretakers to adjust the price caretaker can charge.
-   * When payment of service is by cash, administrators would deduct the full amount from caretakers’ banks. If insufficient, deduct from pay. 
-   * Salary is given by administrators to part-time and full-time caretakers monthly
+* When payment of service is by cash, administrators would deduct the full amount from caretakers’ banks. If insufficient, deduct from pay. 
+* Salary is given by administrators to part-time and full-time caretakers monthly
 
 
 
 
 
 
-
-
-[a]If we have username, do we still need user_id? Since many websites in reality require unique usernames
-
-
-(Reminder to go through the other serial types too)
-[b]Hey i think we need these details too cos cant make oayment w just credit card number

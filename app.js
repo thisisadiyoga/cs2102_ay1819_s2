@@ -22,10 +22,11 @@ app.use(bodyParser.urlencoded({
 //require('dotenv').load();
 require('./auth').init(app);
 app.use(session({
-  secret: process.env.SECRET,
+  secret: "secret",
   resave: true,
   saveUninitialized: true
 }))
+
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -58,5 +59,9 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.listen(4000, function() {
+  console.log("starting server");
+})
 
 module.exports = app;

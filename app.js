@@ -61,7 +61,7 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(4000, function() {
-  console.log("starting server");
+  console.log("Go onto http://localhost:4000/");
 })
 
 module.exports = app;

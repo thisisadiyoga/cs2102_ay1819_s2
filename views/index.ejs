@@ -36,9 +36,10 @@
 								<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
 									<thead>
 										<tr>
-											<th>Rank</th>
-											<th>Game Name</th>
-											<th>Rating</th>
+											<th>start_timestamp</th>
+											<th>end_timestamp</th>
+											<th>pet_count</th>
+											<th>caretaker_username</th>
 										</tr>
 									</thead>
 									<tfoot>
@@ -48,14 +49,31 @@
 									<tbody>
 										<% for(var i=0; i<tbl.length; i++) { %>
 										<tr>
-											<td><%= tbl[i].ranking%></td>
-											<td><%= tbl[i].gamename%></td>
-											<td><%= tbl[i].rating%></td>
+											<td><%= tbl[i].start_timestamp%></td>
+											<td><%= tbl[i].end_timestamp%></td>
+											<td><%= tbl[i].pet_count%></td>
+											<td><%= tbl[i].caretaker_username%></td>
 										</tr>
 										<% } %>
 									</tbody>
 								</table>
 							</div>
+
+
+							<form action="/add_availability" method="POST" class="add-availability-form" >
+							<label>Caretaker Username: </label>
+							<input type="text" name="caretaker_username">
+
+							<label>Start timestamp: </label>
+							<input type="text" name="start_timestamp">
+
+							<label>End timestamp: </label>
+								<input type="text" name="end_timestamp">
+
+							<label>Number of pets: </label>
+								<input type="number" min="0" step="1" name="pet_count">
+							<input type="submit" >
+							</form>
 							<nav aria-label="...">
 								<ul class="pagination">
 									<% if(p == 1) { %>

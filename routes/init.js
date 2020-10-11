@@ -33,12 +33,15 @@ function initRouter(app) {
 	
 	app.post('/reg_user'   , passport.antiMiddleware(), reg_user   );
 
+	//PROTECTED POST
+	app.post('/add_availability', add_availability);
+
 	/* LOGIN */
 	app.post('/login', passport.authenticate('local', {
 		successRedirect: '/dashboard',
 		failureRedirect: '/'
 	}));
-	
+
 	/* LOGOUT */
 	app.get('/logout', passport.authMiddleware(), logout);
 }
@@ -70,15 +73,17 @@ function msg(req, fld, pass, fail) {
 
 // GET
 function index(req, res, next) {
-	var ctx = 0, idx = 0, tbl, total;
+	var ctx = 0, idx = 0, tbl, total; //row count, index, table, total
 	if(Object.keys(req.query).length > 0 && req.query.p) {
 		idx = req.query.p-1;
 	}
-	pool.query(sql_query.query.page_lims, [idx*10], (err, data) => {
+	pool.query(sql_query.query.page_lims, (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			tbl = [];
+			console.log("table is empty " + err);
 		} else {
 			tbl = data.rows;
+			console.log(JSON.stringify(tbl[0]));
 		}
 		pool.query(sql_query.query.ctx_games, (err, data) => {
 			if(err || !data.rows || data.rows.length == 0) {
@@ -168,7 +173,7 @@ function retrieve(req, res, next) {
 }
 
 
-// POST 
+// POST
 function update_info(req, res, next) {
 	var username  = req.user.username;
 	var firstname = req.body.firstname;
@@ -250,6 +255,57 @@ function reg_user(req, res, next) {
 					return res.redirect('/dashboard');
 				}
 			});
+		}
+	});
+}
+
+function add_availability(req, res, next) {
+	var caretaker_username = req.body.caretaker_username;
+	var start_timestamp = new Date(req.body.start_timestamp);
+	var end_timestamp = new Date(req.body.end_timestamp);
+	var pet_count = req.body.pet_count;
+	console.log("Caretaker username is " + caretaker_username);
+
+	pool.query(sql_query.query.add_availability, [start_timestamp, end_timestamp, pet_count, caretaker_username], (err, data) => {
+		if(err) {
+			console.error("Error in adding new availability period. " + err);
+			res.redirect('/availabilities?add=fail'); //TODO: check structure of restful routing
+		} else {
+			res.redirect('/availabilities?add=pass'); //TODO: check structure of restful routing
+		}
+	});
+}
+
+// DELETE
+function delete_availability(req, res, next) {
+	var username = req.user.username;
+	var start_timestamp = req.body.start_timestamp;
+	var end_timestamp = req.body.end_timestamp;
+
+	pool.query(sql_query.query.delete_availability, [username, start_timestamp, end_timestamp], (err, data) => {
+		if(err) {
+			console.error("Error in deleting availability period");
+			res.redirect('/availabilities?delete=fail'); //TODO: check structure of restful routing
+		} else {
+			res.redirect('/availabilities?delete=pass'); //TODO: check structure of restful routing
+		}
+	});
+}
+
+// UPDATE
+function update_availability(req, res, next) {
+	var username = req.user.username;
+	var old_start_timestamp = req.body.old_start_timestamp;
+	var old_end_timestamp = req.body.old_end_timestamp;
+	var new_start_timestamp = req.body.new_start_timestamp;
+    var new_end_timestamp = req.body.new_end_timestamp;
+
+	pool.query(sql_query.query.delete_availability, [username, old_start_timestamp, old_end_timestamp, new_start_timestamp, new_end_timestamp], (err, data) => {
+		if(err) {
+			console.error("Error in updating availability period");
+			res.redirect('/availabilities?update=fail'); //TODO: check structure of restful routing
+		} else {
+			res.redirect('/availabilities?update=pass'); //TODO: check structure of restful routing
 		}
 	});
 }

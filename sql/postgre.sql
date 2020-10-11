@@ -6,11 +6,12 @@ CREATE TABLE Timings (
 )
 
 CREATE TABLE Bids (
-	pet_id VARCHAR REFERENCES Owns(pet_id),
+	owner_username VARCHAR,
+	pet_id VARCHAR,
 	p_start_date DATE,
 	p_end_date DATE,
-	starting_date DATE, -- change data type
-	ending_date DATE, -- change data type
+	starting_date DATE,
+	ending_date DATE,
 	username VARCHAR,
 	rating NUMERIC,
 	review VARCHAR,
@@ -24,8 +25,9 @@ CREATE TABLE Bids (
 	FOREIGN KEY (p_start_date, p_end_date) REFERENCES Timings(p_start_date, p_end_date),
 	FOREIGN KEY (starting_date, ending_date, username) REFERENCES
 	Availabilities(starting_date, ending_date, username),
+	FOREIGN KEY (owner_username, pet_id) REFERENCES ownsPets(username, pet_id),
 	CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
 	CHECK ((is_successful = true) OR (mode_of_transfer IS NULL AND is_paid IS NULL AND
 	payment_method IS NULL)),
-	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)) -- change depending on maximum rating
+	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5))
 )

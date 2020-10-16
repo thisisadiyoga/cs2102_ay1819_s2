@@ -11,26 +11,22 @@ CREATE TABLE Caretakers (
 	reg_date	DATE NOT NULL DEFAULT GETDATE(),
 	is_full_time	BIT,
 	avg_rating	FLOAT CHECK (avg_rating >= 0),
-	no_of_reviews	INTEGER
+	no_of_reviews	INTEGER,
+	no_of_pets_taken INTEGER
 );
 
-CREATE OR REPLACE FUNCTION update_review_rating() RETURNS trigger AS $ret$
-/*Need to fix later*/
-	BEGIN
-		UPDATE Caretakers
-		SET no_of_reviews=no_of_reviews+1;
-		UPDATE Caretakers
-		SET avg_rating=(avg_rating+rating)/no_of_reviews
-		WHERE (Bids.username=Caretakers.username);
-		RETURN NEW;
-	END;
-$ret$ LANGUAGE plpgsql;
-
-
-CREATE TRIGGER check_review_rating
-	AFTER INSERT ON Bids
-	FOR EACH ROW
-	EXECUTE PROCEDURE update_review_rating;
+/*DROP TRIGGER IF EXISTS OnBid;
+DELIMITER //
+CREATE TRIGGER OnBid
+  AFTER INSERT ON Bids FOR EACH ROW
+  BEGIN
+    UPDATE Caretakers
+	SET Caretakers.avg_rating = ((Caretakers.avg_rating*no_of_reviews)+Bids.rating)/(Caretakers.no_of_reviews + 1)
+	Caretakers.no_of_reviews = Caretakers.no_of_reviews + 1
+	Caretakers.no_of_pets_taken = Caretakers.no_of_pets_taken + 1
+     WHERE Caretaker.username = Bids.username
+  END //
+DELIMITER ;*/
 
 CREATE TABLE Requested_by (
 	username  	VARCHAR(9)  NOT NULL,

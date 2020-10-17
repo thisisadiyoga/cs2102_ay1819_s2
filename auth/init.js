@@ -12,23 +12,15 @@ const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   //ssl: true
-<<<<<<< HEAD
-  user: 'postgres',
-  host: 'localhost',
-  database: 'pet-care',
-  password: '19051967XinRu',
-  port: 5432,
+  user : 'postgres', 
+  host : 'localhost',
+  database : 'pet-care', 
+  password : '19051967XinRu', 
+  port : 5432, 
 });
-
 
 function findUser (username, callback) {
 	pool.query(sql_query.query.get_user, [username], (err, data) => {
-=======
-});
-
-function findUser (username, callback) {
-	pool.query(sql_query.query.userpass, [username], (err, data) => {
->>>>>>> origin/master
 		if(err) {
 			console.error("Cannot find user");
 			return callback(null);
@@ -41,12 +33,6 @@ function findUser (username, callback) {
 			return callback(null, {
 				username    : data.rows[0].username,
 				passwordHash: data.rows[0].password,
-<<<<<<< HEAD
-=======
-				firstname   : data.rows[0].first_name,
-				lastname    : data.rows[0].last_name,
-				status      : data.rows[0].status
->>>>>>> origin/master
 			});
 		} else {
 			console.error("More than one user?");

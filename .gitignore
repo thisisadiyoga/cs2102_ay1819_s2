@@ -1,12 +1,7 @@
 # Logs
 logs
-<<<<<<< HEAD
 .log
 npm-debug.log
-=======
-*.log
-npm-debug.log*
->>>>>>> origin/master
 yarn-debug.log*
 yarn-error.log*
 

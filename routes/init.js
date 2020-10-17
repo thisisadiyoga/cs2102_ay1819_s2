@@ -1,10 +1,18 @@
 const sql_query = require('../sql');
+const postgres_details = require('../config')
 const passport = require('passport');
 const bcrypt = require('bcrypt')
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
+	
+	
+	user: postgres_details.user,
+	host: postgres_details.host,
+	database: postgres_details.database,
+	password: postgres_details.password,
+	port: postgres_details.port,
 	connectionString: process.env.DATABASE_URL,
   //ssl: true
 });
@@ -16,7 +24,7 @@ function initRouter(app) {
 	/* GET */
 	app.get('/'      , index );
 	app.get('/search', search);
-	
+
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/games'    , passport.authMiddleware(), games    );
@@ -41,6 +49,10 @@ function initRouter(app) {
 	
 	/* LOGOUT */
 	app.get('/logout', passport.authMiddleware(), logout);
+
+	/*ADMIN*/
+	app.get('/admin', admin);
+
 }
 
 
@@ -60,6 +72,11 @@ function basic(req, res, page, other) {
 	}
 	res.render(page, info);
 }
+
+function admin(req, res, next) {
+	res.render('admin', { auth: false, page:'admin' });
+}
+
 function query(req, fld) {
 	return req.query[fld] ? req.query[fld] : '';
 }
@@ -254,6 +271,30 @@ function reg_user(req, res, next) {
 	});
 }
 
+// function reg_admin(req, res, next) {
+// 	var admin_username  = req.body.username;
+// 	var password  = bcrypt.hashSync(req.body.password, salt);
+// 	// var last_login_time = Date.now();
+// 	var last_login_time = "2020-10-17 04:05:06";
+// 	pool.query(sql_query.query.add_user, [username, password, last_login_time], (err, data) => {
+// 		if(err) {
+// 			console.error("Error in adding user", err);
+// 			res.redirect('/admin?reg=fail');
+// 		} else {
+// 			req.login({
+// 				username    : username,
+// 				passwordHash: password,
+
+// 			}, function(err) {
+// 				if(err) {
+// 					return res.redirect('/admin?reg=fail');
+// 				} else {
+// 					return res.redirect('/admin');
+// 				}
+// 			});
+// 		}
+// 	});
+// }
 
 // LOGOUT
 function logout(req, res, next) {

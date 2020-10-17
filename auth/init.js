@@ -1,3 +1,4 @@
+const postgres_details = require('../config.js')
 const sql_query = require('../sql');
 
 const passport = require('passport');
@@ -10,6 +11,11 @@ const antiMiddleware = require('./antimiddle');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
+  user: postgres_details.user,
+  host: postgres_details.host,
+  database: postgres_details.database,
+  password: postgres_details.password,
+  port: postgres_details.port,
   connectionString: process.env.DATABASE_URL,
   //ssl: true
 });

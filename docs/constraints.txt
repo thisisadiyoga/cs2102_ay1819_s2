@@ -1,0 +1,201 @@
+Constraints 
+
+
+Preliminary constraints: constraints that cannot be captured by the ER diagram.
+
+
+Users
+* Users are identified by their username.
+* A user must either be a caretaker or a pet owner (covering constraint). Since caretakers and pet owners can use the same account, a user can be both a caretaker and a pet owner (overlapping constraint).
+* Users have a username and a password for account authentication and profile management purposes.
+* Passwords must be hashed and salted for security purposes.
+* Users have an email address to facilitate account recovery, notification of appointments and status updates of pets under caretakers’ care.
+* Users have a first and last name.
+* Users have a Date of Birth (DOB). The DOB ensures that a user is above the age of 16 and is therefore legally allowed to work as a caretaker and/or request for services.
+* Users have a registration date.
+* Users have an address which is used for pet pickup purposes. The address consists of the block number, street address, unit number, and postal code.
+* Users have a profile picture which is used for identity verification purposes during pet pickups.
+* Users must register bank details including full name on bank account, account number and bank name. This is for payment and salary transfer and payment purposes.
+* Bank details will be encrypted for security purposes.
+
+
+________________
+
+
+Caretakers
+* Caretakers are identified by their username.
+* Their average rating out of five and the number of reviews they receive must be recorded. This is updated every time a review is made.
+* Caretakers must either be a full-time or part-time caretaker but not both (covering and non-overlapping constraint).
+* Each caretaker declares their availability in terms of a start date and an end date. The start date and end date identifies a period during which the caretaker is available. If a caretaker is deleted, his/her availability periods no longer need to be recorded in the database.
+* Each caretaker gets a salary. The month in which the salary is given identifies a salary uniquely from among the salaries received by the caretaker. If a caretaker is deleted, we need not keep track of the salary any longer.
+* Each caretaker charges a daily price for each pet, only under the categories they can take care of. The way this price is set differs from part-time caretakers to full-time caretakers.
+
+
+Preliminary Constraints
+
+
+* Caretakers should not take care of pets they cannot care for.
+* When advertising their availability, they should minimally include the kind of pets they can take care of, their daily price for each kind of Pet, etc.. 
+* Each part-time caretaker sets a daily price for the category of pets they can take care of.
+* Each full-time caretaker will have their daily price for the category of pets they can take care of as calculated by the system.
+* Each full-time caretaker will have their daily price calculated according to their rating.
+
+
+
+
+________________
+
+
+Availability
+* Each availability period must have a start date and end date.
+* The number of pets that each caretaker is taking care of during an availability period must be recorded.
+
+
+Preliminary Constraints
+* The number of pets that each caretaker is taking care of during an availability period, will be automatically increased or decreased automatically by the system everytime a service is accepted or cancelled respectively.
+* Each caretaker cannot have 2 overlapping time slots.
+
+
+Preliminary Constraints (for Part-Time Caretakers)
+* For each part-time Caretaker, they should be able to specify their availability for the current year and the next year.
+* Each part-time Caretaker cannot take care of more than 2 Pets unless they have a rating of more than 4 out of 5.
+* Each part-time caretaker cannot take care of more than 5 pets at any one time regardless of rating.
+
+
+Preliminary Constraints (for Full-Time Caretakers)
+* Each full-time Caretaker must work for a minimum of 2 × 150 consecutive days a year
+* Each full-time Caretaker is treated as available until they apply for leave
+* Full-time Caretakers cannot apply for leave if there is at least one Pet under their care
+* Full-time caretakers have a limit of up to 5 Pet at any one time
+
+
+________________
+
+
+Owners
+* Owners are identified by their username.
+* Each owner must own at least one pet. Every pet must be owned by exactly one owner.
+* If an owner is deleted, information about his/her pets no longer needs to be recorded in the database.
+* Each owner can review a service provided by a particular caretaker by leaving a rating and comment about the service.
+* Each service can only be reviewed at most once.
+* Each owner bids for a caretaker to take care of their pet, with a proposed start and end date. The status of the bid will be ‘processing’, unless the bid is selected by the system.
+
+
+Preliminary Constraints
+* The time period as indicated by the proposed start date and proposed end date of a bid must lie within an availability period of the caretaker being bid for.
+
+
+Pets
+* Pets are identified by their pet_id. It is an identifying name tag unique for all pets (e.g. buddy1437), chosen by the owner. Pets also have a name, which is the nickname/actual name of the pet (e.g. buddy). Names may not be unique. 
+* Pets must also have a photo and size for identification purposes.
+* Pets have special requirements related to how they need to be taken care of (e.g. daily walk, types of food, etc).
+* Pets have a description and a sociability level which can help caretakers provide better pet care services.
+* Every pet is classified under exactly one category to facilitate browsing.
+
+
+Categories
+* Categories are identified by their category name (cat_name).
+* Their base price must be recorded.
+
+
+
+
+________________
+
+
+Bids
+* Each bid has a status indicating whether it is ‘successful’, ‘not successful’, or ‘processing’. 
+* Each bid has a type of service specified by the pet owner, and a start date and end date of when the owner needs the caretaker to take care of their pet. 
+* The successful bidder could either be chosen by the caretaker or automatically selected by the system based on some criteria. This is known as a successful bid.
+* If a bid is successful, it will be selected to become a service to be completed by a caretaker. 
+* Each successful bid can only be selected once.
+* Every service must be associated with exactly one successful bid.
+
+
+Preliminary constraints
+* The bid could either be selected by the caretaker or automatically selected by the system.
+* Full-time Caretakers will always select the bid if they are available in the bidded time slot and are capable of taking care of the breed of pet.
+* Past service records must be kept even after the deletion of pets, owner or caretaker accounts.
+* Each bid is uniquely identified by proposed start date, proposed end date, owner’s user_id and caretaker’s user_id.
+
+
+Service
+* Services are identified by their ref_no, a string manually set by the administrator (may consist of the date, quantity and other numbers) for the transaction reference.
+* The mode of pet transfer is recorded.
+* The total price of the service, payment method, and payment status are recorded.
+* Each service must be from a successful bid.
+
+
+Preliminary constraints
+* For every service, owners must pay for the total price of service upfront by a pre-registered credit card or paying cash.
+* Both the Pet Owner and Caretaker should agree on how to transfer the Pet, which includes, but is not exclusive to, (1) Pet Owner deliver, (2) caretaker pick up, (3) transfer through physical building of PCS.
+* The total price of service calculated by the system is the number of days multiplied by the daily price.
+
+
+________________
+
+
+Reviews
+* The rating and comments of each review must be recorded.
+* The reviews will be seen by all users.
+* Each owner may submit multiple reviews to the same caretaker, if the Caretaker has taken care of the Owner’s pet multiple times (including for the same pet).
+* All reviews of a particular caretaker need not be kept if that caretaker is removed.
+However, all reviews can be kept even after the pet owner is removed.
+
+
+
+
+Preliminary Constraints
+* The average rating must be updated as ratings are added. This is to maintain the quality of service by limiting or increasing the total number of pets a caretaker can take at any given time.
+* At the end of the care period, the Pet Owner can post a review on and give rating to the Caretaker.
+
+
+Set_price
+* The daily_price of each set_price must be recorded. This indicates the daily price of each category.
+* Price for each category of each caretaker increases with the rating of the full-time caretaker but will never be below the base price
+
+
+Preliminary Constraints 
+* The daily_price is always larger than or equal to the base price.
+
+
+Salaries
+* For each salary, the salary amount, month, and year it is issued on must be recorded.
+* All salaries must be given by any PCS Administrator.
+
+
+Preliminary Constraints (for Part-time Caretakers)
+* Part-time caretakers will receive 75% of their service price as salary.
+
+
+Preliminary Constraints (for Full-time Caretakers)
+* The salary of full-time Caretaker depends on how many Pet are taken care of in a given month for how many days (i.e. pet value day)
+* Full-time Caretakers will receive a salary of $3000 per month for up to 60 pet-days.
+* Full-time caretakers caretakers will receive 80% of their price as bonus for any excess pet-day.
+
+
+________________
+
+Administrators
+
+
+* Administrators have separate accounts from users since they are entitled to more privileges.
+* Administrators are identified by their admin_id (i.e. username).
+* Administrators have a password.
+* Passwords must be hashed and salted for security purposes.
+* Their last login time must also be recorded for security reasons (in case of unauthorised access).
+* For each service, an administrator will collect a fee which equals the total price of that service. The fee for a service will be collected exactly once.
+* Administrators set the base daily price for each pet category for full-time caretakers.
+
+
+Preliminary Constraints
+* Categories must be approved and added by the administrator when there is enough demand. (e.g. a snake category can be added if there are enough caretakers who can accommodate a snake and there is a high enough demand for it).
+* Administrators will take into account the daily base price and rating of full-time caretakers to adjust the price caretaker can charge.
+* When payment of service is by cash, administrators would deduct the full amount from caretakers’ banks. If insufficient, deduct from pay. 
+* Salary is given by administrators to part-time and full-time caretakers monthly
+
+
+
+
+
+

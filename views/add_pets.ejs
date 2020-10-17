@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>Register</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+		<!-- Custom styles for this template-->
+		<link href="stylesheets/index.css" rel="stylesheet">
+  </head>
+	<body class="bg-dark">
+		<div class="container">
+			<div class="card card-register mx-auto mt-5">
+				<div class="card-header">Register a Pet</div>
+				<div class="card-body">
+					<form action="/add_pets" method="post">
+						<div class="form-group">
+							<div class="form-row">
+								<div class="col-md-12">
+									<div class="form-label-group">
+										<input type="text" id="name" class="form-control" placeholder="Name" required="required" name="name">
+										<label for="name">Name</label>
+									</div>
+								</div>
+							</div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <label for="cat_name">Pet Type</label>
+                                    <select class="form-control" id="cat_name" name="cat_name" required="required">
+                                        <% for(var i=0; i<cat_list.length; i++) { %>
+                                        <option><%= cat_list[i].cat_name%></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cat_type">Pet Size</label>
+                                    <select class="form-control" id="size" name="size" required="required">
+                                        <option>Extra Small</option>
+                                        <option>Small</option>
+                                        <option>Medium</option>
+                                        <option>Large</option>
+                                        <option>Extra Large</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+							<div class="form-row">
+								<div class="col-md-12">
+                                    <label for="description">Description (in less than 100 characters)</label>
+									<div class="form-label-group">
+                                        <textarea id="description" class="form-control" placeholder="Briefly describe your pet (e.g. interests, personality, looks, etc.)" name="description" maxlength="100" rows="3"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="form-row">
+								<div class="col-md-12">
+                                    <label for="sociability">Sociability (in less than 100 characters)</label>
+									<div class="form-label-group">
+                                        <textarea id="sociability" class="form-control" placeholder="Briefly explain any socialising issues with other animals or types of pets, if any" name="sociability" maxlength="100" rows="3"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="form-row">
+								<div class="col-md-12">
+                                    <label for="special_req">Special Requirements (in less than 100 characters)</label>
+									<div class="form-label-group">
+										<textarea id="special_req" class="form-control" placeholder="Briefly describe areas that require extra care (e.g. diet, medicine, etc.), if any" name="special_req" maxlength="100" rows="3"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<button class="btn btn-primary btn-block" type="submit">Add Pet</button>
+					</form>
+					<div class="text-center">
+						<a class="d-block small mt-3" href="/pets">Back to Pets</a>
+						<!--<a class="d-block small" href="/password">Forgot Password?</a>-->
+					</div>
+				</div>
+			</div>
+		</div>
+		<%- include bottomscript.ejs %>
+  </body>
+</html>

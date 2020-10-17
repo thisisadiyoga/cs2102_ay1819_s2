@@ -1,17 +1,18 @@
 const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
+const postgres_details = require("../config.js");
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
-	//ssl: true
-	user : 'postgres', 
-	host : 'localhost',
-	database : 'pet-care', 
-	password : '19051967XinRu', 
-	port : 5432, 
+	//ssl: true 
+	user: postgres_details.user, 
+	host: postgres_details.host,
+	database: postgres_details.database, 
+	password : postgres_details.password, 
+	port : postgres_details.port,
 });
 
 const round = 10;

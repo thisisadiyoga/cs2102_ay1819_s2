@@ -3,6 +3,7 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
+const postgres_details = require("../config.js");
 
 const authMiddleware = require('./middleware');
 const antiMiddleware = require('./antimiddle');
@@ -12,11 +13,11 @@ const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   //ssl: true
-  user : 'postgres', 
-  host : 'localhost',
-  database : 'pet-care', 
-  password : '19051967XinRu', 
-  port : 5432, 
+  user: postgres_details.user, 
+	host: postgres_details.host,
+	database: postgres_details.database, 
+	password : postgres_details.password, 
+	port : postgres_details.port,
 });
 
 function findUser (username, callback) {

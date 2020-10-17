@@ -60,8 +60,16 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+<<<<<<< HEAD
 app.listen(9000, function() {
   console.log("Go onto http://localhost:9000/");
 })
 
 module.exports = app;
+=======
+app.listen(4000, function() {
+  console.log("Go onto http://localhost:4000/");
+})
+
+module.exports = app;
+>>>>>>> origin/master

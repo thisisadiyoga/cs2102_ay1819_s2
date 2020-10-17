@@ -1,7 +1,12 @@
 # Logs
 logs
+<<<<<<< HEAD
 .log
 npm-debug.log
+=======
+*.log
+npm-debug.log*
+>>>>>>> origin/master
 yarn-debug.log*
 yarn-error.log*
 
@@ -59,6 +64,9 @@ typings/
 
 # next.js build output
 .next
+<<<<<<< HEAD
 
 #postgres_pw
 config.js
+=======
+>>>>>>> origin/master

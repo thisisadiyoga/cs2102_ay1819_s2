@@ -7,7 +7,11 @@
 		<meta name="description" content="">
 		<meta name="author" content="">
 
+<<<<<<< HEAD
 		<title>The Collar Klub</title>
+=======
+		<title>Meeple World</title>
+>>>>>>> origin/master
 
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
@@ -22,14 +26,24 @@
 			<%- include sidebar.ejs %>
 			
 			<div id="content-wrapper">
+<<<<<<< HEAD
 				<div class="container-fluid">		
 					<div class="card mb-3">
 						<div class="card-header">
 							<i class="fas fa-address-card"></i> &nbsp; Profile Information
+=======
+				<div class="container-fluid">
+					<%- include name.ejs %>
+					
+					<div class="card mb-3">
+						<div class="card-header">
+							<i class="fas fa-address-card"></i> &nbsp; Basic Information
+>>>>>>> origin/master
 						</div>
 						<form method="post" action="/update_info">
 							<div class="card-body">
 								<div class="form-group row">
+<<<<<<< HEAD
 									<label for="username" class="col-sm-2 col-form-label"><b>Username:</b></label>
 									<div class="col-sm-4">
 										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%=user %>" name="username">
@@ -44,20 +58,58 @@
 								</div>
 							</div>
 							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Email</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= info_msg %></span></div>
+=======
+									<label for="username" class="col-sm-2 col-form-label"><b>Meeple ID:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+									</div>
+									<label for="status" class="col-sm-2 col-form-label"><b>Type:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="status" value="<%= status %>" name="status">
+									</div>
+								</div>
+								<div class="form-group row">
+									<label for="firstname" class="col-sm-2 col-form-label"><b>First:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" class="form-control" id="firstname" placeholder="First Name" name="firstname" value="<%= firstname %>">
+									</div>
+									<label for="lastname" class="col-sm-2 col-form-label"><b>Last:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" class="form-control" id="lastname" placeholder="Last Name" name="lastname" value="<%= lastname %>">
+									</div>
+								</div>
+							</div>
+							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Info</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= info_msg %></span></div>
+>>>>>>> origin/master
 						</form>
 					</div>
 					
 					<div class="card mb-3">
 						<div class="card-header">
+<<<<<<< HEAD
 							<i class="fas fa-key"></i> &nbsp; Password Change
+=======
+							<i class="fas fa-key"></i> &nbsp; Password: <i>must be at least 8 characters</i>
+>>>>>>> origin/master
 						</div>
 						<form method="post" action="/update_pass">
 							<div class="card-body">
 								<div class="form-group row">
+<<<<<<< HEAD
 									<label for="username" class="col-sm-2 col-form-label"><b>Username:</b></label>
 									<div class="col-sm-4">
 										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
 									</div>
+=======
+									<label for="username" class="col-sm-2 col-form-label"><b>Meeple ID:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+									</div>
+									<label for="status" class="col-sm-2 col-form-label"><b>Type:</b></label>
+									<div class="col-sm-4">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="status" value="<%= status %>" name="status">
+									</div>
+>>>>>>> origin/master
 								</div>
 								<div class="form-group row">
 									<label for="password" class="col-sm-2 col-form-label"><b>Password:</b></label>

@@ -1,35 +1,30 @@
 const sql = {}
 
 sql.query = {
-	// Counting & Average
-	count_play: 'SELECT COUNT(winner) FROM game_plays WHERE user1=$1 OR user2=$1',
-	count_wins: 'SELECT COUNT(winner) FROM game_plays WHERE winner=$1',
-	avg_rating: 'SELECT AVG(rating) FROM user_games INNER JOIN game_list ON user_games.gamename=game_list.gamename WHERE username=$1',
-	
-	// Information
-	page_game: 'SELECT * FROM game_list WHERE ranking >= $1 AND ranking <= $2 ORDER BY ranking ASC',
-	page_lims: 'SELECT * FROM availabilities',
-	ctx_games: 'SELECT COUNT(*) FROM availabilities',
-	all_games: 'SELECT ranking,game_list.gamename AS game,rating FROM user_games INNER JOIN game_list ON user_games.gamename=game_list.gamename WHERE username=$1 ORDER BY ranking ASC',
-	all_plays: 'SELECT gamename AS game, user1, user2, winner FROM game_plays WHERE user1=$1 OR user2=$1',
+		// Counting & Average
+    	count_play: 'SELECT COUNT(winner) FROM game_plays WHERE user1=$1 OR user2=$1',
+    	count_wins: 'SELECT COUNT(winner) FROM game_plays WHERE winner=$1',
+    	avg_rating: 'SELECT AVG(rating) FROM user_games INNER JOIN game_list ON user_games.gamename=game_list.gamename WHERE username=$1',
 
-	// Insertion
-	add_game: 'INSERT INTO user_games (username, gamename) VALUES($1,$2)',
-	add_play: 'INSERT INTO game_plays (user1, user2, gamename, winner) VALUES($1::timesamt,$2, $3, $4)',
-	add_user: 'INSERT INTO username_password (username, password, status, first_name, last_name) VALUES ($1,$2,\'Bronze\',$3,$4)',
+    	// Information
+    	read_weekly_availabilities: 'SELECT start_date, end_date FROM declares_availabilities WHERE caretaker_username = $1 AND (start_timestamp >= $2 AND start_timestamp <= interval \'1 week\' ) ORDER BY start_timestamp ASC', //TODO: cast $2 to 12am of the day
+    	read_monthly_availabilities: 'SELECT start_date, end_date FROM declares_availabilities WHERE caretaker_username = $1 AND  (start_timestamp >= $2 AND start_timestamp <= interval \'1  month\' ) ORDER BY start_timestamp ASC', //TODO: cast $2 to 12am of the day
+    	read_yearly_availabilities: 'SELECT start_date, end_date FROM declares_availabilities WHERE caretaker_username = $1 AND  (start_timestamp >= $2 AND start_timestamp <= interval \'1  year\' ) ORDER BY start_timestamp ASC', //TODO: cast $2 to 12am of the day
 
-	//Insertion
-	add_availability: 'INSERT INTO availabilities VALUES($1,$2,$3,$4)',
-	
-	// Login
-	userpass: 'SELECT * FROM username_password WHERE username=$1',
-	
-	// Update
-	update_info: 'UPDATE username_password SET first_name=$2, last_name=$3 WHERE username=$1',
-	update_pass: 'UPDATE username_password SET password=$2 WHERE username=$1',
-	
-	// Search
-	search_game: 'SELECT * FROM game_list WHERE lower(gamename) LIKE $1',
+    	// Insertion
+    	add_availability: 'INSERT INTO declares_availabilities (start_timestamp, end_timestamp, caretaker_username) VALUES($1,$2,$3)',
+
+    	// Login
+    	userpass: 'SELECT * FROM username_password WHERE username=$1',
+
+    	// Update
+    	update_availability: 'UPDATE declares_availability SET start_timestamp = $2, end_timestamp = $3 WHERE caretaker_username=$1',
+
+    	//Deletion
+    	delete_availability: 'DELETE FROM declares_availability WHERE start_timestamp = $1 AND end_timestamp = $2 AND caretaker_username = $4',
+
+    	// Search
+    	search_game: 'SELECT * FROM game_list WHERE lower(gamename) LIKE $1',
 }
 
 module.exports = sql

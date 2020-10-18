@@ -1,124 +1,153 @@
-CREATE TABLE availabilities (
-	start_timestamp  timestamp  NOT NULL CHECK (start_timestamp > NOW()),
-	end_timestamp  timestamp NOT NULL CHECK (start_timestamp > NOW()),
-	pet_count int DEFAULT 0 NOT NULL CHECK (pet_count <= 5),
-	caretaker_username varchar(90) NOT NULL, --REFERENCES caretaker.username ON DELETE CASCADE,
-	CHECK(start_timestamp < end_timestamp)
+CREATE TABLE categories (
+	cat_name		VARCHAR(10) 	PRIMARY KEY, 
+	base_price		NUMERIC
 );
 
-CREATE TABLE username_password (
-	username   varchar(9)  PRIMARY KEY,
-	password   varchar(64) NOT NULL,
-	status     varchar(6)  NOT NULL,
-	first_name varchar(64) NOT NULL,
-	last_name  varchar(64) NOT NULL
+CREATE TABLE owners(
+	username		VARCHAR		PRIMARY KEY,
+	first_name		NAME		NOT NULL,
+	last_name		NAME		NOT NULL,
+	password		VARCHAR(64)	NOT NULL, 
+	email			VARCHAR		NOT NULL UNIQUE, 
+	dob				DATE		NOT NULL, --check today - DOB >= 13 
+	unit_no			VARCHAR,
+	postal_code		VARCHAR(6)	NOT NULL,
+	credit_card_no	VARCHAR		NOT NULL,
+	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE,
+	photo			BYTEA		NOT NULL
 );
 
-CREATE TABLE game_list (
-	gamename  varchar(64) PRIMARY KEY,
-	rating    real        NOT NULL,
-	ranking   int         NOT NULL
+CREATE TABLE owns_pets(
+	username		VARCHAR		NOT NULL REFERENCES Owners(username) ON DELETE CASCADE, -- username of owner
+	name 			NAME		NOT NULL, --name of pet
+	description		TEXT, 
+	cat_name		VARCHAR(10)	NOT NULL REFERENCES Categories(cat_name),
+	size			VARCHAR		NOT NULL, 
+	sociability		VARCHAR,
+	special_req		VARCHAR,
+	img				BYTEA		NOT NULL,
+	PRIMARY KEY (username, name)
 );
 
-CREATE TABLE user_games (
-	username  varchar(9)  NOT NULL,
-	gamename  varchar(64) NOT NULL,
-	PRIMARY KEY(username,gamename),
-	FOREIGN KEY(username) REFERENCES username_password(username),
-	FOREIGN KEY(gamename) REFERENCES game_list(gamename)
+
+CREATE TABLE declares_availabilities(
+    start_timestamp TIMESTAMP NOT NULL,
+    end_timestamp TIMESTAMP NOT NULL,
+    caretaker_username VARCHAR REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    CHECK (end_timestamp > start_timestamp),
+    PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
+                                                --They will be merged
+
+
 );
 
-CREATE TABLE game_plays (
-	user1     varchar(9)  NOT NULL,
-	user2     varchar(9)  NOT NULL,
-	gamename  varchar(64) NOT NULL,
-	winner    varchar(9)  NOT NULL,
-	FOREIGN KEY(user1)    REFERENCES username_password(username),
-	FOREIGN KEY(user2)    REFERENCES username_password(username),
-	FOREIGN KEY(winner)   REFERENCES username_password(username),
-	FOREIGN KEY(gamename) REFERENCES game_list(gamename)
-);
 
--- Populate table with dummy values --
+-- INSERT categories
+CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 
+							  			 base_price		NUMERIC) AS
+	$$ BEGIN
+	   INSERT INTO Categories (cat_name, base_price) 
+	   VALUES (cat_name, base_price);
+	   END; $$
+	LANGUAGE plpgsql;
 
-INSERT INTO availabilities (start_timestamp, end_timestamp, pet_count, caretaker_username)
-VALUES ('2021-06-22 19:10:25-07','2022-06-22 19:10:25-07', 3, 'Sam')
-RETURNING *;
+CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
+									   first_name		NAME,
+									   last_name		NAME,
+									   password			VARCHAR(64),
+									   email			VARCHAR,
+									   dob				DATE,
+									   unit_no			VARCHAR,
+									   postal_code		VARCHAR(6),
+									   credit_card_no	VARCHAR) AS
+	$$ BEGIN
+	   INSERT INTO Owners(username, first_name, last_name, password, email, dob, unit_no, postal_code, credit_card_no, reg_date)
+	   VALUES (username, first_name, last_name, password, email, dob, unit_no, postal_code, credit_card_no, CURRENT_DATE);
+	   END; $$
+	LANGUAGE plpgsql;
+	
+CREATE OR REPLACE PROCEDURE add_pet (pet_id				VARCHAR,
+									 username			VARCHAR,
+									 name 				NAME, 
+									 description		VARCHAR, 
+									 cat_name			VARCHAR(10),
+									 size				VARCHAR, 
+									 sociability		VARCHAR,
+									 special_req		VARCHAR,
+									 img				BYTEA) AS
+	$$ BEGIN
+	   INSERT INTO ownsPets (pet_id, username, name, description, cat_name, size, sociability, special_req, img)
+	   VALUES (pet_id, username, name, description, cat_name, size, sociability, special_req, BYTEA(img));
+	   END; $$
+	LANGUAGE plpgsql;
 
 
-INSERT INTO availabilities (start_timestamp, end_timestamp, pet_count, caretaker_username)
-SELECT generate_series('2021-06-22 19:10:25-07', '2022-06-22 19:10:25-07', '10 day'::interval), generate_series('2022-06-22 19:10:25-07', '2023-06-22 19:10:25-07', '10 day'::interval), floor(random() * 5)
-  , 'user_' || floor(random() * 100)
-RETURNING *;
+---Availabilities Trigger
 
-CREATE OR REPLACE FUNCTION update_user_status_from_plays() RETURNS trigger AS $ret$
-	BEGIN
-		UPDATE username_password
-		SET status='Silver'
-		WHERE (
-			SELECT COUNT(*) FROM game_plays WHERE username=NEW.user1
-		) > 10;
-		UPDATE username_password
-		SET status='Gold'
-		WHERE (
-			SELECT COUNT(*) FROM game_plays WHERE username=NEW.user1
-		) > 20;
-		UPDATE username_password
-		SET status='Silver'
-		WHERE (
-			SELECT COUNT(*) FROM game_plays WHERE username=NEW.user2
-		) > 10;
-		UPDATE username_password
-		SET status='Gold'
-		WHERE (
-			SELECT COUNT(*) FROM game_plays WHERE username=NEW.user2
-		) > 20;
-		RETURN NEW;
-	END;
-$ret$ LANGUAGE plpgsql;
+--Merge availabilities if they coincide
+CREATE OR REPLACE FUNCTION merge_availabilities()
+RETURNS TRIGGER AS
+$$ DECLARE new_start, new_end, old_start TIMESTAMP
+    BEGIN
+    IF NEW.start_timestamp >= NRW.end_timestamp THEN
+    RETURN NULL;
+    ELSIF
+    NOT EXISTS (SELECT 1 FROM declares_availabilities a1 WHERE a1.caretaker_username = NEW.caretaker_username AND (GREATEST (a1.start_timestamp, NEW.start_timestamp) < LEAST (a1.end_timestamp, NEW.end_timestamp))) THEN --No overlap
+    RETURN NEW;
+    ELSIF
+    EXISTS (SELECT 1 FROM declares_availabilities a2 WHERE a2.caretaker_username = NEW.caretaker_username AND (a2.start_timestamp <= NEW.start_timestamp AND a2.end_timestamp >= NEW.end_timestamp)) THEN --New period is a subset of an existing periond
+    RETURN NULL;
+    ELSE
+    SELECT LEAST(a3.start_timestamp, NEW.start_timestamp) INTO new_start, GREATEST(a3.end_timestamp, NEW.end_timestamp) INTO new_end, a1.start_timestamp INTO old_start
+    FROM declares_availabilities a3
+    WHERE a3.caretaker_username = NEW.caretaker_username AND (GREATEST (a3.start_timestamp, NEW.start_timestamp) < LEAST (a3.end_timestamp, NEW.end_timestamp));
 
-CREATE OR REPLACE FUNCTION merge_availabilities() RETURNS trigger AS $ret$
-	BEGIN
-	    --Case 0: new availability period does not coincide with old availability period at all --
-	    IF((SELECT COUNT(*) FROM availabilities A WHERE A.start_timestamp > NEW.start_timestamp OR A.end_timestamp < NEW.end_timestamp) <= 0)
-	    THEN
-	    RAISE NOTICE 'new availability does not coincide with old availability';
-	    RETURN NEW;
-	    END IF;
+    DELETE FROM declares_availabilities a4
+    WHERE a4.caretaker_username = NEW.caretaker_username AND a4.start_timestamp = old_start;
 
-	    --Case 1: old availability period is part of  --
-		UPDATE availabilities
-		SET start_timestamp= NEW.start_timestamp, end_timestamp= NEW.end_timestamp
-		WHERE (
-			SELECT * FROM availabilities WHERE (caretaker_username = NEW.caretaker_username AND start_timestamp > NEW.start_timestamp AND end_timestamp < NEW.end_timestamp)
-		);
-		--Case 2: When new availability period coincide with old availability period on the left hand side --
-		UPDATE availabilities
-        		SET start_timestamp= NEW.start_timestamp
-        		WHERE (
-        			SELECT * FROM availabilities WHERE (caretaker_username = NEW.caretaker_username AND start_timestamp > NEW.start_timestamp AND start_timestamp <= NEW.end_timestamp AND end_timestamp >= NEW.end_timestamp)
-        		);
-      --Case 3: When new availability period coincide with old availability period on the right hand side --
-      	UPDATE availabilities
-              	SET end_timestamp= NEW.end_timestamp
-              	WHERE (
-              		SELECT * FROM availabilities WHERE (caretaker_username = NEW.caretaker_username AND start_timestamp <= NEW.start_timestamp AND start_timestamp <= NEW.end_timestamp AND end_timestamp >= NEW.end_timestamp)
 
-             	);
-		RETURN NULL;
-	END;
-$ret$ LANGUAGE plpgsql;
+    RETURN (new_start, new_start, NEW.caretaker_username);
+    END IF;
+    END $$
+ LANGUAGE plpgsql;
 
-CREATE TRIGGER check_user_status_from_plays
-	AFTER INSERT ON game_plays
-	FOR EACH ROW
-	EXECUTE PROCEDURE update_user_status_from_plays();
+CREATE TRIGGER merge_availabilities
+BEFORE UPDATE ON declares_availabilities
+FOR EACH ROW EXECUTE PROCEDURE merge_availabilities();
 
---Checks if new availability period coincides with existng availability. If so, merge them.--
-CREATE TRIGGER check_coincide_availability_period
-	BEFORE INSERT
-	ON availabilities
-	FOR EACH ROW
-	EXECUTE PROCEDURE merge_availabilities();
+--delete availabilities only if there are no pets the caretaker is scheduled to care for
+CREATE OR REPLACE FUNCTION check_deletable()
+RETURNS TRIGGER AS
+$$
+   BEGIN
+   IF EXISTS (SELECT 1
+              FROM bids b1
+              WHERE b1.caretaker_username = OLD.caretaker_username AND (GREATEST (b1.start_timestamp, NEW.start_timestamp) < LEAST (b1.end_timestamp, NEW.end_timestamp)) ) THEN --There is overlap
+
+   RAISE EXCEPTION 'The period cannot be deleted as there is a successful bid within that period'
+   END IF;
+
+   END $$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER check_deletable
+BEFORE DELETE ON declares_availabilities
+FOR EACH ROW EXECUTE PROCEDURE check_deletable();
+
+--Update availabilities while checking if it can be shrunked and merging if it is expanded
+--Break update down into delete and insertion
+CREATE OR REPLACE FUNCTION update_availabilities()
+RETURNS TRIGGER AS
+$$
+  BEGIN
+  DELETE FROM declares_availabilities a1 WHERE a1.caretaker_username = OLD.caretaker_username AND a1.start_timestamp = OLD.start_timestamp;
+  INSERT INTO declares_availabilities (start_timestamp, end_timestamp, caretaker_username) VALUES(NEW.start_timestamp, NEW.end_timestamp, NEW.caretaker_username);
+  END $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_availabilities
+INSTEAD OF UPDATE ON declares_availabilities
+FOR EACH ROW EXECUTE PROCEDURE update_availabilities();
 
 

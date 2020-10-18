@@ -35,10 +35,12 @@ function initRouter(app) {
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/pets', passport.authMiddleware(), update_pet);
 	
-	app.post('/register'   , passport.antiMiddleware(), reg_user);
+	app.post('/register', passport.antiMiddleware(), reg_user);
+	app.post('/del_user', passport.authMiddleware(), del_user);
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
+	
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('local', {
@@ -198,7 +200,7 @@ function del_pet (req, res, next) {
 }
 
 function reg_user(req, res, next) {
-	var username		= req.user.username;
+	var username		= req.body.username;
 	var firstname		= req.body.firstname;
 	var lastname		= req.body.lastname;
 	var password		= bcrypt.hashSync(req.body.password, salt);
@@ -219,7 +221,7 @@ function reg_user(req, res, next) {
 				if(err) {
 					return res.redirect('/register?reg=fail');
 				} else {
-					return res.redirect('/dashboard');
+					return res.redirect('/add_pets');
 				}
 			});
 		}
@@ -245,6 +247,24 @@ function reg_pet(req, res, next) {
 	});
 }
 
+function del_user (req, res, next) {
+	var username = req.user.username;
+	pool.query(sql_query.query.del_owner, [username], (err, data) => {
+		if(err) {
+			console.error("Error in deleting account", err);
+			res.redirect("/dashboard");
+		} else {
+			pool.query(sql_query.query.del_caretaker, [username], (err, data) => {
+				if(err) {
+					console.error("Error in deleting account", err);
+					res.redirect("/dashboard");
+				} else {
+					res.redirect("/");
+				}
+			});
+		}
+	});
+}
 
 // LOGOUT
 function logout(req, res, next) {

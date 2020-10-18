@@ -16,6 +16,8 @@ sql.query = {
 	update_pet : "UPDATE ownsPets SET cat_name = $3, size = $4, description = $5, sociability = $6, special_req = $7 WHERE username = $1 AND name = $2;", 
 
 	//delete information
+	del_owner : "DELETE FROM Owners WHERE username = $1;", 
+	del_caretaker: "DELETE FROM Caretakers WHERE username = $1", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
 }
 

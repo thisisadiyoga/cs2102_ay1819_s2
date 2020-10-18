@@ -1,24 +1,3 @@
-/*
-CREATE TABLE caretakers(
-	username VARCHAR PRIMARY KEY
-);
-
-CREATE TABLE is_paid_salaries (
-	caretaker_id VARCHAR REFERENCES caretakers(username)
-	ON DELETE cascade,
-	year INTEGER,
-	month INTEGER,
-	salary_amount NUMERIC NOT NULL,
-	PRIMARY KEY (caretaker_id, year, month)
-);
-
-CREATE TABLE administrators (
-	admin_id VARCHAR PRIMARY KEY,
-	password VARCHAR(64) NOT NULL,
-	last_login_time TIMESTAMP,
-);
- */
- 
 CREATE TABLE Categories (
 	cat_name		VARCHAR(10) 	PRIMARY KEY, 
 	base_price		NUMERIC
@@ -48,11 +27,44 @@ CREATE TABLE ownsPets(
 	PRIMARY KEY (username, name)
 );
 
+CREATE TABLE Caretakers (
+	username   	VARCHAR PRIMARY KEY,
+	first_name 	VARCHAR NOT NULL,
+	last_name  	VARCHAR NOT NULL,
+	password   	VARCHAR(64) NOT NULL,
+	email		VARCHAR NOT NULL UNIQUE CHECK(email LIKE '%@%.%'),
+	credit_card_no	VARCHAR NOT NULL,
+	DOB			DATE NOT NULL,
+	postal_code	VARCHAR(6),
+	unit_no		VARCHAR,
+	reg_date		DATE NOT NULL DEFAULT CURRENT_DATE,
+	is_full_time	BIT,
+	avg_rating	FLOAT CHECK (avg_rating >= 0),
+	no_of_reviews	INTEGER,
+	no_of_pets_taken INTEGER
+);
+
 CREATE VIEW Users AS (
 	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date FROM Owners
 	UNION
 	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date FROM Caretakers
 );
+
+CREATE TABLE isPaidSalaries (
+	caretaker_id VARCHAR REFERENCES caretakers(username)
+	ON DELETE cascade,
+	year INTEGER,
+	month INTEGER,
+	salary_amount NUMERIC NOT NULL,
+	PRIMARY KEY (caretaker_id, year, month)
+);
+
+CREATE TABLE Administrators (
+	admin_id VARCHAR PRIMARY KEY,
+	password VARCHAR(64) NOT NULL,
+	last_login_time TIMESTAMP
+);
+
 
 -- INSERT categories
 CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 

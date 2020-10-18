@@ -1,8 +1,7 @@
 const sql_query = require('../sql');
 const postgres_details = require('../config')
 const passport = require('passport');
-const bcrypt = require('bcrypt')
-const postgres_details = require("../config.js");
+const bcrypt = require('bcrypt');
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
@@ -214,6 +213,7 @@ function del_pet (req, res, next) {
 }
 
 function reg_user(req, res, next) {
+	console.log(req);
 	var username		= req.user.username;
 	var firstname		= req.body.firstname;
 	var lastname		= req.body.lastname;
@@ -223,6 +223,20 @@ function reg_user(req, res, next) {
 	var credit_card_no	= req.body.credit_card_no;
 	var unit_no			= req.body.unit_no;
 	var postal_code 	= req.body.postal_code;
+
+	// let info = {
+	// 	username		: req.user.username,
+	// 	firstname		: req.body.firstname,
+	//  	lastname		: req.body.lastname,
+	// 	 password		: bcrypt.hashSync(req.body.password, salt),
+	// 	 email			: req.body.email,
+	// 	 dob			: req.body.dob,
+	// 	 credit_card_no	: req.body.credit_card_no,
+	// 	 unit_no		: req.body.unit_no,
+	//  	postal_code 	: req.body.postal_code,
+	// }
+	// console.log(info)
+
 	pool.query(sql_query.query.add_owner, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);

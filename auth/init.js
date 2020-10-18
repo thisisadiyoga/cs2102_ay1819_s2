@@ -4,7 +4,6 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
-const postgres_details = require("../config.js");
 
 const authMiddleware = require('./middleware');
 const antiMiddleware = require('./antimiddle');

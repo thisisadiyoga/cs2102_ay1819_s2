@@ -36,7 +36,7 @@ function initRouter(app) {
 	app.post('/pets', passport.authMiddleware(), update_pet);
 	
 	app.post('/register', passport.antiMiddleware(), reg_user);
-	app.post('/del_user', passport.authMiddleware(), del_user);
+	app.post('/del_user', del_user);
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
@@ -249,17 +249,20 @@ function reg_pet(req, res, next) {
 
 function del_user (req, res, next) {
 	var username = req.user.username;
+
+	req.session.destroy()
+	req.logout()
+
 	pool.query(sql_query.query.del_owner, [username], (err, data) => {
 		if(err) {
 			console.error("Error in deleting account", err);
-			res.redirect("/dashboard");
 		} else {
 			pool.query(sql_query.query.del_caretaker, [username], (err, data) => {
 				if(err) {
 					console.error("Error in deleting account", err);
-					res.redirect("/dashboard");
 				} else {
-					res.redirect("/");
+					console.log("User deleted");
+					res.redirect('/')
 				}
 			});
 		}

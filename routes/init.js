@@ -249,7 +249,7 @@ function reg_pet(req, res, next) {
 
 function del_user (req, res, next) {
 	var username = req.user.username;
-
+	
 	req.session.destroy()
 	req.logout()
 

@@ -104,3 +104,13 @@ CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
 	   VALUES (username, name, description, cat_name, size, sociability, special_req);
 	   END; $$
 	LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR PRIMARY KEY,
+										password 		VARCHAR(64) NOT NULL,
+										last_login_time TIMESTAMP 
+										) AS
+	$$ BEGIN
+	   INSERT INTO Administrators (admin_id, password, last_login_time ) 
+	   VALUES (admin_id, password, last_login_time ); 
+	   END; $$
+	LANGUAGE plpgsql;

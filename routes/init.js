@@ -42,10 +42,12 @@ function initRouter(app) {
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/pets', passport.authMiddleware(), update_pet);
 	
-	app.post('/register'   , passport.antiMiddleware(), reg_user);
+	app.post('/register', passport.antiMiddleware(), reg_user);
+	app.post('/del_user', del_user);
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
+	
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('local', {
@@ -60,7 +62,6 @@ function initRouter(app) {
 	app.get('/admin', admin);
 
 }
-
 
 // Render Function
 function basic(req, res, page, other) {
@@ -213,8 +214,7 @@ function del_pet (req, res, next) {
 }
 
 function reg_user(req, res, next) {
-	console.log(req);
-	var username		= req.user.username;
+	var username		= req.body.username;
 	var firstname		= req.body.firstname;
 	var lastname		= req.body.lastname;
 	var password		= bcrypt.hashSync(req.body.password, salt);
@@ -223,19 +223,6 @@ function reg_user(req, res, next) {
 	var credit_card_no	= req.body.credit_card_no;
 	var unit_no			= req.body.unit_no;
 	var postal_code 	= req.body.postal_code;
-
-	// let info = {
-	// 	username		: req.user.username,
-	// 	firstname		: req.body.firstname,
-	//  	lastname		: req.body.lastname,
-	// 	 password		: bcrypt.hashSync(req.body.password, salt),
-	// 	 email			: req.body.email,
-	// 	 dob			: req.body.dob,
-	// 	 credit_card_no	: req.body.credit_card_no,
-	// 	 unit_no		: req.body.unit_no,
-	//  	postal_code 	: req.body.postal_code,
-	// }
-	// console.log(info)
 
 	pool.query(sql_query.query.add_owner, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code], (err, data) => {
 		if(err) {
@@ -249,37 +236,38 @@ function reg_user(req, res, next) {
 				if(err) {
 					return res.redirect('/register?reg=fail');
 				} else {
-					return res.redirect('/dashboard');
+					return res.redirect('/add_pets');
 				}
 			});
 		}
 	});
 }
 
-// function reg_admin(req, res, next) {
-// 	var admin_username  = req.body.username;
-// 	var password  = bcrypt.hashSync(req.body.password, salt);
-// 	// var last_login_time = Date.now();
-// 	var last_login_time = "2020-10-17 04:05:06";
-// 	pool.query(sql_query.query.add_user, [username, password, last_login_time], (err, data) => {
-// 		if(err) {
-// 			console.error("Error in adding user", err);
-// 			res.redirect('/admin?reg=fail');
-// 		} else {
-// 			req.login({
-// 				username    : username,
-// 				passwordHash: password,
+function reg_admin(req, res, next) {
+	var admin_username  = req.body.username;
+	var password  = bcrypt.hashSync(req.body.password, salt);
+	// var last_login_time = Date.now();
+	var last_login_time = "2020-10-17 04:05:06";
+	pool.query(sql_query.query.add_user, [username, password, last_login_time], (err, data) => {
+		if(err) {
+			console.error("Error in adding user", err);
+			res.redirect('/admin?reg=fail');
+		} else {
+			req.login({
+				username    : username,
+				passwordHash: password,
 
-// 			}, function(err) {
-// 				if(err) {
-// 					return res.redirect('/admin?reg=fail');
-// 				} else {
-// 					return res.redirect('/admin');
-// 				}
-// 			});
-// 		}
-// 	});
-// }
+			}, function(err) {
+				if(err) {
+					return res.redirect('/admin?reg=fail');
+				} else {
+					return res.redirect('/admin');
+				}
+			});
+		}
+	});
+}
+
 function reg_pet(req, res, next) {
 	var username		= req.user.username;
 	var name			= req.body.name;
@@ -299,6 +287,27 @@ function reg_pet(req, res, next) {
 	});
 }
 
+function del_user (req, res, next) {
+	var username = req.user.username;
+
+	req.session.destroy()
+	req.logout()
+
+	pool.query(sql_query.query.del_owner, [username], (err, data) => {
+		if(err) {
+			console.error("Error in deleting account", err);
+		} else {
+			pool.query(sql_query.query.del_caretaker, [username], (err, data) => {
+				if(err) {
+					console.error("Error in deleting account", err);
+				} else {
+					console.log("User deleted");
+					res.redirect('/')
+				}
+			});
+		}
+	});
+}
 
 // LOGOUT
 function logout(req, res, next) {

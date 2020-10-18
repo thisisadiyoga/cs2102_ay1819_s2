@@ -17,10 +17,8 @@
   </head>
 	<body id="page-top">
 		<%- include navbar.ejs %>
-		
 		<div id="wrapper">
 			<%- include sidebar.ejs %>
-			
 			<div id="content-wrapper">
 				<div class="container-fluid">		
 					<div class="card mb-3">
@@ -38,7 +36,7 @@
 								<div class="form-group row">
 									<label for="email" class="col-sm-2 col-form-label"><b>Email:</b></label>
 									<div class="col-sm-10">
-										<input type="text" required="required" class="form-control" id="email" name="email" />
+										<input type="text" required="required" class="form-control" id="email" name="email" placeholder="Your new email"/>
 									</div>
 
 								</div>
@@ -70,9 +68,11 @@
 						</form>
 					</div>
 				</div>
+				<div>
+					<form action="del_user" method="post"><button class="btn btn-secondary float-left" type="submit" id="username" name="username" value="<%= user %>">Delete Account</button></form>
+				</div>
 			</div>
 		</div>
-		
 		<%- include bottomscript.ejs %>
   </body>
 </html>

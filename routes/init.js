@@ -29,12 +29,7 @@ const salt  = bcrypt.genSaltSync(round);
 function initRouter(app) {
 	/* GET */
 	app.get('/'      , index );
-<<<<<<< HEAD
-	app.get('/search', search);
-
-=======
 	
->>>>>>> master
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);

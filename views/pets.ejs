@@ -46,7 +46,7 @@
                                     <tbody>
                                         <% for(var i=0; i<pet.length; i++) { %>
                                         <tr>
-                                            <td style="max-width:35px;">
+                                            <td style="max-width:20px;">
                                                 <!-- Button trigger modal -->
                                                 <button class="btn" type="submit" id="name" name="name" value="<%= pet[i].name%>"><i class="fas fa-trash" title="Delete Pet" data-toggle="modal" data-target="#confirmModal"></i></button>
 
@@ -63,7 +63,7 @@
                                                             <div class="modal-body">Confirm the deletion of <%= pet[i].name%>?
                                                             </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                            <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                                                             <form action="del_pet" method="post"><button class="btn" type="submit" id="name" name="name" value="<%= pet[i].name%>">Delete Pet</form>
                                                         </div>
                                                     </div>
@@ -83,7 +83,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <a class="btn btn-secondary" href="/add_pets">Add Pet</a><span class="badge badge-pill badge-info"><%= add_msg %></span>
+                            <a class="btn btn-primary" href="/add_pets">Add Pet</a><span class="badge badge-pill badge-info"><%= add_msg %></span>
                         </div>
                     </div>
                 </div>

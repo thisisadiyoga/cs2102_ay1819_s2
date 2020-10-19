@@ -16,6 +16,8 @@
 		<link href="stylesheets/index.css" rel="stylesheet">
   </head>
 	<body class="bg-dark">
+		<!--Scripts-->
+
 		<div class="container">
 			<div class="card card-register mx-auto mt-5">
 				<div class="card-header">Edit a Pet</div>
@@ -35,20 +37,22 @@
                             <div class="form-row">
                                 <div class="col-md-6">
                                     <label for="cat_name">Pet Type</label>
-                                    <select class="form-control" id="cat_name" name="cat_name" required="required">
+                                    <select class="form-control" id="cat_name" name="cat_name" required="required" value="<%= pet.cat_name %>">
 										<% for(var i=0; i<cat_list.length; i++) { %>
-                                        <option> <%= cat_list[i].cat_name;%></option>
+										<% var selected = ( cat_list[i].cat_name == pet.cat_name ) ? "selected" : ""; %>
+										<option <%=selected %>> <%= cat_list[i].cat_name;%></option>
                                         <% } %>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="cat_type">Pet Size</label>
-                                    <select class="form-control" id="size" name="size" required="required" value="<%= pet.size%>">
-                                        <option>Extra Small</option>
-                                        <option>Small</option>
-                                        <option>Medium</option>
-                                        <option>Large</option>
-                                        <option>Extra Large</option>
+                                    <select class="form-control" id="size" name="size" required="required">
+										<% ( pet.size == "Extra Small" ) ? "selected" : ""; %>
+                                        <option <% var selected = ( pet.size == "Extra Small" ) ? "selected" : ""; %> <%=selected %>>Extra Small</option>
+                                        <option <% var selected = ( pet.size == "Small" ) ? "selected" : ""; %> <%=selected %>>Small</option>
+                                        <option <% var selected = ( pet.size == "Medium" ) ? "selected" : ""; %> <%=selected %>>Medium</option>
+                                        <option <% var selected = ( pet.size == "Large" ) ? "selected" : ""; %> <%=selected %>>Large</option>
+                                        <option <% var selected = ( pet.size == "Extra Large" ) ? "selected" : ""; %> <%=selected %>>Extra Large</option>
                                     </select>
                                 </div>
                             </div>

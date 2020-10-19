@@ -3,6 +3,7 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
+const postgres_details = require("../config.js");
 
 const authMiddleware = require('./middleware');
 const antiMiddleware = require('./antimiddle');
@@ -12,10 +13,15 @@ const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   //ssl: true
+  user: postgres_details.user, 
+	host: postgres_details.host,
+	database: postgres_details.database, 
+	password : postgres_details.password, 
+	port : postgres_details.port,
 });
 
 function findUser (username, callback) {
-	pool.query(sql_query.query.userpass, [username], (err, data) => {
+	pool.query(sql_query.query.get_user, [username], (err, data) => {
 		if(err) {
 			console.error("Cannot find user");
 			return callback(null);
@@ -28,9 +34,6 @@ function findUser (username, callback) {
 			return callback(null, {
 				username    : data.rows[0].username,
 				passwordHash: data.rows[0].password,
-				firstname   : data.rows[0].first_name,
-				lastname    : data.rows[0].last_name,
-				status      : data.rows[0].status
 			});
 		} else {
 			console.error("More than one user?");

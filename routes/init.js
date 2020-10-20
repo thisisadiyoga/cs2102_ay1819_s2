@@ -102,7 +102,7 @@ function pets (req, res, next) {
 			pet = data.rows;
 		}
 
-	basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
+	basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), edit_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), del_msg: msg(req, 'del', 'Pet deleted successfully', 'Error in deleting pet'), auth: true });
 	});
 }
 
@@ -157,9 +157,9 @@ function update_pet (req, res, next) {
 	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req], (err, data) => {
 		if(err) {
 			console.error("Error in updating pet");
-			res.redirect('/pets?pass=fail');
+			res.redirect('/pets?edit=fail');
 		} else {
-			res.redirect('/pets?pass=pass');
+			res.redirect('/pets?edit=pass');
 		}
 	});
 }
@@ -178,7 +178,7 @@ function edit_pet(req, res, next) {
 		pool.query(sql_query.query.get_pet, [req.user.username, req.body.name], (err, data) => {
 			if(err || !data.rows || data.rows.length == 0) {
 				console.error("Pet not found");
-				res.redirect('/pets');
+				res.redirect('/pets?edit=fail');
 			} else {
 				pet = data.rows[0];
 				basic(req, res, 'edit_pet', { cat_list : cat_list, pet : pet, add_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), auth: true });
@@ -192,9 +192,9 @@ function del_pet (req, res, next) {
 	pool.query(sql_query.query.del_pet, [req.user.username, req.body.name], (err, data) => {
 		if(err) {
 			console.error("Pet not found");
-			res.redirect('/pets');
+			res.redirect('/pets?del=fail');
 		} else {
-			res.redirect('/pets');
+			res.redirect('/pets?del=pass');
 		}
 	});
 }
@@ -240,9 +240,9 @@ function reg_pet(req, res, next) {
 	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req], (err, data) => {
 		if(err) {
 			console.error("Error in adding pet", err);
-			res.redirect('/pets?pet_reg=fail');
+			res.redirect('/pets?add=fail');
 		} else {
-			res.redirect('/pets?pet_reg=pass');
+			res.redirect('/pets?add=pass');
 		}
 	});
 }
@@ -262,7 +262,7 @@ function del_user (req, res, next) {
 					console.error("Error in deleting account", err);
 				} else {
 					console.log("User deleted");
-					res.redirect('/')
+					res.redirect('/?del=pass')
 				}
 			});
 		}

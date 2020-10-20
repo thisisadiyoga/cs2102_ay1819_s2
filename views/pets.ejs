@@ -63,8 +63,8 @@
                                                             <div class="modal-body">Confirm the deletion of <%= pet[i].name%>?
                                                             </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-                                                            <form action="del_pet" method="post"><button class="btn" type="submit" id="name" name="name" value="<%= pet[i].name%>">Delete Pet</form>
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                            <form action="del_pet" method="post"><button class="btn btn-primary" type="submit" id="name" name="name" value="<%= pet[i].name%>">Delete Pet</button></form>
                                                         </div>
                                                     </div>
                                                     </div>
@@ -83,7 +83,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <a class="btn btn-primary" href="/add_pets">Add Pet</a><span class="badge badge-pill badge-info"><%= add_msg %></span>
+                            <div><a class="btn btn-primary" href="/add_pets">Add Pet</a>&nbsp;<span class="badge badge-pill badge-info"><%= add_msg %></span><span class="badge badge-pill badge-info"><%= edit_msg %></span><span class="badge badge-pill badge-info"><%= del_msg %></span></div>
                         </div>
                     </div>
                 </div>

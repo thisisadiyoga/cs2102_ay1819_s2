@@ -105,8 +105,8 @@ CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
 	   END; $$
 	LANGUAGE plpgsql;
 
-CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR PRIMARY KEY,
-										password 		VARCHAR(64) NOT NULL,
+CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
+										password 		VARCHAR(64),
 										last_login_time TIMESTAMP 
 										) AS
 	$$ BEGIN

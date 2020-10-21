@@ -8,6 +8,7 @@ sql.query = {
 
 	get_user : "SELECT * FROM Users WHERE username = $1;",
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2", 
+	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1",
 
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 

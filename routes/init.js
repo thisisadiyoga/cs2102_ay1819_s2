@@ -7,7 +7,6 @@ const bcrypt = require('bcrypt');
 const { Pool } = require('pg');
 const pool = new Pool({
 	
-	
 	user: postgres_details.user,
 	host: postgres_details.host,
 	database: postgres_details.database,
@@ -15,11 +14,6 @@ const pool = new Pool({
 	port: postgres_details.port,
 	connectionString: process.env.DATABASE_URL,
 	//ssl: true 
-	user: postgres_details.user, 
-	host: postgres_details.host,
-	database: postgres_details.database, 
-	password : postgres_details.password, 
-	port : postgres_details.port,
 });
 
 const round = 10;
@@ -43,6 +37,7 @@ function initRouter(app) {
 	app.post('/pets', passport.authMiddleware(), update_pet);
 	
 	app.post('/register', passport.antiMiddleware(), reg_user);
+	app.post('/registerAdmin', passport.antiMiddleware(), reg_admin);
 	app.post('/del_user', del_user);
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
@@ -50,9 +45,15 @@ function initRouter(app) {
 	
 
 	/* LOGIN */
-	app.post('/login', passport.authenticate('local', {
+	app.post('/login', passport.authenticate('user', {
 		successRedirect: '/dashboard',
 		failureRedirect: '/'
+	}));
+
+	/* LOGIN */
+	app.post('/loginAdmin', passport.authenticate('admin', {
+		successRedirect: '/adminDashboard',
+		failureRedirect: '/admin?login=failed'
 	}));
 	
 	/* LOGOUT */
@@ -96,7 +97,10 @@ function index(req, res, next) {
 }
 
 function dashboard(req, res, next) {
-	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+	basic(req, res, 'dashboard', { 
+		info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), 
+		pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), 
+		auth: true });
 }
 
 function register(req, res, next) {
@@ -232,6 +236,7 @@ function reg_user(req, res, next) {
 			req.login({
 				username    : username,
 				passwordHash: password,
+				isUser: true
 			}, function(err) {
 				if(err) {
 					return res.redirect('/register?reg=fail');
@@ -244,24 +249,27 @@ function reg_user(req, res, next) {
 }
 
 function reg_admin(req, res, next) {
-	var admin_username  = req.body.username;
-	var password  = bcrypt.hashSync(req.body.password, salt);
+	// console.log(req.body);
+	var admin_username  = req.body.admin_username;
+	var admin_password  = bcrypt.hashSync(req.body.admin_password, salt);
 	// var last_login_time = Date.now();
 	var last_login_time = "2020-10-17 04:05:06";
-	pool.query(sql_query.query.add_user, [username, password, last_login_time], (err, data) => {
+	pool.query(sql_query.query.add_admin, [admin_username, admin_password, last_login_time], (err, data) => {
 		if(err) {
-			console.error("Error in adding user", err);
+			console.error("Error in adding admin", err);
 			res.redirect('/admin?reg=fail');
 		} else {
 			req.login({
-				username    : username,
-				passwordHash: password,
+				admin_username: admin_username,
+				passwordHash: admin_password,
+				isUser: false
 
 			}, function(err) {
 				if(err) {
+					console.log(err);
 					return res.redirect('/admin?reg=fail');
 				} else {
-					return res.redirect('/admin');
+					return res.redirect('/adminDashboard');
 				}
 			});
 		}

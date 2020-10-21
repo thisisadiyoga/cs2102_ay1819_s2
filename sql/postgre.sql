@@ -9,7 +9,7 @@ CREATE TABLE Owners(
 	last_name		NAME		NOT NULL,
 	password		VARCHAR(64)	NOT NULL, 
 	email			VARCHAR		NOT NULL UNIQUE, 
-	dob				DATE		NOT NULL, --check today - DOB >= 13 
+	dob				DATE		NOT NULL CHECK (CURRENT_DATE - dob >= 6570),
 	credit_card_no	VARCHAR		NOT NULL,
 	unit_no			VARCHAR,
 	postal_code		VARCHAR(6)	NOT NULL,

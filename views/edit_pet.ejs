@@ -47,7 +47,6 @@
                                 <div class="col-md-6">
                                     <label for="cat_type">Pet Size</label>
                                     <select class="form-control" id="size" name="size" required="required">
-										<% ( pet.size == "Extra Small" ) ? "selected" : ""; %>
                                         <option <% var selected = ( pet.size == "Extra Small" ) ? "selected" : ""; %> <%=selected %>>Extra Small</option>
                                         <option <% var selected = ( pet.size == "Small" ) ? "selected" : ""; %> <%=selected %>>Small</option>
                                         <option <% var selected = ( pet.size == "Medium" ) ? "selected" : ""; %> <%=selected %>>Medium</option>

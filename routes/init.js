@@ -28,18 +28,19 @@ function initRouter(app) {
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 
 	app.get('/register' , passport.antiMiddleware(), register );
-    app.get('/password' , passport.antiMiddleware(), retrieve );
+	app.get('/password' , passport.antiMiddleware(), retrieve );
 	
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/pets', passport.authMiddleware(), update_pet);
-	
+
 	app.post('/register', passport.antiMiddleware(), reg_user);
 	app.post('/del_user', del_user);
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
+	app.post('/display', passport.authMiddleware(), search_caretaker);
 	
 
 	/* LOGIN */
@@ -102,7 +103,7 @@ function pets (req, res, next) {
 			pet = data.rows;
 		}
 
-	basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), edit_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), del_msg: msg(req, 'del', 'Pet deleted successfully', 'Error in deleting pet'), auth: true });
+		basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), edit_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), del_msg: msg(req, 'del', 'Pet deleted successfully', 'Error in deleting pet'), auth: true });
 	});
 }
 
@@ -115,7 +116,7 @@ function add_pets(req, res, next) {
 			cat_list = data.rows;
 		}
 
-	basic(req, res, 'add_pets', { cat_list : cat_list, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
+		basic(req, res, 'add_pets', { cat_list : cat_list, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
 	});
 }
 
@@ -184,7 +185,7 @@ function edit_pet(req, res, next) {
 				basic(req, res, 'edit_pet', { cat_list : cat_list, pet : pet, add_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), auth: true });
 			}
 		}
-	)})
+	)});
 };
 
 function del_pet (req, res, next) {
@@ -266,6 +267,19 @@ function del_user (req, res, next) {
 				}
 			});
 		}
+	});
+}
+
+function search_caretaker (req, res, next) {
+	var caretaker;
+	pool.query(sql_query.query.search_caretaker, ["%" + req.body.name + "%"], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			caretaker = [];
+		} else {
+			caretaker = data.rows;
+		}
+		
+		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
 	});
 }
 

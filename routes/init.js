@@ -278,7 +278,7 @@ function search_caretaker (req, res, next) {
 		} else {
 			caretaker = data.rows;
 		}
-		
+
 		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
 	});
 }

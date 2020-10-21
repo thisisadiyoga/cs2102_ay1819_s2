@@ -44,7 +44,6 @@ function findUser (username, callback) {
 
 function findAdmin (username, callback) {
 	pool.query(sql_query.query.get_admin, [username], (err, data) => {
-    console.log('fromsql_query: ', username, data)
 		if(err) {
 			console.error("Cannot find user");
 			return callback(null);
@@ -66,7 +65,6 @@ function findAdmin (username, callback) {
 }
 
 passport.serializeUser(function (user, callback ) {
-  console.log('serialise', user);
   if(user.username) {
     callback(null, {
      id: user.username,
@@ -82,7 +80,6 @@ passport.serializeUser(function (user, callback ) {
 })
 
 passport.deserializeUser(function (user, callback) {
-  console.log('deserialise', user)
   if (user.type =='user') {
     findUser(user.id, callback);
   } else if (user.type == 'admin') {
@@ -122,9 +119,7 @@ function initPassport () {
 
   passport.use('admin', new LocalStrategy(
     (admin_username, password, done) => {
-      console.log('in localstrategy: ', admin_username)
       findAdmin(admin_username, (err, admin) => {
-        console.log('in callback ', admin, admin_username, password)
         if (err) {
           console.err(err);
           return done(err);

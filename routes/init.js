@@ -27,6 +27,8 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
+	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
+
 
 	app.get('/register' , passport.antiMiddleware(), register );
     app.get('/password' , passport.antiMiddleware(), retrieve );
@@ -100,6 +102,11 @@ function dashboard(req, res, next) {
 	basic(req, res, 'dashboard', { 
 		info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), 
 		pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), 
+		auth: true });
+}
+
+function adminDashboard(req, res, next) {
+	basic(req, res, 'adminDashboard', { 
 		auth: true });
 }
 

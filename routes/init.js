@@ -5,6 +5,7 @@ const postgres_details = require("../config.js");
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
+const { RSA_NO_PADDING } = require('constants');
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
 	//ssl: true 
@@ -29,6 +30,8 @@ function initRouter(app) {
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
+
+	app.get('/rating.js', search_caretaker);
 	
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
@@ -120,12 +123,13 @@ function add_pets(req, res, next) {
 	});
 }
 
+
 // POST 
 function update_info(req, res, next) {
 	var username  = req.user.username;
     var email = req.body.email;
 	pool.query(sql_query.query.update_info, [username, email], (err, data) => {
-		if(err) {
+		if(err) {	
 			console.error("Error in update info");
 			res.redirect('/dashboard?info=fail');
 		} else {

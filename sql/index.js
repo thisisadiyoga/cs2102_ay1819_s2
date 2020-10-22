@@ -39,4 +39,6 @@ sql.query = {
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
 
+}
+
 module.exports = sql

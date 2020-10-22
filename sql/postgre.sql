@@ -38,7 +38,7 @@ CREATE TABLE Caretakers (
 	postal_code	VARCHAR(6),
 	unit_no		VARCHAR,
 	reg_date		DATE NOT NULL DEFAULT CURRENT_DATE,
-	is_full_time	BIT,
+	is_full_time	BOOLEAN,
 	avg_rating	FLOAT CHECK (avg_rating >= 0),
 	no_of_reviews	INTEGER,
 	no_of_pets_taken INTEGER
@@ -64,6 +64,20 @@ CREATE TABLE Administrators (
 	password VARCHAR(64) NOT NULL,
 	last_login_time TIMESTAMP
 );
+
+
+-- Insert dummy values, the password hash is 'asdasd'
+INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, 
+						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
+VALUES ('caretaker_1', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_1',
+		'sample_1', 's@s.com', '02-01-2000', '1231231231231231',
+		'1', '123123', '02-10-2020', 'true', 3.5, 1, 1);
+
+INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, 
+						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
+VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_2',
+		'sample_2', 's2@s.com', '02-01-2000', '1231231231231231',
+		'2', '123123', '02-10-2020', 'true', 4.5, 2, 2);
 
 
 -- INSERT categories

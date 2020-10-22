@@ -12,7 +12,7 @@ sql.query = {
 
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
-
+	list_caretakers: "SELECT username, is_full_time, avg_rating, no_of_pets_taken FROM caretakers;",
 	//edit information
 	update_pass: "UPDATE Owners SET password = $2 WHERE username = $1;",
 	update_info: "UPDATE Owners SET email = $2 WHERE username = $1;",

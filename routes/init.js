@@ -27,7 +27,11 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
+
+	/* admin pages*/
 	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
+	app.post('/registerAdmin', passport.antiMiddleware(), reg_admin);
+	app.get('/adminInformation', passport.authMiddleware(), adminInformation);
 
 
 	app.get('/register' , passport.antiMiddleware(), register );
@@ -39,7 +43,6 @@ function initRouter(app) {
 	app.post('/pets', passport.authMiddleware(), update_pet);
 	
 	app.post('/register', passport.antiMiddleware(), reg_user);
-	app.post('/registerAdmin', passport.antiMiddleware(), reg_admin);
 	app.post('/del_user', del_user);
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
@@ -128,6 +131,21 @@ function pets (req, res, next) {
 		}
 
 	basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
+	});
+}
+
+function adminInformation (req, res, next) {
+	var allInformation;
+
+	pool.query(sql_query.query.list_caretakers, (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			allInformation = [];
+		} else {
+			allInformation = data.rows;
+		}
+		console.log(allInformation);
+
+	basic(req, res, 'adminInformation', { caretakers : allInformation, auth: true });
 	});
 }
 

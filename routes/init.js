@@ -2,6 +2,9 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
 const postgres_details = require("../config.js");
+const multer = require("multer");
+const upload = multer({dest: "../uploads"});
+const fs = require('fs');
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
@@ -32,14 +35,14 @@ function initRouter(app) {
 	app.get('/password' , passport.antiMiddleware(), retrieve );
 
 	app.get('/rating.js', search_caretaker);
-	
+
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/pets', passport.authMiddleware(), update_pet);
 
-	app.post('/register', passport.antiMiddleware(), reg_user);
-	app.post('/del_user', del_user);
+	app.post('/register', [passport.antiMiddleware(), upload.single('avatar')], reg_user);
+	app.post('/del_user', del_user,);
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
@@ -86,7 +89,14 @@ function index(req, res, next) {
 }
 
 function dashboard(req, res, next) {
-	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+	pool.query(sql_query.query.get_user, [req.user.username], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			user = [];
+		} else {
+			user = data.rows[0];
+		}
+	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+	});
 }
 
 function register(req, res, next) {
@@ -214,7 +224,9 @@ function reg_user(req, res, next) {
 	var credit_card_no	= req.body.credit_card_no;
 	var unit_no			= req.body.unit_no;
 	var postal_code 	= req.body.postal_code;
-	pool.query(sql_query.query.add_owner, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code], (err, data) => {
+	var avatar			= fs.readFileSync(req.file.path).toString('base64');
+
+	pool.query(sql_query.query.add_owner, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code, avatar], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
@@ -286,6 +298,8 @@ function search_caretaker (req, res, next) {
 		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
 	});
 }
+
+
 
 // LOGOUT
 function logout(req, res, next) {

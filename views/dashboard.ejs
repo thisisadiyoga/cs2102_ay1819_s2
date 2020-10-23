@@ -24,6 +24,10 @@
 			<div id="content-wrapper">
 				<div class="container-fluid">		
 					<div class="card mb-3">
+						<img src="data:image/png;base64, <%=user.avatar%>" width="200" height="200">
+					</div>
+					
+					<div class="card mb-3">
 						<div class="card-header">
 							<i class="fas fa-address-card"></i> &nbsp; Profile Information
 						</div>
@@ -32,7 +36,7 @@
 								<div class="form-group row">
 									<label for="username" class="col-sm-2 col-form-label"><b>Username:</b></label>
 									<div class="col-sm-4">
-										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%=user %>" name="username">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%=user.username %>" name="username">
 									</div>
 								</div>
 								<div class="form-group row">
@@ -56,7 +60,7 @@
 								<div class="form-group row">
 									<label for="username" class="col-sm-2 col-form-label"><b>Username:</b></label>
 									<div class="col-sm-4">
-										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user %>" name="username">
+										<input type="text" required="required" readonly class="form-control-plaintext" id="username" value="<%= user.username %>" name="username">
 									</div>
 								</div>
 								<div class="form-group row">

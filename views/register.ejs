@@ -20,7 +20,7 @@
 			<div class="card card-register mx-auto mt-5">
 				<div class="card-header"><img src="/images/logo.png" width="50" height="50" />Register an Account</div>
 				<div class="card-body">
-					<form action="/register" method="post">
+					<form action="/register" enctype="multipart/form-data" method="post">
 						<div class="form-group">
 							<div class="form-label-group">
 								<input type="text" id="username" class="form-control" placeholder="Username" required="required" name="username" pattern="[A-Za-z][A-Za-z0-9_]{2,14}">
@@ -95,6 +95,17 @@
 								</div>
 							</div>
 						</div>
+						<div class="form-group">
+							<div class="form-row">
+								<div class="col-md-6">
+									<div class="form-label-group">
+										Profile Picture
+										<input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg">
+									</div>
+								</div>
+							</div>
+						</div>
+						
 						<div class="checkbox">
 							<input type="checkbox" required="required">&nbsp;<label>I agree to the terms and conditions. </label>
 						</div>
@@ -103,6 +114,7 @@
 						</div>
 						<button class="btn btn-primary btn-block" type="submit">Register</button>
 					</form>
+
 					<div class="text-center">
 						<a class="d-block small mt-3" href="/">Back to home</a>
 						<!--<a class="d-block small" href="/password">Forgot Password?</a>-->

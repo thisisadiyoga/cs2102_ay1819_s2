@@ -13,7 +13,8 @@ CREATE TABLE Owners(
 	credit_card_no	VARCHAR		NOT NULL,
 	unit_no			VARCHAR,
 	postal_code		VARCHAR(6)	NOT NULL,
-	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE
+	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE,
+	avatar			BYTEA
 );
 
 CREATE TABLE ownsPets(
@@ -24,13 +25,31 @@ CREATE TABLE ownsPets(
 	size			VARCHAR		NOT NULL, 
 	sociability		VARCHAR,
 	special_req		VARCHAR,
+	img				BYTEA, 
 	PRIMARY KEY (username, name)
 );
 
+CREATE TABLE Caretakers(
+	username		VARCHAR		PRIMARY KEY,
+	first_name		NAME		NOT NULL,
+	last_name		NAME		NOT NULL,
+	password		VARCHAR(64)	NOT NULL, 
+	email			VARCHAR		NOT NULL UNIQUE, 
+	dob				DATE		NOT NULL CHECK (CURRENT_DATE - dob >= 6570),
+	credit_card_no	VARCHAR		NOT NULL,
+	unit_no			VARCHAR,
+	postal_code		VARCHAR(6)	NOT NULL,
+	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE, 
+	is_full_time	BOOLEAN		NOT NULL, 
+	avg_rating		FLOAT		NOT NULL, 
+	no_of_reviews	INT			NOT NULL, 
+	avatar			BYTEA
+);
+
 CREATE VIEW Users AS (
-	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date FROM Owners
+	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date, avatar FROM Owners
 	UNION
-	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date FROM Caretakers
+	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date, avatar FROM Caretakers
 );
 
 -- INSERT categories
@@ -50,11 +69,12 @@ CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
 									   dob				DATE,
 									   credit_card_no	VARCHAR,
 									   unit_no			VARCHAR,
-									   postal_code		VARCHAR(6)
+									   postal_code		VARCHAR(6), 
+									   avatar			BYTEA
 									   ) AS
 	$$ BEGIN
 	   INSERT INTO Owners
-	   VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, CURRENT_DATE);
+	   VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, CURRENT_DATE, avatar);
 	   END; $$
 	LANGUAGE plpgsql;
 	
@@ -64,11 +84,12 @@ CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
 									 cat_name			VARCHAR(10),
 									 size				VARCHAR, 
 									 sociability		VARCHAR,
-									 special_req		VARCHAR
+									 special_req		VARCHAR, 
+									 img 				BYTEA
 									 ) AS
 	$$ BEGIN
 	   INSERT INTO ownsPets
-	   VALUES (username, name, description, cat_name, size, sociability, special_req);
+	   VALUES (username, name, description, cat_name, size, sociability, special_req, img);
 	   END; $$
 	LANGUAGE plpgsql;
 

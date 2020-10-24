@@ -28,7 +28,8 @@ function initRouter(app) {
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 
 	app.get('/register' , passport.antiMiddleware(), register );
-    app.get('/password' , passport.antiMiddleware(), retrieve );
+	app.get('/password' , passport.antiMiddleware(), retrieve );
+	app.get('/caretaker' , passport.antiMiddleware(), caretaker );
 	
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
@@ -40,6 +41,7 @@ function initRouter(app) {
 	app.post('/add_pets', passport.authMiddleware(), reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
+	app.post('/review', passport.authMiddleware(), review);
 	
 
 	/* LOGIN */
@@ -90,6 +92,10 @@ function register(req, res, next) {
 }
 function retrieve(req, res, next) {
 	res.render('retrieve', { page: 'retrieve', auth: false });
+}
+
+function caretaker(req, res, next) {
+	res.render('caretaker', { page: 'caretaker', auth: false });
 }
 
 function pets (req, res, next) {
@@ -224,6 +230,19 @@ function reg_user(req, res, next) {
 					return res.redirect('/add_pets');
 				}
 			});
+		}
+	});
+}
+
+function review (req, res, next) {
+	var username = req.user.username;
+	var review = req.body.review;
+	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req], (err, data) => {
+		if(err) {
+			console.error("Error in submitting review", err);
+			res.redirect('/review?rev=fail');
+		} else {
+			res.redirect('/');
 		}
 	});
 }

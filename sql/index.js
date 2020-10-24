@@ -1,6 +1,8 @@
 const sql = {}
 
 sql.query = {
+	add_owner: "CALL add_owner ($1, $3, $4, $2, $5, $6, $7, $8, $9, $10);",
+	add_pet : "CALL add_pet ($1, $2, $3, $4, $5, $6, $7, $8);", 
 	
 	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
 
@@ -20,11 +22,6 @@ sql.query = {
 
 	search_petdays: 'SELECT SUM(duration) FROM (SELECT p_end_date - p_start_date + 1 AS duration FROM Bids WHERE username = $1 AND p_start_date >= $2 AND p_start_date <= $3 AND is_successful = true)',
 
-	add_owner: "CALL add_owner ($1, $3, $4, $2, $5, $6, $7, $8, $9);",
-	add_pet : "CALL add_pet ($1, $2, $3, $4, $5, $6, $7);", 
-
-	add_admin: "CALL add_admin ($1, $2, $3);",
-
 	get_user : "SELECT * FROM Users WHERE username = $1;",
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2", 
 	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1",
@@ -32,10 +29,15 @@ sql.query = {
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
 	list_caretakers: "SELECT username, is_full_time, avg_rating, no_of_pets_taken FROM caretakers;",
+	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers WHERE username LIKE $1 OR first_name LIKE $1 OR last_name LIKE $1;", 
+
 	//edit information
 	update_pass: "UPDATE Owners SET password = $2 WHERE username = $1;",
 	update_info: "UPDATE Owners SET email = $2 WHERE username = $1;",
-	update_pet : "UPDATE ownsPets SET cat_name = $3, size = $4, description = $5, sociability = $6, special_req = $7 WHERE username = $1 AND name = $2;", 
+	update_avatar: "UPDATE Owners SET avatar = $2 WHERE username = $1;", 
+	update_pet : "UPDATE ownsPets SET cat_name = $3, size = $4, description = $5, sociability = $6, special_req = $7 img = $8 WHERE username = $1 AND name = $2;", 
+
+	upload_userpic: "SELECT encode(profile_pic, 'base64') FROM Users where username = $1;", 
 
 	//delete information
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 

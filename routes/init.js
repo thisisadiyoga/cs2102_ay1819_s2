@@ -1,7 +1,7 @@
 const sql_query = require('../sql');
+const postgres_details = require('../config')
 const passport = require('passport');
-const bcrypt = require('bcrypt')
-const postgres_details = require("../config.js");
+const bcrypt = require('bcrypt');
 const multer = require("multer");
 const upload = multer({dest: "../uploads"});
 const fs = require('fs');
@@ -10,13 +10,14 @@ const fs = require('fs');
 const { Pool } = require('pg');
 const { RSA_NO_PADDING } = require('constants');
 const pool = new Pool({
+	
+	user: postgres_details.user,
+	host: postgres_details.host,
+	database: postgres_details.database,
+	password: postgres_details.password,
+	port: postgres_details.port,
 	connectionString: process.env.DATABASE_URL,
 	//ssl: true 
-	user: postgres_details.user, 
-	host: postgres_details.host,
-	database: postgres_details.database, 
-	password : postgres_details.password, 
-	port : postgres_details.port,
 });
 
 const round = 10;
@@ -30,6 +31,12 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
+
+	/* admin pages*/
+	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
+	app.post('/registerAdmin', passport.antiMiddleware(), reg_admin);
+	app.get('/adminInformation', passport.authMiddleware(), adminInformation);
+
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
@@ -52,15 +59,24 @@ function initRouter(app) {
 	
 
 	/* LOGIN */
-	app.post('/login', passport.authenticate('local', {
+	app.post('/login', passport.authenticate('user', {
 		successRedirect: '/dashboard',
 		failureRedirect: '/'
+	}));
+
+	/* LOGIN */
+	app.post('/loginAdmin', passport.authenticate('admin', {
+		successRedirect: '/adminDashboard',
+		failureRedirect: '/admin?login=failed'
 	}));
 	
 	/* LOGOUT */
 	app.get('/logout', passport.authMiddleware(), logout);
-}
 
+	/*ADMIN*/
+	app.get('/admin', admin);
+
+}
 
 // Render Function
 function basic(req, res, page, other) {
@@ -74,6 +90,10 @@ function basic(req, res, page, other) {
 		}
 	}
 	res.render(page, info);
+}
+
+function admin(req, res, next) {
+	res.render('admin', { auth: false, page:'admin' });
 }
 
 function query(req, fld) {
@@ -91,6 +111,7 @@ function index(req, res, next) {
 }
 
 function dashboard(req, res, next) {
+
 	pool.query(sql_query.query.get_user, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			user = [];
@@ -99,6 +120,12 @@ function dashboard(req, res, next) {
 		}
 	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), avatar_msg : msg(req, 'avatar', 'Profile Picture Updated', 'Error in updating picture'), auth: true });
 	});
+}
+
+function adminDashboard(req, res, next) {
+	basic(req, res, 'adminDashboard', { 
+		auth: true });
+	
 }
 
 function register(req, res, next) {
@@ -119,6 +146,21 @@ function pets (req, res, next) {
 		}
 
 		basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), edit_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), del_msg: msg(req, 'del', 'Pet deleted successfully', 'Error in deleting pet'), auth: true });
+	});
+}
+
+function adminInformation (req, res, next) {
+	var allInformation;
+
+	pool.query(sql_query.query.list_caretakers, (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			allInformation = [];
+		} else {
+			allInformation = data.rows;
+		}
+		console.log(allInformation);
+
+	basic(req, res, 'adminInformation', { caretakers : allInformation, auth: true });
 	});
 }
 
@@ -251,11 +293,40 @@ function reg_user(req, res, next) {
 			req.login({
 				username    : username,
 				passwordHash: password,
+				isUser: true
 			}, function(err) {
 				if(err) {
 					return res.redirect('/register?reg=fail');
 				} else {
 					return res.redirect('/add_pets');
+				}
+			});
+		}
+	});
+}
+
+function reg_admin(req, res, next) {
+	// console.log(req.body);
+	var admin_username  = req.body.admin_username;
+	var admin_password  = bcrypt.hashSync(req.body.admin_password, salt);
+	// var last_login_time = Date.now();
+	var last_login_time = "2020-10-17 04:05:06";
+	pool.query(sql_query.query.add_admin, [admin_username, admin_password, last_login_time], (err, data) => {
+		if(err) {
+			console.error("Error in adding admin", err);
+			res.redirect('/admin?reg=fail');
+		} else {
+			req.login({
+				admin_username: admin_username,
+				passwordHash: admin_password,
+				isUser: false
+
+			}, function(err) {
+				if(err) {
+					console.log(err);
+					return res.redirect('/admin?reg=fail');
+				} else {
+					return res.redirect('/adminDashboard');
 				}
 			});
 		}

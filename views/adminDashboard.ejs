@@ -12,29 +12,16 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
 		<!-- Custom styles for this template-->
 		<link href="stylesheets/index.css" rel="stylesheet">
   </head>
 	<body id="page-top">
 		<%- include navbar.ejs %>
 		<div id="wrapper">
-			<% if(!auth) { %>
-				<%- include loginsidebar.ejs %>
-			<% } else { %>
-				<%- include sidebar.ejs %>
-			<% } %>
-			
+			<%- include adminSidebar.ejs %>
 			<div id="content-wrapper">
-				<div class="container-fluid">
-					<div class="card mb-3">
-						<div class="card-footer small text-muted">CS2102 Database Project</div>
-					</div>
-				</div>
+				
 			</div>
-		</div>
-		
 		<%- include bottomscript.ejs %>
   </body>
 </html>

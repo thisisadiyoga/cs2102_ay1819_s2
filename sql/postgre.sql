@@ -115,7 +115,8 @@ CREATE TABLE Caretakers(
 	is_full_time	BOOLEAN		NOT NULL, 
 	avg_rating		FLOAT		NOT NULL, 
 	no_of_reviews	INT			NOT NULL, 
-	avatar			BYTEA		NOT NULL
+	avatar			BYTEA		NOT NULL,
+	no_of_pets_taken INTEGER    CHECK(no_of_pets_taken > 0)
 );
 
 CREATE VIEW Users AS (
@@ -123,6 +124,36 @@ CREATE VIEW Users AS (
 	UNION
 	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date, avatar FROM Caretakers
 );
+
+CREATE TABLE isPaidSalaries (
+	caretaker_id VARCHAR REFERENCES caretakers(username)
+	ON DELETE cascade,
+	year INTEGER,
+	month INTEGER,
+	salary_amount NUMERIC NOT NULL,
+	PRIMARY KEY (caretaker_id, year, month)
+);
+
+CREATE TABLE Administrators (
+	admin_id VARCHAR PRIMARY KEY,
+	password VARCHAR(64) NOT NULL,
+	last_login_time TIMESTAMP
+);
+
+
+-- Insert dummy values, the password hash is 'asdasd'
+INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, 
+						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
+VALUES ('caretaker_1', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_1',
+		'sample_1', 's@s.com', '02-01-2000', '1231231231231231',
+		'1', '123123', '02-10-2020', 'true', 3.5, 1, 1);
+
+INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, 
+						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
+VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_2',
+		'sample_2', 's2@s.com', '02-01-2000', '1231231231231231',
+		'2', '123123', '02-10-2020', 'true', 4.5, 2, 2);
+
 
 -- INSERT categories
 CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 
@@ -165,6 +196,17 @@ CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
 	   END; $$
 	LANGUAGE plpgsql;
 
+<<<<<<< HEAD
+CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
+										password 		VARCHAR(64),
+										last_login_time TIMESTAMP 
+										) AS
+	$$ BEGIN
+	   INSERT INTO Administrators (admin_id, password, last_login_time ) 
+	   VALUES (admin_id, password, last_login_time ); 
+	   END; $$
+	LANGUAGE plpgsql;
+=======
 
 
 -- Profile Seed --
@@ -1168,3 +1210,4 @@ INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
+>>>>>>> master

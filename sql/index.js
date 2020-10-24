@@ -24,9 +24,11 @@ sql.query = {
 
 	get_user : "SELECT * FROM Users WHERE username = $1;",
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2", 
+	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1",
 
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
+	list_caretakers: "SELECT username, is_full_time, avg_rating, no_of_pets_taken FROM caretakers;",
 	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers WHERE username LIKE $1 OR first_name LIKE $1 OR last_name LIKE $1;", 
 
 	//edit information

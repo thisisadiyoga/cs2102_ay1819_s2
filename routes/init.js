@@ -2,9 +2,13 @@ const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
 const postgres_details = require("../config.js");
+const multer = require("multer");
+const upload = multer({dest: "../uploads"});
+const fs = require('fs');
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
+const { RSA_NO_PADDING } = require('constants');
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
 	//ssl: true 
@@ -28,18 +32,23 @@ function initRouter(app) {
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 
 	app.get('/register' , passport.antiMiddleware(), register );
-    app.get('/password' , passport.antiMiddleware(), retrieve );
-	
+	app.get('/password' , passport.antiMiddleware(), retrieve );
+	app.get('/password' , passport.antiMiddleware(), retrieve );
+
+	app.get('/rating.js', search_caretaker);
+
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
+	app.post('/update_avatar', [passport.authMiddleware(), upload.single('avatar')], update_avatar);
 	app.post('/pets', passport.authMiddleware(), update_pet);
-	
-	app.post('/register', passport.antiMiddleware(), reg_user);
-	app.post('/del_user', del_user);
-	app.post('/add_pets', passport.authMiddleware(), reg_pet);
-	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
+
+	app.post('/register', [passport.antiMiddleware(), upload.single('avatar')], reg_user);
+	app.post('/del_user', del_user,);
+	app.post('/add_pets', [passport.authMiddleware(), upload.single('img')], reg_pet);
+	app.post('/edit_pet', [passport.authMiddleware(), upload.single('img')], edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
+	app.post('/display', passport.authMiddleware(), search_caretaker);
 	
 
 	/* LOGIN */
@@ -82,7 +91,14 @@ function index(req, res, next) {
 }
 
 function dashboard(req, res, next) {
-	basic(req, res, 'dashboard', { info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+	pool.query(sql_query.query.get_user, [req.user.username], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			user = [];
+		} else {
+			user = data.rows[0];
+		}
+	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), avatar_msg : msg(req, 'avatar', 'Profile Picture Updated', 'Error in updating picture'), auth: true });
+	});
 }
 
 function register(req, res, next) {
@@ -102,7 +118,7 @@ function pets (req, res, next) {
 			pet = data.rows;
 		}
 
-	basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
+		basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), edit_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), del_msg: msg(req, 'del', 'Pet deleted successfully', 'Error in deleting pet'), auth: true });
 	});
 }
 
@@ -115,16 +131,17 @@ function add_pets(req, res, next) {
 			cat_list = data.rows;
 		}
 
-	basic(req, res, 'add_pets', { cat_list : cat_list, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
+		basic(req, res, 'add_pets', { cat_list : cat_list, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
 	});
 }
+
 
 // POST 
 function update_info(req, res, next) {
 	var username  = req.user.username;
     var email = req.body.email;
 	pool.query(sql_query.query.update_info, [username, email], (err, data) => {
-		if(err) {
+		if(err) {	
 			console.error("Error in update info");
 			res.redirect('/dashboard?info=fail');
 		} else {
@@ -145,6 +162,20 @@ function update_pass(req, res, next) {
 	});
 }
 
+function update_avatar(req, res, next) {
+	var username = req.user.username;
+	var avatar = fs.readFileSync(req.file.path).toString('base64');
+
+	pool.query(sql_query.query.update_avatar, [username, avatar], (err, data) => {
+		if(err) {
+			console.error("Error in update profile picture");
+			res.redirect('/dashboard?avatar=fail');
+		} else {
+			res.redirect('/dashboard?avatar=pass');
+		}
+	});
+}
+
 function update_pet (req, res, next) {
 	var username = req.user.username;
 	var name = req.body.name;
@@ -153,13 +184,14 @@ function update_pet (req, res, next) {
 	var description = req.body.description;
 	var sociability = req.body.sociability;
 	var special_req = req.body.special_req;
+	var img = fs.readFileSync(req.file.path).toString('base64');
 
-	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req], (err, data) => {
+	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req, img], (err, data) => {
 		if(err) {
 			console.error("Error in updating pet");
-			res.redirect('/pets?pass=fail');
+			res.redirect('/pets?edit=fail');
 		} else {
-			res.redirect('/pets?pass=pass');
+			res.redirect('/pets?edit=pass');
 		}
 	});
 }
@@ -178,13 +210,13 @@ function edit_pet(req, res, next) {
 		pool.query(sql_query.query.get_pet, [req.user.username, req.body.name], (err, data) => {
 			if(err || !data.rows || data.rows.length == 0) {
 				console.error("Pet not found");
-				res.redirect('/pets');
+				res.redirect('/pets?edit=fail');
 			} else {
 				pet = data.rows[0];
 				basic(req, res, 'edit_pet', { cat_list : cat_list, pet : pet, add_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), auth: true });
 			}
 		}
-	)})
+	)});
 };
 
 function del_pet (req, res, next) {
@@ -192,9 +224,9 @@ function del_pet (req, res, next) {
 	pool.query(sql_query.query.del_pet, [req.user.username, req.body.name], (err, data) => {
 		if(err) {
 			console.error("Pet not found");
-			res.redirect('/pets');
+			res.redirect('/pets?del=fail');
 		} else {
-			res.redirect('/pets');
+			res.redirect('/pets?del=pass');
 		}
 	});
 }
@@ -209,7 +241,9 @@ function reg_user(req, res, next) {
 	var credit_card_no	= req.body.credit_card_no;
 	var unit_no			= req.body.unit_no;
 	var postal_code 	= req.body.postal_code;
-	pool.query(sql_query.query.add_owner, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code], (err, data) => {
+	var avatar			= fs.readFileSync(req.file.path).toString('base64');
+
+	pool.query(sql_query.query.add_owner, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code, avatar], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
@@ -236,20 +270,21 @@ function reg_pet(req, res, next) {
 	var size			= req.body.size;
 	var sociability		= req.body.sociability;
 	var special_req		= req.body.special_req;
+	var img				= fs.readFileSync(req.file.path).toString('base64');
 	
-	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req], (err, data) => {
+	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req, img], (err, data) => {
 		if(err) {
 			console.error("Error in adding pet", err);
-			res.redirect('/pets?pet_reg=fail');
+			res.redirect('/pets?add=fail');
 		} else {
-			res.redirect('/pets?pet_reg=pass');
+			res.redirect('/pets?add=pass');
 		}
 	});
 }
 
 function del_user (req, res, next) {
 	var username = req.user.username;
-
+	
 	req.session.destroy()
 	req.logout()
 
@@ -262,12 +297,27 @@ function del_user (req, res, next) {
 					console.error("Error in deleting account", err);
 				} else {
 					console.log("User deleted");
-					res.redirect('/')
+					res.redirect('/?del=pass')
 				}
 			});
 		}
 	});
 }
+
+function search_caretaker (req, res, next) {
+	var caretaker;
+	pool.query(sql_query.query.search_caretaker, ["%" + req.body.name + "%"], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			caretaker = [];
+		} else {
+			caretaker = data.rows;
+		}
+
+		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
+	});
+}
+
+
 
 // LOGOUT
 function logout(req, res, next) {

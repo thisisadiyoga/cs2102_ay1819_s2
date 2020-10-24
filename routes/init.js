@@ -33,18 +33,20 @@ function initRouter(app) {
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
+	app.get('/password' , passport.antiMiddleware(), retrieve );
 
 	app.get('/rating.js', search_caretaker);
 
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
+	app.post('/update_avatar', [passport.authMiddleware(), upload.single('avatar')], update_avatar);
 	app.post('/pets', passport.authMiddleware(), update_pet);
 
 	app.post('/register', [passport.antiMiddleware(), upload.single('avatar')], reg_user);
 	app.post('/del_user', del_user,);
-	app.post('/add_pets', passport.authMiddleware(), reg_pet);
-	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
+	app.post('/add_pets', [passport.authMiddleware(), upload.single('img')], reg_pet);
+	app.post('/edit_pet', [passport.authMiddleware(), upload.single('img')], edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/display', passport.authMiddleware(), search_caretaker);
 	
@@ -95,7 +97,7 @@ function dashboard(req, res, next) {
 		} else {
 			user = data.rows[0];
 		}
-	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), auth: true });
+	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), avatar_msg : msg(req, 'avatar', 'Profile Picture Updated', 'Error in updating picture'), auth: true });
 	});
 }
 
@@ -160,6 +162,20 @@ function update_pass(req, res, next) {
 	});
 }
 
+function update_avatar(req, res, next) {
+	var username = req.user.username;
+	var avatar = fs.readFileSync(req.file.path).toString('base64');
+
+	pool.query(sql_query.query.update_avatar, [username, avatar], (err, data) => {
+		if(err) {
+			console.error("Error in update profile picture");
+			res.redirect('/dashboard?avatar=fail');
+		} else {
+			res.redirect('/dashboard?avatar=pass');
+		}
+	});
+}
+
 function update_pet (req, res, next) {
 	var username = req.user.username;
 	var name = req.body.name;
@@ -168,8 +184,9 @@ function update_pet (req, res, next) {
 	var description = req.body.description;
 	var sociability = req.body.sociability;
 	var special_req = req.body.special_req;
+	var img = fs.readFileSync(req.file.path).toString('base64');
 
-	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req], (err, data) => {
+	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req, img], (err, data) => {
 		if(err) {
 			console.error("Error in updating pet");
 			res.redirect('/pets?edit=fail');
@@ -253,8 +270,9 @@ function reg_pet(req, res, next) {
 	var size			= req.body.size;
 	var sociability		= req.body.sociability;
 	var special_req		= req.body.special_req;
+	var img				= fs.readFileSync(req.file.path).toString('base64');
 	
-	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req], (err, data) => {
+	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req, img], (err, data) => {
 		if(err) {
 			console.error("Error in adding pet", err);
 			res.redirect('/pets?add=fail');

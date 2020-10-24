@@ -14,7 +14,7 @@ CREATE TABLE Owners(
 	unit_no			VARCHAR,
 	postal_code		VARCHAR(6)	NOT NULL,
 	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE,
-	avatar			BYTEA
+	avatar			BYTEA		NOT NULL
 );
 
 CREATE TABLE ownsPets(
@@ -25,7 +25,7 @@ CREATE TABLE ownsPets(
 	size			VARCHAR		NOT NULL, 
 	sociability		VARCHAR,
 	special_req		VARCHAR,
-	img				BYTEA, 
+	img				BYTEA		NOT NULL, 
 	PRIMARY KEY (username, name)
 );
 
@@ -43,7 +43,7 @@ CREATE TABLE Caretakers(
 	is_full_time	BOOLEAN		NOT NULL, 
 	avg_rating		FLOAT		NOT NULL, 
 	no_of_reviews	INT			NOT NULL, 
-	avatar			BYTEA
+	avatar			BYTEA		NOT NULL
 );
 
 CREATE VIEW Users AS (

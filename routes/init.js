@@ -1,22 +1,22 @@
 const sql_query = require('../sql');
 const passport = require('passport');
 const bcrypt = require('bcrypt')
+const flash = require('connect-flash');
 const postgres_details = require("../config.js");
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
-	//ssl: true 
-	user: postgres_details.user, 
-	host: postgres_details.host,
-	database: postgres_details.database, 
-	password : postgres_details.password, 
-	port : postgres_details.port,
+	//ssl: true
+	 user: postgres_details.user,
+    database: postgres_details.database,
+    idleTimeoutMillis: 2000
 });
 
 const round = 10;
 const salt  = bcrypt.genSaltSync(round);
+
 
 function initRouter(app) {
 	/* GET */
@@ -37,9 +37,9 @@ function initRouter(app) {
 	app.get('/password' , passport.antiMiddleware(), retrieve );
 	
 	/* PROTECTED POST */
-	app.post('/update_availability', passport.authMiddleware(), update_availability);
+	app.post('/update_availability', update_availability); //TODO: passport.authMiddleware()
 	app.post('/add_availability'   , add_availability   ); //TODO: passport.authMiddleware()
-	app.post('/delete_availability'   , passport.authMiddleware(), delete_availability);
+	app.post('/delete_availability'   , delete_availability); //TODO passport.authMiddleware()
 	
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
@@ -69,7 +69,7 @@ function initRouter(app) {
 function basic(req, res, page, other) {
 	var info = {
 		page: page,
-		user: req.user.username,
+		//user: req.user.username,
 	};
 	if(other) {
 		for(var fld in other) {
@@ -90,7 +90,8 @@ function msg(req, fld, pass, fail) {
 
 // GET
 function index(req, res, next) {
-    res.render('index', { page: 'index', auth: false });
+   // res.render('index', { page: 'index', auth: false });
+    res.redirect('/weekly_availabilities');
 }
 
 function dashboard(req, res, next) {
@@ -132,18 +133,28 @@ function add_pets(req, res, next) {
 }
 
 function weekly_availabilities(req, res, next) {
-	var now = new Date();
-    var startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    var current_timestamp = startOfDay / 1000;
-    var periods;
-	pool.query(sql_query.query.read_weekly_availabilities, [ current_timestamp], (err, data) => { //TODO req.user.username
+    var availabilities;
+    var error_message, success_message;
+
+
+	pool.query(sql_query.query.read_availabilities,['jay'], (err, data) => { //TODO req.user.username
             if(err || !data.rows || data.rows.length == 0) {
-            			periods = [];
+            			availabilities = [];
+            			console.log('availabilities is null');
+            			console.log("error is" + err);
             		} else {
-            			periods = data.rows;
+            			availabilities = data.rows;
+            		console.log("AVAIL ARE..." + availabilities);
+            			console.log( availabilities);
             		}
 
-			basic(req, res, 'weekly_availabilities', { tbl: periods, availability_msg: msg(req, 'add', 'Availability period added successfully', 'Invalid parameters in availability period'), auth: true });
+
+            		  error_message = req.flash('error');
+            		  console.log('ERROR MESSAGES ARE ' + error_message);
+
+            		  success_message = req.flash('success');
+
+			basic(req, res, 'weekly_availabilities', { availabilities: availabilities, error_message: error_message, success_message: success_message, availability_msg: msg(req, 'add', 'Availability period added successfully', 'Invalid parameters in availability period'), auth: true });
 		});
 }
 
@@ -160,63 +171,65 @@ function monthly_availabilities(req, res, next) {
 
 // POST 
 function update_availability(req, res, next) {
-	var username  = req.user.username;
+	//TODO var username  = req.user.username;
+
+	var old_start_timestamp = req.body.old_start_timestamp;
+	var old_end_timestamp = req.body.old_end_timestamp;
 	var start_timestamp = req.body.start_timestamp;
 	var end_timestamp  = req.body.end_timestamp;
-	var mode = req.body.mode;
-	pool.query(sql_query.query.update_availability, [start_timestamp, end_timestamp, username], (err, data) => {
+
+		console.log('timestamps are ' + start_timestamp + ' ' + end_timestamp + ' ' + old_end_timestamp + ' ' + old_start_timestamp );
+
+	pool.query(sql_query.query.update_availability, [start_timestamp, end_timestamp, old_start_timestamp, 'jay'], (err, data) => { //TODO: username
 		if(err) {
-			console.error("Error in updating availability");
-			if(mode = 'weekly')
-			    res.redirect('/weekly_availabilities?update=fail');
-			else
+			console.error("Error in updating availability " + err);
+
 			 res.redirect('/weekly_availabilities?update=fail');
 		} else {
-            if(mode = 'weekly')
-			    res.redirect('/weekly_availabilities?update=pass');
-			else
+
 			 res.redirect('/weekly_availabilities?update=pass');
 		}
 	});
 }
 
 function add_availability(req, res, next) {
+   console.log('add availability is called');
 	//var username = req.user.username; //TODO username
-	var start_timestamp = req.body.start_timestamp;
+	var start_timestamp = req.body.start_timestamp ;
+	console.log('start_timestamp is ' + start_timestamp);
 	var end_timestamp = req.body.end_timestamp;
+		console.log('timestamps are ' + start_timestamp + ' ' + end_timestamp);
 
-	pool.query(sql_query.query.add_availability, [start_timestamp, end_timestamp, 'jane'], (err, data) => {
+
+	pool.query(sql_query.query.add_availability, [start_timestamp, end_timestamp, 'jay'], (err, data) => {
         if(err) {
-			console.error("Error in adding availability");
-			if(mode = 'weekly')
+			console.error("Error in adding availability " + err);
+                	req.flash('error', 'Error in adding new availability period.');
 			    res.redirect('/weekly_availabilities?add=fail');
-			else
-			 res.redirect('/weekly_availabilities?add=fail');
+
 		} else {
-            if(mode = 'weekly')
-			    res.redirect('/weekly_availabilities?add=pass');
-			else
+            req.flash('success', 'The period is successfully added. It may merge with existing availability schedule.');
 			 res.redirect('/weekly_availabilities?add=pass');
 		}
 	});
 }
 
 function delete_availability(req, res, next) {
-	var username = req.user.username;
-	var start_timestamp = req.body.start_timestamp;
-	var end_timestamp = req.body.end_timestamp;
+	//TODO var username = req.user.username;
+	var start_timestamp = req.body.old_start_timestamp;
+	var end_timestamp = req.body.old_end_timestamp;
+	console.log('deleting availability ' + start_timestamp + " " + end_timestamp);
 
-	pool.query(sql_query.query.delete_availability, [start_timestamp, end_timestamp, username], (err, data) => {
+	pool.query(sql_query.query.delete_availability, [start_timestamp, 'jay'], (err, data) => {
         if(err) {
-			console.error("Error in deleting info");
-			if(mode = 'weekly')
-			    res.redirect('/weekly_availabilities?delete=fail');
-			else
+			console.error("Error in deleting info " + err);
+			req.flash('error', 'The period cannot be deleted as there is a scheduled pet-care job within that period.');
+
 			 res.redirect('/weekly_availabilities?delete=fail');
+
+
 		} else {
-            if(mode = 'weekly')
-			    res.redirect('/weekly_availabilities?delete=pass');
-			else
+		req.flash('success', 'The period is successfully deleted.');
 			 res.redirect('/weekly_availabilities?delete=pass');
 		}
 	});
@@ -228,8 +241,10 @@ function update_info(req, res, next) {
 	pool.query(sql_query.query.update_info, [username, email], (err, data) => {
 		if(err) {
 			console.error("Error in update info");
+			req.flash('error', 'The period cannot be shortened as there is a scheduled pet-care job within the original period.');
 			res.redirect('/dashboard?info=fail');
 		} else {
+			req.flash('success', 'The period is successfully updated.');
 			res.redirect('/dashboard?info=pass');
 		}
 	});

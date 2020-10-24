@@ -10,6 +10,8 @@ const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const passport = require('passport')
+const flash = require('connect-flash')
+
 
 const app = express();
 
@@ -25,10 +27,15 @@ app.use(session({
   secret: "secret",
   resave: true,
   saveUninitialized: true
-}))
+}));
 
-app.use(passport.initialize())
-app.use(passport.session())
+app.use(passport.initialize());
+app.use(passport.session());
+
+// flash setup
+app.use(flash());
+
+
 
 
 // View Engine setup
@@ -54,11 +61,12 @@ app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
   // render the error page
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 
 app.listen(4000, function() {
   console.log("Go onto http://localhost:4000/");

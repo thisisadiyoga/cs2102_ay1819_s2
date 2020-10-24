@@ -1,10 +1,95 @@
  body {
-
-     background: white;
+     background: #121212;
+     color: white;
  }
 
+.button, #calendar .fc-button {
+    background-color: transparent;
+    background-image: none;
+    border: 2px solid white;
+    color: white;
+}
 
-#fullCalendar {
+.new-event-button {
+    margin: 25px;
+    margin-left: 80%;
+}
 
+.button:hover, #calendar .fc-button:hover{
+    background-color: #5fb0dd;
+     border: 2px solid white;
 
 }
+
+#calendar .fc-today {
+    background-color: #484848;
+}
+
+#calendar .fc-day-top {
+    background-color: transparent;
+}
+#calendar .fc-list-heading td{
+    background-color: #484848;
+}
+#calendar .fc-time {
+    color: black;
+}
+
+.modal-content{
+    background-color: #121212;
+
+}
+
+.input-box {
+    background-color: #121212;
+    color: white;
+    outline: none;
+    border: none;
+    border-bottom: 2px solid white;
+    display: inline;
+}
+
+.input-box::placeholder {
+    color: #888888;
+    opacity: 1;
+}
+
+.input-box:hover{
+ border-bottom: 2px solid #5fb0dd;
+ color: #5fb0dd;
+ transition: border-bottom 0.1s ease-in-out;
+}
+
+.input-box:hover::placeholder{
+    color: #5fb0dd;
+    opacity: 1;
+}
+
+.input-container:nth-child(even) {
+    margin-top: 30px;
+}
+
+.color-indicator .color-box {
+     height: 30px;
+     width: 30px;
+     margin: 10px;
+      display: inline-block;
+      vertical-align: middle;
+}
+
+.availability-color {
+    background: #a8eec1;
+}
+
+.bid-color {
+   background: red;
+}
+
+.color-indicator text{
+    display: inline-block;
+}
+
+
+
+
+

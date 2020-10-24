@@ -27,53 +27,69 @@ CREATE TABLE ownsPets(
 	PRIMARY KEY (username, name)
 );
 
+CREATE TABLE caretakers (
+	username   	VARCHAR PRIMARY KEY,
+	first_name 	VARCHAR NOT NULL,
+	last_name  	VARCHAR NOT NULL,
+	password   	VARCHAR(64) NOT NULL,
+	email		VARCHAR NOT NULL UNIQUE CHECK(email LIKE '%@%.%'),
+	credit_card_no	VARCHAR NOT NULL,
+	DOB			DATE NOT NULL,
+	postal_code	VARCHAR(6),
+	unit_no		VARCHAR,
+	reg_date	DATE NOT NULL,
+	is_full_time	BIT,
+	avg_rating	FLOAT CHECK (avg_rating >= 0),
+	no_of_reviews	INTEGER,
+	no_of_pets_taken INTEGER
+);
+
+
+
 CREATE TABLE declares_availabilities(
     start_timestamp TIMESTAMP NOT NULL,
     end_timestamp TIMESTAMP NOT NULL,
-    caretaker_username VARCHAR REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    caretaker_username VARCHAR, --REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
-
-
 );
+
+
+--Dummy table for TESTING only --
+CREATE TABLE bids(
+    start_timestamp TIMESTAMP NOT NULL,
+    end_timestamp TIMESTAMP NOT NULL,
+    caretaker_username VARCHAR, --REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    CHECK (end_timestamp > start_timestamp),
+    PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
+                                                --They will be merged
+);
+
+
 
 CREATE VIEW Users AS (
 	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date FROM Owners
 	UNION
-	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date FROM Caretakers
+	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date FROM caretakers
 );
 
 -- INSERT categories
-CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 
+CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10),
 							  			 base_price		NUMERIC) AS
 	$$ BEGIN
-	   INSERT INTO Categories (cat_name, base_price) 
+	   INSERT INTO Categories (cat_name, base_price)
 	   VALUES (cat_name, base_price);
 	   END; $$
 	LANGUAGE plpgsql;
 
-CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
-									   first_name		NAME,
-									   last_name		NAME,
-									   password			VARCHAR(64),
-									   email			VARCHAR,
-									   dob				DATE,
-									   credit_card_no	VARCHAR,
-									   unit_no			VARCHAR,
-									   postal_code		VARCHAR(6)
-									   ) AS
-	$$ BEGIN
-	   INSERT INTO Owners
-	   VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, CURRENT_DATE);
-	   END; $$
-	LANGUAGE plpgsql;
-	
+
+
 CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
-									 name 				NAME, 
-									 description		VARCHAR, 
+									 name 				NAME,
+									 description		VARCHAR,
 									 cat_name			VARCHAR(10),
-									 size				VARCHAR, 
+									 size				VARCHAR,
 									 sociability		VARCHAR,
 									 special_req		VARCHAR
 									 ) AS
@@ -89,33 +105,38 @@ CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
 --Merge availabilities if they coincide
 CREATE OR REPLACE FUNCTION merge_availabilities()
 RETURNS TRIGGER AS
-$$ DECLARE new_start, new_end, old_start TIMESTAMP
+$$ DECLARE new_start TIMESTAMP WITHOUT TIME ZONE;
+ new_end TIMESTAMP WITHOUT TIME ZONE;
+  old_start TIMESTAMP WITHOUT TIME ZONE;
     BEGIN
-    IF NEW.start_timestamp >= NRW.end_timestamp THEN
+    RAISE NOTICE 'Entering merge_availabilities function ...';
+    IF NEW.start_timestamp >= NEW.end_timestamp THEN
     RETURN NULL;
     ELSIF
-    NOT EXISTS (SELECT 1 FROM declares_availabilities a1 WHERE a1.caretaker_username = NEW.caretaker_username AND (GREATEST (a1.start_timestamp, NEW.start_timestamp) < LEAST (a1.end_timestamp, NEW.end_timestamp))) THEN --No overlap
+    NOT EXISTS (SELECT 1 FROM declares_availabilities a1 WHERE a1.caretaker_username = NEW.caretaker_username AND (GREATEST (a1.start_timestamp, NEW.start_timestamp) <= LEAST (a1.end_timestamp, NEW.end_timestamp))) THEN --No overlap
     RETURN NEW;
     ELSIF
     EXISTS (SELECT 1 FROM declares_availabilities a2 WHERE a2.caretaker_username = NEW.caretaker_username AND (a2.start_timestamp <= NEW.start_timestamp AND a2.end_timestamp >= NEW.end_timestamp)) THEN --New period is a subset of an existing periond
     RETURN NULL;
     ELSE
-    SELECT LEAST(a3.start_timestamp, NEW.start_timestamp) INTO new_start, GREATEST(a3.end_timestamp, NEW.end_timestamp) INTO new_end, a1.start_timestamp INTO old_start
+    RAISE NOTICE 'Going to merge 2 periods ...';
+    SELECT LEAST(a3.start_timestamp, NEW.start_timestamp), GREATEST(a3.end_timestamp, NEW.end_timestamp), a3.start_timestamp INTO new_start, new_end, old_start
     FROM declares_availabilities a3
-    WHERE a3.caretaker_username = NEW.caretaker_username AND (GREATEST (a3.start_timestamp, NEW.start_timestamp) < LEAST (a3.end_timestamp, NEW.end_timestamp));
+    WHERE a3.caretaker_username = NEW.caretaker_username AND (GREATEST (a3.start_timestamp, NEW.start_timestamp) <= LEAST (a3.end_timestamp, NEW.end_timestamp));
 
     DELETE FROM declares_availabilities a4
     WHERE a4.caretaker_username = NEW.caretaker_username AND a4.start_timestamp = old_start;
 
 
-    RETURN (new_start, new_start, NEW.caretaker_username);
+    RETURN (new_start, new_end, NEW.caretaker_username);
     END IF;
     END $$
  LANGUAGE plpgsql;
 
 CREATE TRIGGER merge_availabilities
-BEFORE UPDATE ON declares_availabilities
+BEFORE INSERT ON declares_availabilities
 FOR EACH ROW EXECUTE PROCEDURE merge_availabilities();
+
 
 --delete availabilities only if there are no pets the caretaker is scheduled to care for
 CREATE OR REPLACE FUNCTION check_deletable()
@@ -126,7 +147,9 @@ $$
               FROM bids b1
               WHERE b1.caretaker_username = OLD.caretaker_username AND (GREATEST (b1.start_timestamp, NEW.start_timestamp) < LEAST (b1.end_timestamp, NEW.end_timestamp)) ) THEN --There is overlap
 
-   RAISE EXCEPTION 'The period cannot be deleted as there is a successful bid within that period'
+   RAISE EXCEPTION 'The period cannot be deleted as there is a successful bid within that period';
+   ELSE
+   RETURN OLD;
    END IF;
 
    END $$
@@ -141,14 +164,50 @@ FOR EACH ROW EXECUTE PROCEDURE check_deletable();
 --Break update down into delete and insertion
 CREATE OR REPLACE FUNCTION update_availabilities()
 RETURNS TRIGGER AS
-$$
+$$ DECLARE first_result INTEGER := 0;
+  DECLARE second_result INTEGER := 0;
+  DEClare total_result INTEGER;
   BEGIN
-  DELETE FROM declares_availabilities a1 WHERE a1.caretaker_username = OLD.caretaker_username AND a1.start_timestamp = OLD.start_timestamp;
-  INSERT INTO declares_availabilities (start_timestamp, end_timestamp, caretaker_username) VALUES(NEW.start_timestamp, NEW.end_timestamp, NEW.caretaker_username);
+  RAISE NOTICE 'update avail function is called ...';
+
+  IF (OLD.start_timestamp < NEW.start_timestamp)
+  THEN
+    RAISE NOTICE 'entering 1st part';
+    IF EXISTS(SELECT 1
+              FROM bids b1
+              WHERE b1.caretaker_username = OLD.caretaker_username AND GREATEST(b1.start_timestamp, OLD.start_timestamp) < LEAST(b1.end_timestamp, NEW.start_timestamp)) THEN
+               RAISE NOTICE 'there is a bid between the old and new starting timestamp';
+    first_result := 1;
+    ELSE
+    first_result := 0;
+    END IF;
+    END IF;
+
+
+  IF (OLD.end_timestamp > NEW.end_timestamp)
+  THEN
+    RAISE NOTICE 'entering 2nd part';
+    IF EXISTS(SELECT 1
+              FROM bids b2
+              WHERE b2.caretaker_username = OLD.caretaker_username AND GREATEST(b2.start_timestamp, NEW.end_timestamp) < LEAST(b2.end_timestamp, OLD.end_timestamp)) THEN
+    RAISE NOTICE 'there is a bid between the old and new ending timestamp';
+    second_result := 1;
+    ELSE
+    second_result := 0;
+    END IF;
+   END IF;
+
+   total_result := first_result + second_result;
+   RAISE NOTICE 'total result is %', total_result;
+   IF total_result = 0 THEN
+   RETURN NEW;
+   ELSE
+   RAISE EXCEPTION 'Availability cannot be updated as there as pet caring tasks in the original availability period';
+   END IF;
   END $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER update_availabilities
-INSTEAD OF UPDATE ON declares_availabilities
+BEFORE UPDATE ON declares_availabilities
 FOR EACH ROW EXECUTE PROCEDURE update_availabilities();
 

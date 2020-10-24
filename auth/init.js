@@ -13,11 +13,9 @@ const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   //ssl: true
-  user: postgres_details.user, 
-	host: postgres_details.host,
-	database: postgres_details.database, 
-	password : postgres_details.password, 
-	port : postgres_details.port,
+    user: postgres_details.user,
+	database: postgres_details.database,
+	 idleTimeoutMillis: 2000
 });
 
 function findUser (username, callback) {

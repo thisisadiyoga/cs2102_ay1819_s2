@@ -1,50 +1,73 @@
+$(document).ready(function() {
 
-  $(document).ready(function() {
+var availabilities = $('.test').attr('data-test-value');
+    availabilities = JSON.parse(availabilities);
+ //alert(availabilities[0].start);
+
+
+
+
+
+$(".startTimestamp").flatpickr({
+     enableTime: true,
+     dateFormat: "Y-m-d H:i:00",
+     minDate: new Date()
+});
+
+$(".endTimestamp").flatpickr({
+     enableTime: true,
+     dateFormat: "Y-m-d H:i:00",
+     minDate: new Date()
+});
 
 $('#calendar').fullCalendar({
   header:{
-           left:   'prev,next today',
+           left: 'prev,next today',
            center: 'title',
            right: 'month,agendaWeek,agendaDay,listWeek'
-         }
-,
+         },
   defaultDate: new Date(),
+  timeZone: 'UTC',
   navLinks: true,
   editable: true,
   eventLimit: true,
-  events: [{
-      title: 'Simple static event',
-      start: '2018-11-16',
-      description: 'Super cool event'
-    },
-
-  ],
+  events: availabilities,
+  eventColor: '#A8EEC1',
   dayClick: function (date, jsEvent, view) {
-    var date = moment(date);
+    //Manipulate display side of display time to UTC time
+    //Original time is still the same
+    var day_start = date.toDate();
+    $('.add-availability-form .startTimestamp').flatpickr({dateFormat: "Y-m-d  12:00:00", enableTime: true, defaultDate: day_start,  minDate: new Date()});
+    $('.add-availability-form .endTimestamp').flatpickr({dateFormat: "Y-m-d  12:00:00", enableTime: true, defaultDate: day_start,  minDate: new Date()});
 
-    if (date.isValid()) {
-    //Save to db
-      $('#calendar').fullCalendar('renderEvent', {
-        title: 'Dynamic event from date click',
-        start: date,
-        allDay: true
-      });
-    } else {
-      alert('Invalid');
-    }
-  },
+
+     $('#dateTimePickerModal').modal('show');
+
+},
+
+ eventClick: function (event) {
+
+    //Manipulate display side of display time to UTC time
+    //Original time is still the same
+    var old_start = new Date(event.start);
+    old_start.setHours(old_start.getHours() - 8);
+    $('.update-availability-form .startTimestamp').flatpickr({dateFormat: "Y-m-d  H:i:00", enableTime: true, defaultDate: old_start,  minDate: new Date()});
+    $('.update-availability-form .oldStartTimestamp')[0].setAttribute('value', event.start);
+    $('.delete-availability-form .oldStartTimestamp')[0].setAttribute('value', event.start);
+
+
+   var old_end = new Date(event.end);
+   old_end.setHours(old_end.getHours() - 8);
+    $('.update-availability-form .endTimestamp').flatpickr({dateFormat: "Y-m-d  H:i:00", enableTime: true, defaultDate: old_end,  minDate: new Date()});
+     $('.update-availability-form .oldEndTimestamp')[0].setAttribute('value', event.end);
+    $('.delete-availability-form .oldEndTimestamp')[0].setAttribute('value', event.end);
+
+     $('#updateDateTimePickerModal').modal('show');
+ }
 });
 
 
-$("#startTimestamp").flatpickr({
-     enableTime: true,
-     dateFormat: "Y-m-d H:i:00"
-});
 
-$("#endTimestamp").flatpickr({
-     enableTime: true,
-     dateFormat: "F, d Y H:i"
-});
   });
 
 

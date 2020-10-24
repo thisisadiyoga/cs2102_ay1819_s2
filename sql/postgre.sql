@@ -143,15 +143,3 @@ FOR EACH ROW EXECUTE PROCEDURE OnBid();
 	FOREIGN KEY(p_end_date) REFERENCES Bids(p_end_date),
 	CHECK(p_start_date <= p_end_date)
 );*/
-
-INSERT INTO Caretakers (username, first_name, last_name, password, email, credit_card_no, DOB)
-VALUES ('asdfasdf', 'asdf', 'asdf', 'password', 'asdf@asdf.com', '1234123412341234', '1-1-2000');
-INSERT INTO Caretakers (username, first_name, last_name, password, email, credit_card_no, DOB)
-VALUES ('ghjkghjk', 'ghjk', 'ghjk', 'password', 'ghjk@ghjk.com', '1234123412341234', '1-1-2000');
-
-INSERT INTO Bids (username, rating)
-VALUES ('asdfasdf',5);
-INSERT INTO Bids (username, rating)
-VALUES ('asdfasdf',3);
-
-SELECT * FROM Caretakers;

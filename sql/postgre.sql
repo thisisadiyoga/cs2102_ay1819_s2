@@ -56,16 +56,6 @@ CREATE TABLE declares_availabilities(
 );
 
 
---Dummy table for TESTING only --
-CREATE TABLE bids(
-    start_timestamp TIMESTAMP NOT NULL,
-    end_timestamp TIMESTAMP NOT NULL,
-    caretaker_username VARCHAR, --REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
-    CHECK (end_timestamp > start_timestamp),
-    PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
-                                                --They will be merged
-);
-
 
 
 CREATE VIEW Users AS (

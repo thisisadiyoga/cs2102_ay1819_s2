@@ -15,7 +15,7 @@ CREATE TABLE Owners(
 	postal_code		VARCHAR(6)	NOT NULL,
 	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE,
 	avatar			BYTEA, 
-	is_disabled		BOOLEAN		NOT NULL DEFAULT TRUE --to check if entry is allowed in database
+	o_is_disabled		BOOLEAN		NOT NULL DEFAULT TRUE --to check if entry is allowed in database
 );
 
 CREATE TABLE ownsPets(
@@ -46,7 +46,7 @@ CREATE TABLE Caretakers(
 	no_of_reviews	INT			NOT NULL, 
 	avatar			BYTEA, 
 	no_of_pets_taken INTEGER    CHECK(no_of_pets_taken > 0), 
-	is_disabled		BOOLEAN		NOT NULL DEFAULT FALSE
+	ct_is_disabled		BOOLEAN		NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE Timings (
@@ -85,11 +85,9 @@ CREATE TABLE Bids (
 );
 
 
-CREATE VIEW Users AS (
-	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date, avatar, is_disabled FROM Owners
-	UNION
-	SELECT username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, reg_date, avatar, is_disabled FROM Caretakers
-);
+CREATE VIEW Users AS 
+	SELECT o.username, o.password, o.first_name, o.last_name, o.email, o.dob, o.credit_card_no, o.unit_no, o.postal_code, o.reg_date, o.avatar, o_is_disabled, ct_is_disabled
+	FROM Owners o FULL OUTER JOIN Caretakers ON o.username = caretakers.username;
 
 CREATE TABLE isPaidSalaries (
 	caretaker_id VARCHAR REFERENCES caretakers(username)

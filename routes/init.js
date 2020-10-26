@@ -56,7 +56,6 @@ function initRouter(app) {
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/display', passport.authMiddleware(), search_caretaker);
-	
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('user', {

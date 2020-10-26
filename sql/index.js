@@ -43,6 +43,7 @@ sql.query = {
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
+	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;", 
 
 }
 

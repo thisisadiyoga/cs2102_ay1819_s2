@@ -24,7 +24,18 @@
 			<div class="card card-register mx-auto mt-5">
 				<div class="card-header">Edit a Pet</div>
 				<div class="card-body">
-					<form action="/pets" method="post">
+					<form action="/pets" enctype="multipart/form-data" method="post">
+						<div class="form-group">
+							<div class="form-row">
+								<div class="col-md-6">
+									Picture
+									<div class="form-label-group">
+										<img src="data:image/png;base64, <%= pet.img%>" class="crop" width="100" height="100">
+										<input type="file" name="img" id="img" accept="image/png, image/jpeg">
+									</div>
+								</div>
+							</div>
+						</div>
 						<div class="form-group">
 							<div class="form-row">
 								<div class="col-md-12">

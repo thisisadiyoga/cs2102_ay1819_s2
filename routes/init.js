@@ -48,12 +48,12 @@ function initRouter(app) {
 	app.post('/update_info', passport.authMiddleware(), update_info);
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/update_avatar', [passport.authMiddleware(), upload.single('avatar')], update_avatar);
-	app.post('/pets', passport.authMiddleware(), update_pet);
+	app.post('/pets', [passport.authMiddleware(), upload.single('img')], update_pet);
 
 	app.post('/register', [passport.antiMiddleware(), upload.single('avatar')], reg_user);
 	app.post('/del_user', del_user,);
 	app.post('/add_pets', [passport.authMiddleware(), upload.single('img')], reg_pet);
-	app.post('/edit_pet', [passport.authMiddleware(), upload.single('img')], edit_pet);
+	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/display', passport.authMiddleware(), search_caretaker);
 	
@@ -226,14 +226,28 @@ function update_pet (req, res, next) {
 	var description = req.body.description;
 	var sociability = req.body.sociability;
 	var special_req = req.body.special_req;
-	var img = fs.readFileSync(req.file.path).toString('base64');
+	
 
-	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req, img], (err, data) => {
+	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req], (err, data) => {
 		if(err) {
 			console.error("Error in updating pet");
 			res.redirect('/pets?edit=fail');
 		} else {
-			res.redirect('/pets?edit=pass');
+			if (typeof req.file !== 'undefined')
+			{
+				var img = fs.readFileSync(req.file.path).toString('base64');
+				pool.query(sql_query.query.update_pet_pic, [username, name, img], (err, data) => {
+					if (err) {
+						console.error("Error in updating image");
+						res.redirect('/pets?edit=fail');
+					} else {
+						res.redirect('/pets?edit=pass')
+					}
+				});
+			} else 
+			{
+				res.redirect('/pets?edit=pass');
+			}
 		}
 	});
 }
@@ -259,7 +273,7 @@ function edit_pet(req, res, next) {
 			}
 		}
 	)});
-};
+}
 
 function del_pet (req, res, next) {
 	console.log(req.body.name);

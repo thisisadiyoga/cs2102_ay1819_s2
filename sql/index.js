@@ -35,7 +35,8 @@ sql.query = {
 	update_pass: "UPDATE Owners SET password = $2 WHERE username = $1;",
 	update_info: "UPDATE Owners SET email = $2 WHERE username = $1;",
 	update_avatar: "UPDATE Owners SET avatar = $2 WHERE username = $1;", 
-	update_pet : "UPDATE ownsPets SET cat_name = $3, size = $4, description = $5, sociability = $6, special_req = $7 img = $8 WHERE username = $1 AND name = $2;", 
+	update_pet : "UPDATE ownsPets SET cat_name = $3, size = $4, description = $5, sociability = $6, special_req = $7 WHERE username = $1 AND name = $2;", 
+	update_pet_pic : "UPDATE ownsPets SET img = $3 WHERE username = $1 AND name = $2;",
 
 	upload_userpic: "SELECT encode(profile_pic, 'base64') FROM Users where username = $1;", 
 

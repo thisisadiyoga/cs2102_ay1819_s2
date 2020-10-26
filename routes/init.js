@@ -117,7 +117,7 @@ function dashboard(req, res, next) {
 		} else {
 			user = data.rows[0];
 		}
-	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Information updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), avatar_msg : msg(req, 'avatar', 'Profile Picture Updated', 'Error in updating picture'), auth: true });
+	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Email updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), avatar_msg : msg(req, 'avatar', 'Profile Picture Updated', 'Error in updating picture'), auth: true });
 	});
 }
 
@@ -206,7 +206,6 @@ function update_pass(req, res, next) {
 function update_avatar(req, res, next) {
 	var username = req.user.username;
 	var avatar = fs.readFileSync(req.file.path).toString('base64');
-
 	pool.query(sql_query.query.update_avatar, [username, avatar], (err, data) => {
 		if(err) {
 			console.error("Error in update profile picture");
@@ -288,8 +287,8 @@ function del_pet (req, res, next) {
 
 function reg_user(req, res, next) {
 	var username		= req.body.username;
-	var firstname		= req.body.firstname;
-	var lastname		= req.body.lastname;
+	var first_name		= req.body.firstname;
+	var last_name		= req.body.lastname;
 	var password		= bcrypt.hashSync(req.body.password, salt);
 	var email			= req.body.email;
 	var dob				= req.body.dob;
@@ -298,7 +297,7 @@ function reg_user(req, res, next) {
 	var postal_code 	= req.body.postal_code;
 	var avatar			= fs.readFileSync(req.file.path).toString('base64');
 
-	pool.query(sql_query.query.add_owner, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code, avatar], (err, data) => {
+	pool.query(sql_query.query.add_owner, [username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');

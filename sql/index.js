@@ -1,8 +1,8 @@
 const sql = {}
 
 sql.query = {
-	add_owner: "CALL add_owner ($1, $3, $4, $2, $5, $6, $7, $8, $9, $10);",
-	add_pet : "CALL add_pet ($1, $2, $3, $4, $5, $6, $7, $8);", 
+	add_owner: "CALL add_owner ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);",
+	add_pet : "INSERT INTO ownsPets VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", 
 	
 	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
 
@@ -28,13 +28,13 @@ sql.query = {
 
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
-	list_caretakers: "SELECT username, is_full_time, avg_rating, no_of_pets_taken FROM caretakers;",
+	list_caretakers: "SELECT username, is_full_time, avg_rating, no_of_pets_taken FROM caretakers WHERE is_disabled IS FALSE;",
 	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers WHERE username LIKE $1 OR first_name LIKE $1 OR last_name LIKE $1;", 
 
 	//edit information
-	update_pass: "UPDATE Owners SET password = $2 WHERE username = $1;",
-	update_info: "UPDATE Owners SET email = $2 WHERE username = $1;",
-	update_avatar: "UPDATE Owners SET avatar = $2 WHERE username = $1;", 
+	update_pass: "UPDATE Users SET password = $2 WHERE username = $1;",
+	update_info: "UPDATE Users SET email = $2 WHERE username = $1;",
+	update_avatar: "UPDATE Users SET avatar = $2 WHERE username = $1;", 
 	update_pet : "UPDATE ownsPets SET cat_name = $3, size = $4, description = $5, sociability = $6, special_req = $7 WHERE username = $1 AND name = $2;", 
 	update_pet_pic : "UPDATE ownsPets SET img = $3 WHERE username = $1 AND name = $2;",
 

@@ -3,6 +3,7 @@ const sql = {}
 sql.query = {
 	add_owner: "CALL add_owner ($1, $3, $4, $2, $5, $6, $7, $8, $9, $10);",
 	add_pet : "CALL add_pet ($1, $2, $3, $4, $5, $6, $7, $8);", 
+	add_admin: "CALL add_admin($1, $2, $3)",
 	
 	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
 
@@ -43,6 +44,7 @@ sql.query = {
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
+	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;", 
 
 }
 

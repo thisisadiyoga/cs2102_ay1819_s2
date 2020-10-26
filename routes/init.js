@@ -36,6 +36,7 @@ function initRouter(app) {
 	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
 	app.post('/registerAdmin', passport.antiMiddleware(), reg_admin);
 	app.get('/adminInformation', passport.authMiddleware(), adminInformation);
+	app.post('/del_admin', del_admin);
 
 
 	app.get('/register' , passport.antiMiddleware(), register );
@@ -371,6 +372,23 @@ function del_user (req, res, next) {
 					res.redirect('/?del=pass')
 				}
 			});
+		}
+	});
+
+}
+
+function del_admin (req, res, next) {
+	var admin_id = req.user.admin_username;
+	
+	req.session.destroy()
+	req.logout()
+
+	pool.query(sql_query.query.del_admin, [admin_id], (err, data) => {
+		if(err) {
+			console.error("Error in deleting admin account", err);
+		} else {
+			console.log("Admin deleted");
+			res.redirect('/?del=pass')
 		}
 	});
 }

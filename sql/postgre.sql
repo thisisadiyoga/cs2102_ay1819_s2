@@ -38,6 +38,7 @@ CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP, pe 
 $$ DECLARE tot_p NUMERIC;
 BEGIN
 tot_p := (EXTRACT(DAY FROM AGE(pe, ps)) + 1) * (SELECT daily_price FROM Charges WHERE username = ct AND cat_name IN (SELECT cat_name FROM ownsPets WHERE username = ou AND name = pn));
+IF NOT EXISTS (SELECT 1 FROM Timings WHERE p_start_date = ps AND p_end_date = pe) THEN INSERT INTO Timings VALUES (ps, pe); END IF;
 INSERT INTO Bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
 END; $$
 LANGUAGE plpgsql;

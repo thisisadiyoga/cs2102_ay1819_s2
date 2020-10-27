@@ -81,8 +81,8 @@ function initRouter(app) {
 	app.get('/viewbids', passport.authMiddleware(), view_bids);
 	app.get('/feedback', passport.authMiddleware(), rate_review_form);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
-	app.get('/newbid', passport.authMiddleWare(), newbid);
-	app.post('/insert_bid', passport.authMiddleWare(), insert_bid);
+	app.get('/newbid', passport.authMiddleware(), newbid);
+	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
 }
 
 // Render Function
@@ -425,7 +425,7 @@ function view_bids (req, res, next) {
 }
 
 function rate_review_form (req, res, next) {
-	basic(req, res, 'rate_review', {auth : true});
+	res.redirect('/rate_review');
 }
 
 function rate_review (req, res, next) {
@@ -447,6 +447,7 @@ function rate_review (req, res, next) {
 
 function newbid (req, res, next) {
 	basic(req, res, 'bid_form', {auth:true});
+	res.redirect('/bid_form');
 }
 
 function insert_bid (req, res, next) {

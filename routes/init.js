@@ -28,6 +28,7 @@ function initRouter(app) {
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 
 	app.get('/register' , passport.antiMiddleware(), register );
+	app.get('/ctregister' , passport.antiMiddleware(), ctregister );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
 	app.get('/caretaker' , passport.antiMiddleware(), caretaker );
 	
@@ -42,6 +43,7 @@ function initRouter(app) {
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/review', passport.authMiddleware(), review);
+	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 	
 
 	/* LOGIN */
@@ -92,6 +94,10 @@ function register(req, res, next) {
 }
 function retrieve(req, res, next) {
 	res.render('retrieve', { page: 'retrieve', auth: false });
+}
+
+function ctregister(req, res, next) {
+	res.render('ctregister', { page: 'ctregister', auth: false });
 }
 
 function caretaker(req, res, next) {
@@ -228,6 +234,39 @@ function reg_user(req, res, next) {
 					return res.redirect('/register?reg=fail');
 				} else {
 					return res.redirect('/add_pets');
+				}
+			});
+		}
+	});
+}
+
+function reg_ct(req, res, next) {
+	var username		= req.body.username;
+	var firstname		= req.body.firstname;
+	var lastname		= req.body.lastname;
+	var password		= bcrypt.hashSync(req.body.password, salt);
+	var email			= req.body.email;
+	var dob				= req.body.dob;
+	var credit_card_no	= req.body.credit_card_no;
+	var unit_no			= req.body.unit_no;
+	var postal_code 	= req.body.postal_code;
+	var avatar			= fs.readFileSync(req.file.path).toString('base64');
+	var is_full_time 	= req.body.is_full_time;
+
+	pool.query(sql_query.query.add_caretaker, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code, avatar, is_full_time], (err, data) => {
+		if(err) {
+			console.error("Error in adding caretaker", err);
+			res.redirect('/ctregister?reg=fail');
+		} else {
+			req.login({
+				username    : username,
+				passwordHash: password,
+				isUser: true
+			}, function(err) {
+				if(err) {
+					return res.redirect('/ctregister?reg=fail');
+				} else {
+					return res.redirect('/ctregister?reg=pass');
 				}
 			});
 		}

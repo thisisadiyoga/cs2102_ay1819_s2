@@ -27,7 +27,7 @@
                 <div class="container-fluid">		
                     <div class="card mb-3">
                         <div class="card-header">
-                            <i class="fas fa-dog"></i> &nbsp; My Pets
+                            <i class="fas fa-paw"></i> &nbsp; My Pets
                         </div>
                         <div class="card-body">
                             <% var text = (pet.length == 0) ? "Warning! Pet owner features are unusable until a pet is added!" : "" %>
@@ -49,7 +49,7 @@
                                     <tbody>
                                         <% for(var i=0; i<pet.length; i++) { %>
                                         <tr>
-                                            <td style="max-width:20px;">
+                                            <td>
                                                 <!-- Button trigger modal -->
                                                 <button class="btn" type="submit" id="name" name="name" value="<%= pet[i].name%>"><i class="fas fa-trash" title="Delete Pet" data-toggle="modal" data-target="#confirmModal"></i></button>
 
@@ -75,13 +75,13 @@
                                                 &nbsp;
                                                 <form action="edit_pet" method="post"><button class="btn" type="submit" id="name" name="name" value="<%= pet[i].name%>"><i class="fas fa-edit" title="Edit Pet"></i></form>
                                                 </td>
-                                            <td style="max-width:5px"><img src="data:image/png;base64, <%= pet[i].img%>" class="crop" width="100" height="100"></td>
-                                            <td style="max-width:5px;"><%= pet[i].name%></td>
-                                            <td style="max-width:5px;"><%= pet[i].cat_name%></td>
-                                            <td style="max-width:5px;"><%= pet[i].size%></td>
-                                            <td style="max-width:200px;"><%= pet[i].description%></td>
-                                            <td style="max-width:200px;"><%= pet[i].sociability%></td>
-                                            <td style="max-width:200px;"><%= pet[i].special_req%></td>
+                                            <td><img src="data:image/png;base64, <%= pet[i].img%>" class="crop" width="100" height="100"></td>
+                                            <td><%= pet[i].name%></td>
+                                            <td><%= pet[i].cat_name%></td>
+                                            <td><%= pet[i].size%></td>
+                                            <td><%= pet[i].description%></td>
+                                            <td><%= pet[i].sociability%></td>
+                                            <td><%= pet[i].special_req%></td>
                                         </tr>
                                         <% } %>
                                     </tbody>

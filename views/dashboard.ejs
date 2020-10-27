@@ -26,18 +26,27 @@
 				<div class="container-fluid">
 					<div class="card mb-3">
 						<div class="card-header">
-							<i class="fas fa-address-card"></i> &nbsp; Profile Picture
+							<i class="fas fa-camera"></i> &nbsp; Profile Picture
 						</div>	
 						<form method="post" enctype="multipart/form-data" action="/update_avatar">
-							<div class="card mb-3">
-								<img src="data:image/png;base64, <%=user.avatar%>" class="crop" width="100" height="100"><input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg" required="required">
+							<div class="card-body">
+								<div class="form-group row">
+									<div class="col-sm-4">
+										<img src="data:image/png;base64, <%=user.avatar%>" class="crop" width="100" height="100">
+										<div class="form-group row"></div>
+										<input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg" required="required">
+									</div>
+								</div>
 							</div>
-							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Profile Picture</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= avatar_msg %></span></div>
+							<div class="card-footer small text-muted">
+								<button type="submit" class="btn btn-secondary">Update Profile Picture</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= avatar_msg %></span>
+							</div>
 						</form>
+					</div>
 
 					<div class="card mb-3">
 						<div class="card-header">
-							<i class="fas fa-address-card"></i> &nbsp; Profile Information
+							<i class="fas fa-info-circle"></i> &nbsp; Profile Information
 						</div>
 						<form method="post" action="/update_info">
 							<div class="card-body">
@@ -84,26 +93,27 @@
 				</div>
 				<div style="padding-left: 35px">
 					<!-- Button trigger modal -->
-					<button type="button" class="btn btn-primary float-left" data-toggle="modal" data-target="#confirmModal">
+					<button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#confirmModal">
 						Delete Account
 					</button>
 					<!-- Modal -->
 					<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 						<div class="modal-dialog" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h5 class="modal-title" id="exampleModalLabel">Confirm deletion</h5>
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-									<span aria-hidden="true">&times;</span>
-								</button>
-							</div>
-								<div class="modal-body">Confirm the deletion of account <%= user.username %>?
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="exampleModalLabel">Confirm deletion</h5>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
 								</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-								<form action="del_user" method="post"><button class="btn btn-primary float-left" type="submit" id="username" name="username" value="<%= user %>">Delete Account</button></form>
+									<div class="modal-body">Confirm the deletion of account <%= user.username %>?
+										<p style="color:red">WARNING: deleting this account permanently removes all account data and this action is irreversible</p>
+									</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+									<form action="del_user" method="post"><button class="btn btn-primary float-left" type="submit" id="username" name="username" value="<%= user %>">Delete Account</button></form>
+								</div>
 							</div>
-						</div>
 						</div>
 					</div>
 				</div>

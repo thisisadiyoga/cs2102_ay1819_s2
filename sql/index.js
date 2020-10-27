@@ -3,28 +3,31 @@ const sql = {}
 sql.query = {
 	add_owner: "CALL add_owner ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);",
 	add_pet : "INSERT INTO ownsPets VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", 
+	add_cat : "INSERT INTO Categories VALUES ($1, $2);", 
+	add_admin : "INSERT INTO Administrators VALUES ($1, $2, $3);", 
 	
-	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
+	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
 
-	choose_bids: 'SELECT choose_bids()',
+	choose_bids: 'SELECT choose_bids();',
 
-	rate_or_review: 'SELECT rate_or_review($1, $2, $3, $4, $5, $6, $7)',
+	rate_or_review: 'SELECT rate_or_review($1, $2, $3, $4, $5, $6, $7);',
 
-	set_transac_details: 'SELECT set_transac_details($1, $2, $3, $4, $5, $6, $7)',
+	set_transac_details: 'SELECT set_transac_details($1, $2, $3, $4, $5, $6, $7);',
 
-	pay_bid: 'SELECT pay_bid($1, $2, $3, $4, $5)',
+	pay_bid: 'SELECT pay_bid($1, $2, $3, $4, $5);',
 
-	search_reviews: 'SELECT review FROM Bids WHERE username = $1 AND review IS NOT NULL',
+	search_reviews: 'SELECT review FROM Bids WHERE username = $1 AND review IS NOT NULL;',
 
-	search_avg_rating: 'SELECT AVG(rating) FROM Bids WHERE username = $1',
+	search_avg_rating: 'SELECT AVG(rating) FROM Bids WHERE username = $1;',
 
-	search_past_orders: 'SELECT pet_name, p_start_date, p_end_date, username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true',
+	search_past_orders: 'SELECT pet_name, p_start_date, p_end_date, username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true;',
 
-	search_petdays: 'SELECT SUM(duration) FROM (SELECT p_end_date - p_start_date + 1 AS duration FROM Bids WHERE username = $1 AND p_start_date >= $2 AND p_start_date <= $3 AND is_successful = true)',
+	search_petdays: 'SELECT SUM(duration) FROM (SELECT p_end_date - p_start_date + 1 AS duration FROM Bids WHERE username = $1 AND p_start_date >= $2 AND p_start_date <= $3 AND is_successful = true);',
 
 	get_user : "SELECT * FROM Users WHERE username = $1;",
-	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2", 
-	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1",
+	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
+	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1;",
+	get_caretaker : "SELECT * FROM Caretakers WHERE username = $1 AND is_disabled IS FALSE;", 
 
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
@@ -37,14 +40,16 @@ sql.query = {
 	update_avatar: "UPDATE Users SET avatar = $2 WHERE username = $1;", 
 	update_pet : "UPDATE ownsPets SET cat_name = $3, size = $4, description = $5, sociability = $6, special_req = $7 WHERE username = $1 AND name = $2;", 
 	update_pet_pic : "UPDATE ownsPets SET img = $3 WHERE username = $1 AND name = $2;",
+	update_cat : "UPDATE Categories SET base_price = $2 WHERE cat_name = $1;", 
 
 	upload_userpic: "SELECT encode(profile_pic, 'base64') FROM Users where username = $1;", 
 
 	//delete information
+	del_user : "DELETE FROM Users WHERE username = $1", 
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
-	del_caretaker: "DELETE FROM Caretakers WHERE username = $1", 
+	del_caretaker: "DELETE FROM Caretakers WHERE username = $1;", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
-
+	disable_cat : "UPDATE FROM Categories WHERE cat_name = $1", 
 }
 
 module.exports = sql

@@ -36,12 +36,16 @@ function initRouter(app) {
 	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
 	app.post('/registerAdmin', passport.antiMiddleware(), reg_admin);
 	app.get('/adminInformation', passport.authMiddleware(), adminInformation);
+	app.get('/category', passport.authMiddleware(), category);
+	app.post('/edit_cat', passport.authMiddleware(), edit_cat);
+	//app.post('/del_cat', passport.authMiddleware(), del_cat);
+	app.post('/add_cat', passport.authMiddleware(), add_cat);
 
-
+	/*Registration*/ 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
-	app.get('/password' , passport.antiMiddleware(), retrieve );
 
+	/*Search*/
 	app.get('/rating.js', search_caretaker);
 
 	/* PROTECTED POST */
@@ -124,7 +128,6 @@ function dashboard(req, res, next) {
 function adminDashboard(req, res, next) {
 	basic(req, res, 'adminDashboard', { 
 		auth: true });
-	
 }
 
 function register(req, res, next) {
@@ -316,6 +319,49 @@ function reg_user(req, res, next) {
 		}
 	});
 }
+
+function category (req, res, next) {
+	var category;
+
+	pool.query(sql_query.query.list_cats, [], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			category = [];
+		} else {
+			category = data.rows;
+		}
+
+		basic(req, res, 'category', { category : category, add_msg: msg(req, 'add', 'Category added successfully', 'Error in adding category'), edit_msg: msg(req, 'edit', 'Category edited successfully', 'Error in editing category'), del_msg: msg(req, 'del', 'Category deleted successfully', 'Error in deleting category'), auth: true });
+	});
+}
+
+function edit_cat(req, res, next) {
+	var cat_name = req.body.cat_name;
+	var base_price = req.body.base_price;
+
+	pool.query(sql_query.query.update_cat, [cat_name, base_price], (err, data) => {
+		if(err) {
+			console.error("Category not found", err);
+			res.redirect('/category?edit=fail');
+		} else {
+			res.redirect('/category?edit=pass');
+		}
+	});
+}
+
+function add_cat(req, res, next) {
+	var cat_name = req.body.cat_name;
+	var base_price = req.body.base_price;
+
+	pool.query(sql_query.query.add_cat, [cat_name, base_price], (err, data) => {
+		if (err) {
+			console.error("Category add failed", err);
+			res.redirect('/category?add=fail');
+		} else {
+			res.redirect('/category?add=pass');
+		}
+	});
+}
+
 
 function reg_admin(req, res, next) {
 	// console.log(req.body);

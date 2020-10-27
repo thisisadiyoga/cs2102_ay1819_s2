@@ -3,7 +3,7 @@ CREATE TABLE Timings (
 	p_end_date TIMESTAMP,
 	PRIMARY KEY (p_start_date, p_end_date),
 	CHECK (p_end_date > p_start_date)
-)
+);
 
 CREATE TABLE Bids (
 	owner_username VARCHAR,
@@ -32,7 +32,7 @@ CREATE TABLE Bids (
 	mode_of_transfer IS NULL)),
 	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
 	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date > p_start_date))
-)
+);
 
 CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP, pe TIMESTAMP, sd TIMESTAMP, ed TIMESTAMP, ct VARCHAR, ts VARCHAR) AS
 $$ DECLARE tot_p NUMERIC;

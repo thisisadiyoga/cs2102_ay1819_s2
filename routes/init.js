@@ -466,6 +466,12 @@ function insert_bid (req, res, next) {
 			basic(req, res, 'bids', {auth:true});
 		}
 	});
+
+	pool.query(sql_query.choose_bids, (err, data) => {
+		if (err) {
+			console.error("Error in choosing bids", err);
+		}
+	});
 }
 
 // LOGOUT

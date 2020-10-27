@@ -77,6 +77,12 @@ function initRouter(app) {
 	/*ADMIN*/
 	app.get('/admin', admin);
 
+	/*BIDS*/
+	app.get('/viewbids', passport.authMiddleware(), view_bids);
+	app.get('/feedback', passport.authMiddleware(), rate_review_form);
+	app.post('/rate_review', passport.authMiddleware(), rate_review);
+	app.get('/newbid', passport.authMiddleWare(), newbid);
+	app.post('/insert_bid', passport.authMiddleWare(), insert_bid);
 }
 
 // Render Function
@@ -396,17 +402,70 @@ function del_admin (req, res, next) {
 function search_caretaker (req, res, next) {
 	var caretaker;
 	pool.query(sql_query.query.search_caretaker, ["%" + req.body.name + "%"], (err, data) => {
-		if(err || !data.rows || data.rows.length == 0) {
+		if (err || !data.rows || data.rows.length == 0) {
 			caretaker = [];
 		} else {
 			caretaker = data.rows;
 		}
-
 		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
 	});
 }
 
+function view_bids (req, res, next) {
+	var owner = req.user.username;
+	var bids;
+	pool.query(sql_query.query.view_bids, [owner], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			bids = [];
+		} else {
+			bids = data.rows;
+		}
+		basic(req, res, 'bids', {auth : true});
+	});
+}
 
+function rate_review_form (req, res, next) {
+	basic(req, res, 'rate_review', {auth : true});
+}
+
+function rate_review (req, res, next) {
+    var owner = req.body.ownername;
+    var pet = req.body.petname;
+    var start = req.body.startdate;
+    var end = req.body.enddate;
+    var caretaker = req.body.caretakername;
+    var rating = req.body.rating;
+	var review = req.body.review;
+	pool.query(sql_query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
+		if (err) {
+			console.error("Error in creating rating/review", err);
+		} else {
+			basic(req, res, 'bids', {auth:true})
+		}
+	});
+}
+
+function newbid (req, res, next) {
+	basic(req, res, 'bid_form', {auth:true});
+}
+
+function insert_bid (req, res, next) {
+	var owner = req.body.ownername;
+	var pet = req.body.petname;
+	var p_start = req.body.pstartdate;
+	var p_end = req.body.penddate;
+	var start = req.body.startdate;
+	var end = req.body.enddate;
+	var caretaker = req.body.caretakername;
+	var service = req.body.servicetype;
+	pool.query(sql_query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+		if (err) {
+			console.error("Error in creating bid", err);
+		} else {
+			basic(req, res, 'bids', {auth:true});
+		}
+	});
+}
 
 // LOGOUT
 function logout(req, res, next) {

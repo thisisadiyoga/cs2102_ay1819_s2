@@ -5,7 +5,7 @@ sql.query = {
 	add_pet : "CALL add_pet ($1, $2, $3, $4, $5, $6, $7, $8);", 
 	add_admin: "CALL add_admin($1, $2, $3)",
 	
-	select_all: 'SELECT * FROM Bids',
+	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND p_start_date = $5 AND p_end_date = $6 AND caretaker_username = $7',
 	insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
 	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',

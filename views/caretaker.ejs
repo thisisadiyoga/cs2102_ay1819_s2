@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>The Collar Klub</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+		<!-- Custom styles for this template-->
+        <link href="stylesheets/index.css" rel="stylesheet">
+        <link href="stylesheets/picture.css" rel="stylesheet">
+    </head>
+
+    <body id="page-top">
+    
+    
+        <div id="wrapper">
+            <%- include sidebar.ejs %>
+
+            <div id="content-wrapper">
+                <div class="container-fluid">		
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="fas fa-dog"></i> &nbsp; Caretaker Overview
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Caretaker Type</th>
+                                            <th>Rating</th>
+                                            <th>Number of Pets This Month</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="max-width:5px;"><%= username%></td>
+                                            <td style="max-width:5px;">
+                                                <% if(is_full_time) { %> 
+                                                    Full-Time
+                                                <% } else { %> 
+                                                    Part-Time
+                                                <% } %>
+                                            </td>
+                                            <td style="max-width:5px;"><%= avg_rating%></td>
+                                            <% for(var i=0; i< bids.length; i++) { %>
+                                                <% if(bids.username == username) { %>
+                                                <!--<tr>
+                                                    <td style="max-width:5px;"><%= bids[i].type_of_service%></td>
+                                                    <td style="max-width:5px;"><%= bids[i].status%></td>
+                                                    <td style="max-width:5px;"><%= bids[i].p_start_date%></td>
+                                                    <td style="max-width:5px;"><%= bids[i].p_end_date%></td>
+                                                </tr>-->
+                                                <% } %>
+                                            <% } %>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!--<table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Reviews</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for(var i=0; i< bids.length; i++) { %>
+                                            <% if(bids[i].username == username) { %>
+                                            <tr>
+                                                <td style="max-width:200px;"><%= bids[i].review%></td>
+                                            </tr>
+                                            <% } %>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                                <table class="table table-bordered" id="dataTable3" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="4">Jobs Previously Taken</th>
+                                            <th>Service Type</th>
+                                            <th>Status</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for(var i=0; i< bids.length; i++) { %>
+                                            <% if(bids.username == username) { %>
+                                            <tr>
+                                                <td style="max-width:5px;"><%= bids[i].type_of_service%></td>
+                                                <td style="max-width:5px;"><%= bids[i].status%></td>
+                                                <td style="max-width:5px;"><%= bids[i].p_start_date%></td>
+                                                <td style="max-width:5px;"><%= bids[i].p_end_date%></td>
+                                            </tr>
+                                            <% } %>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                                <table class="table table-bordered" id="dataTable4" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Salary Details</th>
+                                            <th>Month</th>
+                                            <th>Year</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for(var i=0; i< salaries.length; i++) { %>
+                                            <% if(salaries[i].username == username) { %>
+                                            <tr>
+                                                <td style="max-width:5px;"><%= salaries[i].month%></td>
+                                                <td style="max-width:5px;"><%= salaries[i].year%></td>
+                                                <td style="max-width:5px;"><%= salaries[i].amount%></td>
+                                            </tr>
+                                            <% } %>
+                                        <% } %>
+                                    </tbody>
+                                </table>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include bottomscript.ejs %>
+    </body>
+</html>

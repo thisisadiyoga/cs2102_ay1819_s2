@@ -196,21 +196,55 @@ CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
 	   END; $$
 	LANGUAGE plpgsql;
 
-<<<<<<< HEAD
-CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
-										password 		VARCHAR(64),
-										last_login_time TIMESTAMP 
-										) AS
+CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
+									   first_name		NAME,
+									   last_name		NAME,
+									   password			VARCHAR(64),
+									   email			VARCHAR,
+									   dob				DATE,
+									   credit_card_no	VARCHAR,
+									   unit_no			VARCHAR,
+									   postal_code		VARCHAR(6), 
+									   avatar			BYTEA,
+									   is_full_time		BOOLEAN
+									   ) AS
 	$$ BEGIN
-	   INSERT INTO Administrators (admin_id, password, last_login_time ) 
-	   VALUES (admin_id, password, last_login_time ); 
+	   INSERT INTO Users VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, CURRENT_DATE);
+	   INSERT INTO Caretakers VALUES (username, is_full_time);
 	   END; $$
 	LANGUAGE plpgsql;
-=======
 
+/*CREATE OR REPLACE FUNCTION OnBid() RETURNS TRIGGER AS $$
+BEGIN
+	IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+		UPDATE Caretakers
+		SET (avg_rating, no_of_reviews, no_of_pets_taken) = (((avg_rating*no_of_reviews)+NEW.rating)/(no_of_reviews + 1),
+		no_of_reviews + 1,
+		no_of_pets_taken + 1)
+		FROM Bids
+		WHERE Caretakers.username = NEW.username;
+	END IF;
+	RETURN NULL;
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER ChangeCaretakerDetails
+AFTER INSERT OR UPDATE OR DELETE ON Bids
+FOR EACH ROW EXECUTE PROCEDURE OnBid();
+
+CREATE TABLE Requested_by (
+	username  	VARCHAR(9)  NOT NULL,
+	p_start_date  	DATE NOT NULL,
+	p_end_date  	DATE NOT NULL,
+	PRIMARY KEY(username,p_start_date,p_end_date),
+	FOREIGN KEY(username) REFERENCES Caretakers(username),
+	FOREIGN KEY(p_start_date) REFERENCES Bids(p_start_date),
+	FOREIGN KEY(p_end_date) REFERENCES Bids(p_end_date),
+	CHECK(p_start_date <= p_end_date)
+);*/
 
 -- Profile Seed --
-INSERT INTO Owners VALUES ('Brutea', '', '', '', '', , '', '', '', CURRENT_DATE());
+/*INSERT INTO Owners VALUES ('Brutea', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('Alphantom', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('Videogre', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('Corsairway', '', '', '', '', , '', '', '', CURRENT_DATE());
@@ -1209,5 +1243,4 @@ INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
 INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
-INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());
->>>>>>> master
+INSERT INTO Owners VALUES ('', '', '', '', '', , '', '', '', CURRENT_DATE());*/

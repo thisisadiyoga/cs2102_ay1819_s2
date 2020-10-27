@@ -3,6 +3,7 @@ const sql = {}
 sql.query = {
 	add_owner: "CALL add_owner ($1, $3, $4, $2, $5, $6, $7, $8, $9, $10);",
 	add_pet : "CALL add_pet ($1, $2, $3, $4, $5, $6, $7, $8);", 
+	add_caretaker: "CALL add_caretaker ($1, $3, $4, $2, $5, $6, $7, $8, $9, $10, $11);",
 	
 	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
 

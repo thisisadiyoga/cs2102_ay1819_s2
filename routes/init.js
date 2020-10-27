@@ -31,6 +31,7 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
+	app.get('/review', passport.authMiddleware(), add_caretakers);
 
 	/* admin pages*/
 	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
@@ -40,7 +41,7 @@ function initRouter(app) {
 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
-	app.get('/password' , passport.antiMiddleware(), retrieve );
+	app.get('/ctregister' , passport.antiMiddleware(), ctregister );
 
 	app.get('/rating.js', search_caretaker);
 
@@ -49,6 +50,9 @@ function initRouter(app) {
 	app.post('/update_pass', passport.authMiddleware(), update_pass);
 	app.post('/update_avatar', [passport.authMiddleware(), upload.single('avatar')], update_avatar);
 	app.post('/pets', passport.authMiddleware(), update_pet);
+	//app.post('/update_ctinfo', passport.authMiddleware(), update_ctinfo);
+	//app.post('/update_ctpass', passport.authMiddleware(), update_ctpass);
+	//app.post('/update_ctavatar', [passport.authMiddleware(), upload.single('avatar')], update_ctavatar);
 
 	app.post('/register', [passport.antiMiddleware(), upload.single('avatar')], reg_user);
 	app.post('/del_user', del_user,);
@@ -56,6 +60,8 @@ function initRouter(app) {
 	app.post('/edit_pet', [passport.authMiddleware(), upload.single('img')], edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/display', passport.authMiddleware(), search_caretaker);
+	app.post('/review', passport.authMiddleware(), rev_caretaker);
+	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 	
 
 	/* LOGIN */
@@ -135,6 +141,13 @@ function retrieve(req, res, next) {
 	res.render('retrieve', { page: 'retrieve', auth: false });
 }
 
+function review(req, res, next) {
+	res.render('review', { page: 'review', auth: false });
+}
+function ctregister(req, res, next) {
+	res.render('ctregister', { page: 'ctregister', auth: false });
+}
+
 function pets (req, res, next) {
 	var pet;
 
@@ -177,6 +190,18 @@ function add_pets(req, res, next) {
 	});
 }
 
+function add_caretakers(req, res, next) {
+	var caretakers;
+	pool.query(sql_query.query.list_caretakers, [], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			caretakers = [];
+		} else {
+			caretakers = data.rows;
+		}
+
+		basic(req, res, 'add_caretakers', { caretakers : caretakers, add_msg: msg(req, 'add', 'Caretaker added successfully', 'Error in adding caretaker'), auth: true });
+	});
+}
 
 // POST 
 function update_info(req, res, next) {
@@ -305,6 +330,39 @@ function reg_user(req, res, next) {
 	});
 }
 
+function reg_ct(req, res, next) {
+	var username		= req.body.username;
+	var firstname		= req.body.firstname;
+	var lastname		= req.body.lastname;
+	var password		= bcrypt.hashSync(req.body.password, salt);
+	var email			= req.body.email;
+	var dob				= req.body.dob;
+	var credit_card_no	= req.body.credit_card_no;
+	var unit_no			= req.body.unit_no;
+	var postal_code 	= req.body.postal_code;
+	var avatar			= fs.readFileSync(req.file.path).toString('base64');
+	var is_full_time 	= req.body.is_full_time;
+
+	pool.query(sql_query.query.add_caretaker, [username, password, firstname, lastname, email, dob, credit_card_no, unit_no, postal_code, avatar, is_full_time], (err, data) => {
+		if(err) {
+			console.error("Error in adding caretaker", err);
+			res.redirect('/ctregister?reg=fail');
+		} else {
+			req.login({
+				username    : username,
+				passwordHash: password,
+				isUser: true
+			}, function(err) {
+				if(err) {
+					return res.redirect('/ctregister?reg=fail');
+				} else {
+					return res.redirect('/ctregister?reg=pass');
+				}
+			});
+		}
+	});
+}
+
 function reg_admin(req, res, next) {
 	// console.log(req.body);
 	var admin_username  = req.body.admin_username;
@@ -329,6 +387,20 @@ function reg_admin(req, res, next) {
 					return res.redirect('/adminDashboard');
 				}
 			});
+		}
+	});
+}
+
+function rev_caretaker (req, res, next) {
+	var username = req.user.username;
+	var review = req.body.review;
+	//NEED TO CHANGE THIS
+	pool.query(sql_query.query.rate_or_review, [0, review, username, username, username, CURRENT_DATE, CURRENT_DATE], (err, data) => {
+		if(err) {
+			console.error("Error in submitting review", err);
+			res.redirect('/review?rev=fail');
+		} else {
+			res.redirect('/');
 		}
 	});
 }

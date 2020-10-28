@@ -16,7 +16,9 @@ CREATE TABLE Users (
 	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-___') OR NULL), 
 	postal_code		VARCHAR			NOT NULL, 
 	avatar			BYTEA			NOT NULL, 
-	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE
+	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE, 
+	is_owner		BOOLEAN			NOT NULL DEFAULT FALSE, 
+	is_caretaker	BOOLEAN			NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE Owners (
@@ -82,7 +84,41 @@ FOR EACH ROW EXECUTE PROCEDURE update_disable();
 
 --------------------------------------------------------
 
+--trigger to show type of account (caretaker, owner, user)
+CREATE OR REPLACE FUNCTION update_caretaker()
+RETURNS TRIGGER AS 
+	$$ DECLARE is_caretaker BOOLEAN;
+	BEGIN
+		SELECT 1 INTO is_caretaker FROM Caretakers WHERE username = NEW.username;
+		IF is_caretaker THEN UPDATE Users SET is_caretaker = TRUE;
+		ELSE UPDATE Users SET is_caretaker = FALSE;
+		END IF;
 
+		RETURN NEW;
+	END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_caretaker_status
+AFTER INSERT OR DELETE ON Caretakers
+FOR EACH ROW EXECUTE PROCEDURE update_caretaker();
+
+CREATE OR REPLACE FUNCTION update_owner()
+RETURNS TRIGGER AS 
+	$$ DECLARE is_owner BOOLEAN;
+	BEGIN
+		SELECT 1 INTO is_owner FROM Owners WHERE username = NEW.username;
+		IF is_owner THEN UPDATE Users SET is_owner = TRUE;
+		ELSE UPDATE Users SET is_owner = FALSE;
+		END IF;
+
+		RETURN NEW;
+	END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_owner_status
+AFTER INSERT OR DELETE ON Owners
+FOR EACH ROW EXECUTE PROCEDURE update_owner();
+--------------------------------------------------------
 
 CREATE TABLE Timings (
 	p_start_date DATE,
@@ -181,7 +217,6 @@ CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 	   END; $$
 	LANGUAGE plpgsql;
 
-<<<<<<< HEAD
 
 -- SEED VALUES
 --Owners
@@ -1185,5 +1220,3 @@ insert into Users (username, first_name, last_name, password, email, dob, credit
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hsharlandrp', 'Helen', 'Sharland', '3k6oyzbqP5', 'hsharlandrp@merriam-webster.com', '1988-11-17', '36786476630902', null, '799251', 'https://robohash.org/quimolestiaeperspiciatis.bmp?size=50x50&set=set1', '2020-07-17');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('eemettrq', 'Ewen', 'Emett', '0FLKPIQ7g7re', 'eemettrq@google.com', '1984-08-16', '4911432579397543146', '25-672', '506471', 'https://robohash.org/voluptatemconsecteturvoluptatum.jpg?size=50x50&set=set1', '2020-08-13');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('vjandacrr', 'Violet', 'Jandac', 'QWNbqFKM2R', 'vjandacrr@smh.com.au', '1981-11-11', '3564289361243299', null, '836817', 'https://robohash.org/saepemagniqui.png?size=50x50&set=set1', '2020-07-22');
-=======
->>>>>>> master

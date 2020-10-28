@@ -88,6 +88,9 @@ function basic(req, res, page, other) {
 	var info = {
 		page: page,
 		user: req.user.username,
+		avatar : req.user.avatar, 
+		is_owner : req.user.is_owner, 
+		is_caretaker : req.user.is_caretaker
 	};
 	if(other) {
 		for(var fld in other) {
@@ -135,6 +138,7 @@ function adminDashboard(req, res, next) {
 function register(req, res, next) {
 	res.render('register', { page: 'register', auth: false });
 }
+
 function retrieve(req, res, next) {
 	res.render('retrieve', { page: 'retrieve', auth: false });
 }
@@ -326,9 +330,9 @@ function reg_user(req, res, next) {
 				isUser: true
 			}, function(err) {
 				if(err) {
-					return res.redirect('/register?reg=fail');
+					res.redirect('/register?reg=fail');
 				} else {
-					return res.redirect('/add_pets');
+					res.redirect('/add_pets');
 				}
 			});
 		}

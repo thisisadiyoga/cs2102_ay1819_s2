@@ -1,7 +1,10 @@
 $(document).ready(function() {
 
-var availabilities = $('.test').attr('data-test-value');
+var availabilities = $('.availabilities-test').attr('data-test-value');
     availabilities = JSON.parse(availabilities);
+var  bids = $('.bids-test').attr('data-test-value');
+    bids = JSON.parse(bids);
+
  //alert(availabilities[0].start);
 
 
@@ -29,9 +32,10 @@ $('#calendar').fullCalendar({
   defaultDate: new Date(),
   timeZone: 'UTC',
   navLinks: true,
-  editable: true,
+  disableDragging: true,
   eventLimit: true,
   events: availabilities,
+  events: bids,
   eventColor: '#A8EEC1',
   dayClick: function (date, jsEvent, view) {
     //Manipulate display side of display time to UTC time

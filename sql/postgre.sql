@@ -13,7 +13,7 @@ CREATE TABLE Users (
 	email			VARCHAR			NOT NULL UNIQUE CHECK(email LIKE '%@%.%'),
 	dob				DATE			NOT NULL CHECK (CURRENT_DATE - dob >= 6750), 
 	credit_card_no	VARCHAR			NOT NULL, 
-	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-___')), 
+	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-___') OR NULL), 
 	postal_code		VARCHAR			NOT NULL, 
 	avatar			BYTEA			NOT NULL, 
 	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE
@@ -27,9 +27,9 @@ CREATE TABLE Owners (
 CREATE TABLE Caretakers (
 	username			VARCHAR			PRIMARY KEY REFERENCES Users(username) ON DELETE CASCADE, 
 	is_full_time		BOOLEAN			NOT NULL, 
-	avg_rating			FLOAT			NOT NULL, 
-	no_of_reviews		INT				NOT NULL, 
-	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0), 
+	avg_rating			FLOAT			NOT NULL DEFAULT 0, 
+	no_of_reviews		INT				NOT NULL DEFAULT 0, 
+	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0) DEFAULT 0, 
 	is_disabled			BOOLEAN			NOT NULL DEFAULT FALSE
 );
 

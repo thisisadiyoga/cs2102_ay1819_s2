@@ -9,6 +9,7 @@ const fs = require('fs');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const { RSA_NO_PADDING } = require('constants');
+const { allowedNodeEnvironmentFlags } = require('process');
 const pool = new Pool({
 	
 	user: postgres_details.user,
@@ -38,7 +39,6 @@ function initRouter(app) {
 	app.get('/adminInformation', passport.authMiddleware(), adminInformation);
 	app.get('/category', passport.authMiddleware(), category);
 	app.post('/edit_cat', passport.authMiddleware(), edit_cat);
-	//app.post('/del_cat', passport.authMiddleware(), del_cat);
 	app.post('/add_cat', passport.authMiddleware(), add_cat);
 
 	/*Registration*/ 
@@ -60,6 +60,7 @@ function initRouter(app) {
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/display', passport.authMiddleware(), search_caretaker);
+	app.post('/ctsignup', passport.authMiddleware(), ct_from_owner)
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('user', {
@@ -121,7 +122,7 @@ function dashboard(req, res, next) {
 		} else {
 			user = data.rows[0];
 		}
-	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Email updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), avatar_msg : msg(req, 'avatar', 'Profile Picture Updated', 'Error in updating picture'), auth: true });
+	basic(req, res, 'dashboard', { user : user, info_msg: msg(req, 'info', 'Email updated successfully', 'Error in updating information'), pass_msg: msg(req, 'pass', 'Password updated successfully', 'Error in updating password'), avatar_msg : msg(req, 'avatar', 'Profile Picture Updated', 'Error in updating picture'), join_msg : msg(req, 'join', 'Welcome to caretakers', 'Error in joining caretakers'), auth: true });
 	});
 }
 
@@ -176,6 +177,19 @@ function add_pets(req, res, next) {
 		}
 
 		basic(req, res, 'add_pets', { cat_list : cat_list, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
+	});
+}
+
+function ct_from_owner (req, res, next) {
+	var is_full_time = req.body.is_full_time;
+
+	pool.query(sql_query.query.add_caretaker, [req.user.username, is_full_time], (err, data) => {
+		if(err) {
+			console.error("Error in update info", err);
+			res.redirect('/dashboard?join=fail');
+		} else {
+			res.redirect('/dashboard?join=pass');
+		}
 	});
 }
 
@@ -456,3 +470,43 @@ function logout(req, res, next) {
 }
 
 module.exports = initRouter;
+
+
+
+
+
+
+
+/*function search_nearby (req, res, next) {
+	var username = req.user.username;
+	var filter;
+	var nearby;
+
+	console.log(username);
+	
+	pool.query(sql_query.query.get_area, [username], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			filter = [];
+			console.error("postal code not found");
+			res.redirect("/display");
+		} else {
+			filter = data.rows[0].postal_code
+
+			pool.query(sql_query.query.find_nearby, [username, filter[0, 2] + "____"], (err, data) => {
+				if(err) {
+					console.error("Error in deleting account", err);
+					res.redirect("/display?found=pass")
+				} else if (!data.rows || data.rows.length == 0){
+					console.info("No nearby caretaker found");
+					nearby = []
+					
+					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'No nearby caretaker found', 'Error in searching caretaker'), auth: true });
+				} else {
+					console.log("Caretaker found");
+					nearby = data.rows
+					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'Caretakers found', 'Error in searching caretaker'), auth: true });
+				}
+			});
+		}
+	});
+}*/

@@ -22,15 +22,6 @@
 				<div class="card-header"><img src="/images/logo.png" width="50" height="50" />Register Caretaker</div>
 				<div class="card-body">
 					<form action="/ctregister" enctype="multipart/form-data" method="post">
-						<div class="form-check form-check-inline">
-						  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="is_full_time" value="true">
-						  <label class="form-check-label" for="inlineRadio1">Full-Time</label>
-						</div>
-						<div class="form-check form-check-inline">
-						  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="is_full_time" value="false">
-						  <label class="form-check-label" for="inlineRadio2">Part-Time</label>
-                        </div>
-                        <p></p>
 						<div class="form-group">
 							<div class="form-label-group">
 								<input type="text" id="username" class="form-control" placeholder="Username" required="required" name="username" pattern="[A-Za-z][A-Za-z0-9_]{2,14}">
@@ -115,6 +106,15 @@
 								</div>
 							</div>
 						</div>
+						
+						<div>
+							<label for="is_full_time">As full-time or part time</label>
+                            <select class="form-control" id="is_full_time" name="is_full_time" required="required">
+								<option value=1>Full-time</option>
+								<option value=0>Part-time</option>
+							</select>
+						</div>
+						<p></p>
 						
 						<div class="checkbox">
 							<input type="checkbox" required="required">&nbsp;<label>I agree to the terms and conditions. </label>

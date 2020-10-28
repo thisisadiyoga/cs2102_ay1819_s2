@@ -21,7 +21,6 @@
     
         <div id="wrapper">
             <%- include sidebar.ejs %>
-
             <div id="content-wrapper">
                 <div class="container-fluid">		
                     <div class="card mb-3">
@@ -31,88 +30,32 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Caretaker Type</th>
-                                            <th>Rating</th>
-                                            <th>Number of pets</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="max-width:5px;"><%= username%></td>
-                                            <td style="max-width:5px;">
-                                                <% if(is_full_time) { %> 
-                                                    Full-Time
-                                                <% } else { %> 
-                                                    Part-Time
-                                                <% } %>
-                                            </td>
-                                            <td style="max-width:5px;"><%= avg_rating%></td>
-                                            <td style="max-width:200px;"><%= no_of_pets_taken%></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Reviews</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                    <tr>
+                                        <th>Name</th>
+                                        <td style="max-width:5px;"><%= username%></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Caretaker Type</th>
+                                        <td style="max-width:5px;">
+                                            <% if(is_full_time) { %> 
+                                                Full-Time
+                                            <% } else { %> 
+                                                Part-Time
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Rating</th>
+                                        <td style="max-width:5px;"><%= avg_rating%></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Number of pets this month</th>
                                         <% for(var i=0; i< bids.length; i++) { %>
                                             <% if(bids[i].username == username) { %>
-                                            <tr>
-                                                <td style="max-width:200px;"><%= bids[i].review%></td>
-                                            </tr>
+                                            <td style="max-width:200px;"><%= bids[i].review%></td>
                                             <% } %>
                                         <% } %>
-                                    </tbody>
-                                </table>
-                                <table class="table table-bordered" id="dataTable3" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th colspan="4">Jobs Previously Taken</th>
-                                            <th>Service Type</th>
-                                            <th>Status</th>
-                                            <th>Start Date</th>
-                                            <th>End Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% for(var i=0; i< bids.length; i++) { %>
-                                            <% if(bids.username == username) { %>
-                                            <tr>
-                                                <td style="max-width:5px;"><%= bids[i].type_of_service%></td>
-                                                <td style="max-width:5px;"><%= bids[i].status%></td>
-                                                <td style="max-width:5px;"><%= bids[i].p_start_date%></td>
-                                                <td style="max-width:5px;"><%= bids[i].p_end_date%></td>
-                                            </tr>
-                                            <% } %>
-                                        <% } %>
-                                    </tbody>
-                                </table>
-                                <table class="table table-bordered" id="dataTable4" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Salary Details</th>
-                                            <th>Month</th>
-                                            <th>Year</th>
-                                            <th>Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% for(var i=0; i< salaries.length; i++) { %>
-                                            <% if(salaries[i].username == username) { %>
-                                            <tr>
-                                                <td style="max-width:5px;"><%= salaries[i].month%></td>
-                                                <td style="max-width:5px;"><%= salaries[i].year%></td>
-                                                <td style="max-width:5px;"><%= salaries[i].amount%></td>
-                                            </tr>
-                                            <% } %>
-                                        <% } %>
-                                    </tbody>
+                                    </tr>
                                 </table>
                             </div>
                         </div>

@@ -13,12 +13,11 @@
 		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 
 		<!-- Custom styles for this template-->
-		<link href="stylesheets/index.css" rel="stylesheet">
+        <link href="stylesheets/index.css" rel="stylesheet">
+        <link href="stylesheets/picture.css" rel="stylesheet">
     </head>
 
     <body id="page-top">
-    
-    
         <div id="wrapper">
             <%- include sidebar.ejs %>
             <div id="content-wrapper">
@@ -32,12 +31,12 @@
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <tr>
                                         <th>Name</th>
-                                        <td style="max-width:5px;"><%= username%></td>
+                                        <td style="max-width:5px;"><%= caretaker[0].username%></td>
                                     </tr>
                                     <tr>
                                         <th>Caretaker Type</th>
                                         <td style="max-width:5px;">
-                                            <% if(is_full_time) { %> 
+                                            <% if(caretaker[0].is_full_time) { %> 
                                                 Full-Time
                                             <% } else { %> 
                                                 Part-Time
@@ -46,15 +45,11 @@
                                     </tr>
                                     <tr>
                                         <th>Rating</th>
-                                        <td style="max-width:5px;"><%= avg_rating%></td>
+                                        <td style="max-width:5px;"><%= caretaker[0].avg_rating%></td>
                                     </tr>
                                     <tr>
                                         <th>Number of pets this month</th>
-                                        <% for(var i=0; i< bids.length; i++) { %>
-                                            <% if(bids[i].username == username) { %>
-                                            <td style="max-width:200px;"><%= bids[i].review%></td>
-                                            <% } %>
-                                        <% } %>
+                                        <td style="max-width:200px;"><%= petdays%></td>
                                     </tr>
                                 </table>
                             </div>

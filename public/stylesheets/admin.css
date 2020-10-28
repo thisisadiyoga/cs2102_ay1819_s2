@@ -1,0 +1,15 @@
+.login-box {
+    
+    display: flex;
+    flex-direction: column;
+
+}
+
+.login-container {
+    padding: 20px;
+    width: 30%;
+}
+
+.login-input {
+    margin-top: 10px;
+}

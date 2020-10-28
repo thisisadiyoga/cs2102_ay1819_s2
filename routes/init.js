@@ -40,6 +40,7 @@ function initRouter(app) {
 	app.get('/category', passport.authMiddleware(), category);
 	app.post('/edit_cat', passport.authMiddleware(), edit_cat);
 	app.post('/add_cat', passport.authMiddleware(), add_cat);
+	app.post('/del_admin', del_admin);
 
 	/*Registration*/ 
 	app.get('/register' , passport.antiMiddleware(), register );
@@ -55,7 +56,7 @@ function initRouter(app) {
 	app.post('/pets', [passport.authMiddleware(), upload.single('img')], update_pet);
 
 	app.post('/register', [passport.antiMiddleware(), upload.single('avatar')], reg_user);
-	app.post('/del_user', del_user,);
+	app.post('/del_user', del_user);
 	app.post('/add_pets', [passport.authMiddleware(), upload.single('img')], reg_pet);
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
@@ -431,7 +432,7 @@ function del_user (req, res, next) {
 	req.session.destroy()
 	req.logout()
 
-	pool.query(sql_query.query.del_owner, [username], (err, data) => {
+	pool.query(sql_query.query.del_user, [username], (err, data) => {
 		if(err) {
 			console.error("Error in deleting account", err);
 		} else {
@@ -443,6 +444,23 @@ function del_user (req, res, next) {
 					res.redirect('/?del=pass')
 				}
 			});
+		}
+	});
+
+}
+
+function del_admin (req, res, next) {
+	var admin_id = req.user.admin_username;
+	
+	req.session.destroy()
+	req.logout()
+
+	pool.query(sql_query.query.del_admin, [admin_id], (err, data) => {
+		if(err) {
+			console.error("Error in deleting admin account", err);
+		} else {
+			console.log("Admin deleted");
+			res.redirect('/?del=pass')
 		}
 	});
 }

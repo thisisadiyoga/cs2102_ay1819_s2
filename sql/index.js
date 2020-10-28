@@ -50,6 +50,7 @@ sql.query = {
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1;", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
+	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;", 
 
 	get_area : "SELECT postal_code FROM Users WHERE username = $1;", 
 	find_nearby : "SELECT * FROM Caretakers WHERE NOT is_disabled AND username IN (SELECT username FROM Users WHERE postal_code LIKE $2; AND username <> $1",  //where string is extract of first 2 digits of postal code + filter [00]____

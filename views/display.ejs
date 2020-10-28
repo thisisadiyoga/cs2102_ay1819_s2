@@ -26,13 +26,50 @@
     
         <div id="wrapper">
             <%- include sidebar.ejs %>
-
             <div id="content-wrapper">
                 <div class="container-fluid">		
                     <div class="card mb-3">
                         <div class="card-header">
-                            <i class="fas fa-dog"></i> &nbsp; Caretaker Information
-                        </div>
+                            <i class="fas fa-id-badge"></i> &nbsp; Caretaker Information
+
+                            <!-- Button trigger modal -->
+                            <button class="btn btn-sm btn-outline-dark" style="float:right" type="submit" id="ctsignup" name="ctsignup" data-toggle="modal" data-target="#confirmModal">Join as caretaker</i></button>
+                            
+                            <!--modal information-->
+                            <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Sign up as <%= user %></h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                        <div class="modal-body">
+                                            <form action="ctsignup" method="post">
+                                                <div class="form-group">
+                                                    <div class="form-row">
+                                                        <div class="col-md-12">
+                                                            <label for="cat_type">As full-time or part time</label>
+                                                            <select class="form-control" id="is_full_time" name="is_full_time" required="required">
+                                                                <option value=1>Full-time</option>
+                                                                <option value=0>Part-time</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <input type="checkbox" required="required">&nbsp;<label>I agree to the <a href="/">terms and conditions</a>. </label>
+                                                </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button class="btn btn-primary btn-block" type="submit">Register</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -50,13 +87,13 @@
                                     <tbody>
                                         <% for(var i=0; i<caretaker.length; i++) { %>
                                         <tr>
-                                            <td style="max-width:5px"><%= caretaker[i].username%></td>
-                                            <td style="max-width:5px"><%= caretaker[i].first_name%></td>
-                                            <td style="max-width:5px"><%= caretaker[i].last_name%></td>
-                                            <td style="max-width:5px"><%= caretaker[i].postal_code%></td>
+                                            <td><%= caretaker[i].username%></td>
+                                            <td><%= caretaker[i].first_name%></td>
+                                            <td><%= caretaker[i].last_name%></td>
+                                            <td><%= caretaker[i].postal_code%></td>
                                             <% var time = (caretaker[i].is_full_time == 1) ? "⚫": "⚪"%>
-                                            <td style="max-width:5px"><%= time%></td>
-                                            <td style="max-width:5px" id="avg_rating<%=i%>">
+                                            <td><%= time%></td>
+                                            <td id="avg_rating<%=i%>">
                                                 <div>
                                                   <i class="star star-under fa fa-star">
                                                     <i class="star star-over fa fa-star"></i>
@@ -76,7 +113,7 @@
                                                 &nbsp;&nbsp;&nbsp;<%= caretaker[i].avg_rating%>
                                                 </div>
                                             </td>
-                                            <td style="max-width:5px"><%= caretaker[i].no_of_reviews%></td>
+                                            <td><%= caretaker[i].no_of_reviews%></td>
                                         </tr>
                                         <script>
                                             rateStyle('<%=caretaker[i].avg_rating%>', 'avg_rating<%=i%>');

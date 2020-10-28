@@ -23,7 +23,7 @@ const pool = new Pool({
 function findUser (username, callback) {
 	pool.query(sql_query.query.get_user, [username], (err, data) => {
 		if(err) {
-			console.error("Cannot find user");
+      console.error("Cannot find user");
 			return callback(null);
 		}
 		

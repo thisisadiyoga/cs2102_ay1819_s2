@@ -1,9 +1,9 @@
+const postgres_details = require('../config.js')
 const sql_query = require('../sql');
 
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
-const postgres_details = require("../config.js");
 
 const authMiddleware = require('./middleware');
 const antiMiddleware = require('./antimiddle');
@@ -11,6 +11,11 @@ const antiMiddleware = require('./antimiddle');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
+  user: postgres_details.user,
+  host: postgres_details.host,
+  database: postgres_details.database,
+  password: postgres_details.password,
+  port: postgres_details.port,
   connectionString: process.env.DATABASE_URL,
   //ssl: true
     user: postgres_details.user,
@@ -21,7 +26,7 @@ const pool = new Pool({
 function findUser (username, callback) {
 	pool.query(sql_query.query.get_user, [username], (err, data) => {
 		if(err) {
-			console.error("Cannot find user");
+      console.error("Cannot find user");
 			return callback(null);
 		}
 		
@@ -31,7 +36,7 @@ function findUser (username, callback) {
 		} else if(data.rows.length == 1) {
 			return callback(null, {
 				username    : data.rows[0].username,
-				passwordHash: data.rows[0].password,
+        passwordHash: data.rows[0].password,
 			});
 		} else {
 			console.error("More than one user?");
@@ -40,16 +45,55 @@ function findUser (username, callback) {
 	});
 }
 
-passport.serializeUser(function (user, cb) {
-  cb(null, user.username);
+function findAdmin (username, callback) {
+	pool.query(sql_query.query.get_admin, [username], (err, data) => {
+		if(err) {
+			console.error("Cannot find user");
+			return callback(null);
+		}
+		
+		if(data.rows.length == 0) {
+			console.error("Admin does not exists?");
+			return callback(null)
+		} else if(data.rows.length == 1) {
+			return callback(null, {
+				admin_username    : data.rows[0].admin_id,
+        passwordHash      : data.rows[0].password,
+			});
+		} else {
+			console.error("More than one admin?");
+			return callback(null);
+		}
+	});
+}
+
+passport.serializeUser(function (user, callback ) {
+  if(user.username) {
+    callback(null, {
+     id: user.username,
+     type: 'user'
+    });
+  } else {
+    callback(null, {
+      id: user.admin_username,
+      type: 'admin'
+    });
+  }
+  // callback(null, user.username);
 })
 
-passport.deserializeUser(function (username, cb) {
-  findUser(username, cb);
+passport.deserializeUser(function (user, callback) {
+  if (user.type =='user') {
+    findUser(user.id, callback);
+  } else if (user.type == 'admin') {
+    findAdmin(user.id, callback);
+  } else {
+    console.error("No such type of user");
+  }
 })
 
 function initPassport () {
-  passport.use(new LocalStrategy(
+  passport.use('user',new LocalStrategy(
     (username, password, done) => {
       findUser(username, (err, user) => {
         if (err) {
@@ -74,11 +118,42 @@ function initPassport () {
         })
       })
     }
+  )); 
+
+  passport.use('admin', new LocalStrategy(
+    (admin_username, password, done) => {
+      findAdmin(admin_username, (err, admin) => {
+        if (err) {
+          console.err(err);
+          return done(err);
+        }
+
+        // User not found
+        if (!admin) {
+          console.error('Admin not found');
+          return done(null, false);
+        }
+
+        // Always use hashed passwords and fixed time comparison
+        bcrypt.compare(password, admin.passwordHash, (err, isValid) => {
+          if (err) {
+            console.err(err);
+            return done(err);
+          }
+          if (!isValid) {
+            return done(null, false);
+          }
+          return done(null, admin);
+        })
+      })
+    }
   ));
 
   passport.authMiddleware = authMiddleware;
   passport.antiMiddleware = antiMiddleware;
-	passport.findUser = findUser;
+  passport.findUser = findUser;
+  passport.findAdmin = findAdmin;
+  
 }
 
 module.exports = initPassport;

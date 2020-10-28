@@ -1,0 +1,22 @@
+.star {
+    position: relative;
+    display: inline-block;
+    font-size: 30px;
+  }
+  
+  .star-under {
+    color: #ddd;
+  }
+  
+  .star-over {
+    color: #f80;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+  }
+  
+  .star-visible {
+    display: inline-block;
+  }

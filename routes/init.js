@@ -525,11 +525,11 @@ function search_caretaker (req, res, next) {
 
 function caretaker (req, res, next) {
 	var caretaker;
-	var petdays;
-	var startdate = new Date(date.getFullYear(), date.getMonth(), 1);
-	var lastdate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+	var date = new Date();
+	var currmonth = date.getMonth();
+	var curryear = date.getFullYear();
 
-	pool.query(sql_query.query.get_user, [req.user.username], (err, data) => {
+	pool.query(sql_query.query.get_ct, [req.user.username, currmonth, curryear], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			caretaker = [];
 		} else {
@@ -537,16 +537,6 @@ function caretaker (req, res, next) {
 		}
 
 		basic(req, res, 'caretaker', { caretaker : caretaker, add_msg: msg(req, 'add', 'Caretaker added successfully', 'Error in adding caretaker'), auth: true });
-	});
-
-	pool.query(sql_query.query.search_petdays, [req.user.username, startdate, lastdate], (err, data) => {
-		if(err || !data.rows || data.rows.length == 0) {
-			petdays = [];
-		} else {
-			petdays = data.rows;
-		}
-
-		basic(req, res, 'caretaker', { petdays : petdays, add_msg: msg(req, 'add', 'Petdays added successfully', 'Error in adding petdays'), auth: true });
 	});
 }
 

@@ -31,11 +31,11 @@
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <tr>
                                         <th>Name</th>
-                                        <td style="max-width:5px;"><%= caretaker[0].username%></td>
+                                        <td><%= caretaker[0].username%></td>
                                     </tr>
                                     <tr>
                                         <th>Caretaker Type</th>
-                                        <td style="max-width:5px;">
+                                        <td>
                                             <% if(caretaker[0].is_full_time) { %> 
                                                 Full-Time
                                             <% } else { %> 
@@ -45,11 +45,11 @@
                                     </tr>
                                     <tr>
                                         <th>Rating</th>
-                                        <td style="max-width:5px;"><%= caretaker[0].avg_rating%></td>
+                                        <td><%= caretaker[0].avg_rating%></td>
                                     </tr>
                                     <tr>
-                                        <th>Number of pets this month</th>
-                                        <td style="max-width:200px;"><%= petdays%></td>
+                                        <th>Expected Salary for the Month</th>
+                                        <td><%= caretaker[0].salary_amount%></td>
                                     </tr>
                                 </table>
                             </div>

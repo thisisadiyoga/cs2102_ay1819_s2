@@ -12,18 +12,18 @@
 			<i class="fas fa-fw fa-paw"></i>
 			<span>My Pets</span></a>
 	</li>
-	<li class="nav-item" <%= page==="pets" ? "active" : "" %>>
-		<a class="nav-link" href="<%= page==="pets" ? "#" : "/viewbids" %>">
-			<i class="fas fa-fw fa-dog"></i>
-			<span>My Bids</span></a>
+	<li class="nav-item" <%= page==="viewbids" ? "active" : "" %>>
+				<a class="nav-link" href="<%= page==="viewbids" ? "#" : "/viewbids" %>">
+					<i class="fas fa-fw fa-dog"></i>
+					<span>My Bids</span></a>
 	</li>
-	<li class="nav-item" <%= page==="pets" ? "active" : "" %>>
-		<a class="nav-link" href="<%= page==="pets" ? "#" : "/feedback" %>">
+	<li class="nav-item" <%= page==="rate_review" ? "active" : "" %>>
+		<a class="nav-link" href="<%= page==="rate_review" ? "#" : "/rate_review" %>">
 			<i class="fas fa-fw fa-dog"></i>
 			<span>Feedback Page</span></a>
 	</li>
-	<li class="nav-item" <%= page==="pets" ? "active" : "" %>>
-		<a class="nav-link" href="<%= page==="pets" ? "#" : "/newbid" %>">
+	<li class="nav-item" <%= page==="newbid" ? "active" : "" %>>
+		<a class="nav-link" href="<%= page==="newbid" ? "#" : "/newbid" %>">
 			<i class="fas fa-fw fa-dog"></i>
 			<span>New Bid</span></a>
 	</li>

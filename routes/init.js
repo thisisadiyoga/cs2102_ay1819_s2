@@ -83,8 +83,8 @@ function initRouter(app) {
 
 	/*BIDS*/
 	app.get('/viewbids', passport.authMiddleware(), view_bids);
-	app.get('/feedback', passport.authMiddleware(), rate_review_form);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
+	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.get('/newbid', passport.authMiddleware(), newbid);
 	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
 }
@@ -485,6 +485,7 @@ function search_caretaker (req, res, next) {
 
 function view_bids (req, res, next) {
 	var owner = req.user.username;
+	console.log(owner);
 	var bids;
 	pool.query(sql_query.query.view_bids, [owner], (err, data) => {
 		if (err || !data.rows || data.rows.length == 0) {
@@ -492,12 +493,13 @@ function view_bids (req, res, next) {
 		} else {
 			bids = data.rows;
 		}
-		basic(req, res, 'bids', {auth : true});
+		basic(req, res, 'viewbids', {data: bids, auth : true});
 	});
 }
 
 function rate_review_form (req, res, next) {
-	res.render('rate_review');
+	console.log("lol");
+	res.render('rate_review', {auth:true});
 }
 
 function rate_review (req, res, next) {
@@ -508,20 +510,22 @@ function rate_review (req, res, next) {
     var caretaker = req.body.caretakername;
     var rating = req.body.rating;
 	var review = req.body.review;
-	pool.query(sql_query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
+	pool.query(sql_query.query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
 		if (err) {
 			console.error("Error in creating rating/review", err);
 		} else {
-			basic(req, res, 'bids', {auth:true})
+			res.redirect('/viewbids');
 		}
 	});
 }
 
 function newbid (req, res, next) {
-	res.render('bid_form');
+	res.render('newbid', {auth:true});
 }
 
 function insert_bid (req, res, next) {
+	console.log("Reached!");
+	console.log(req.body.ownername);
 	var owner = req.body.ownername;
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
@@ -530,15 +534,15 @@ function insert_bid (req, res, next) {
 	var end = req.body.enddate;
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
-	pool.query(sql_query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
 		if (err) {
 			console.error("Error in creating bid", err);
 		} else {
-			basic(req, res, 'bids', {auth:true});
+			basic(req, res, 'viewbids', {auth:true});
 		}
 	});
 
-	pool.query(sql_query.choose_bids, (err, data) => {
+	pool.query(sql_query.query.choose_bids, (err, data) => {
 		if (err) {
 			console.error("Error in choosing bids", err);
 		}

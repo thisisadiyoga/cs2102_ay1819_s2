@@ -5,29 +5,21 @@ sql.query = {
 	add_pet : "INSERT INTO ownsPets VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", 
 	add_cat : "INSERT INTO Categories VALUES ($1, $2);", 
 	add_admin : "INSERT INTO Administrators VALUES ($1, $2, $3);", 
-	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);",
-
 	//BIDS
-  read_bids: 'SELECT p_start_date AS start, p_end_date AS end, \'Caretaker: \" || username AS title, total_price, rating, review, is_paid is_successful FROM bids WHERE owner_username = $1', //TODO: cast $2 to 12am of the day
+	read_bids: 'SELECT p_start_date AS start, p_end_date AS end, \'Caretaker: \" || username AS title, total_price, rating, review, is_paid is_successful FROM bids WHERE owner_username = $1', //TODO: cast $2 to 12am of the day
 
-	
-	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
+	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
 
-	choose_bids: 'SELECT choose_bids();',
-
-	rate_or_review: 'SELECT rate_or_review($1, $2, $3, $4, $5, $6, $7);',
-
-	set_transac_details: 'SELECT set_transac_details($1, $2, $3, $4, $5, $6, $7);',
-
-	pay_bid: 'SELECT pay_bid($1, $2, $3, $4, $5);',
-
-	search_reviews: 'SELECT review FROM Bids WHERE username = $1 AND review IS NOT NULL;',
-
-	search_avg_rating: 'SELECT AVG(rating) FROM Bids WHERE username = $1;',
-
-	search_past_orders: 'SELECT pet_name, p_start_date, p_end_date, username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true;',
-
-	search_petdays: 'SELECT SUM(duration) FROM (SELECT p_end_date - p_start_date + 1 AS duration FROM Bids WHERE username = $1 AND p_start_date >= $2 AND p_start_date <= $3 AND is_successful = true);',
+	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
+	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND p_start_date = $5 AND p_end_date = $6 AND caretaker_username = $7',
+	insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
+	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
+	set_transac_details: 'UPDATE Bids SET payment_method = $1, mode_of_transfer = $2 WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND p_start_date = $6 AND p_end_date = $7',
+	pay_bid: 'UPDATE Bids SET is_paid = true WHERE owner_username = $1 AND pet_name = $2 AND caretaker_username = $3 AND p_start_date = $4 AND p_end_date = $5',
+	search_reviews: 'SELECT review FROM Bids WHERE caretaker_username = $1 AND review IS NOT NULL',
+	search_avg_rating: 'SELECT AVG(rating) FROM Bids WHERE caretaker_username = $1',
+	search_past_orders: 'SELECT pet_name, p_start_date, p_end_date, caretaker_username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true',
+	search_petdays: 'SELECT SUM(duration) FROM (SELECT EXTRACT(DAY FROM AGE(p_end_date, p_start_date)) + 1 AS duration FROM Bids WHERE caretaker_username = $1 AND p_start_date >= $2 AND p_start_date <= $3 AND is_successful = true)',
 
 	get_user : "SELECT * FROM Users WHERE username = $1;",
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 

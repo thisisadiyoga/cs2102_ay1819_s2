@@ -1,3 +1,50 @@
+-- TIMINGS, BIDS
+
+CREATE TABLE Timings (
+	p_start_date TIMESTAMP,
+	p_end_date TIMESTAMP,
+	PRIMARY KEY (p_start_date, p_end_date),
+	CHECK (p_end_date > p_start_date)
+);
+
+CREATE TABLE Bids (
+	owner_username VARCHAR,
+	pet_name VARCHAR,
+	p_start_date TIMESTAMP,
+	p_end_date TIMESTAMP,
+	starting_date TIMESTAMP,
+	ending_date TIMESTAMP,
+	caretaker_username VARCHAR,
+	rating NUMERIC,
+	review VARCHAR,
+	is_successful BOOLEAN,
+	payment_method VARCHAR,
+	mode_of_transfer VARCHAR,
+	is_paid BOOLEAN,
+	total_price NUMERIC NOT NULL CHECK (total_price > 0),
+	type_of_service VARCHAR NOT NULL,
+	PRIMARY KEY (pet_name, owner_username, p_start_date, p_end_date, starting_date, ending_date, caretaker_username),
+	FOREIGN KEY (p_start_date, p_end_date) REFERENCES Timings(p_start_date, p_end_date),
+	FOREIGN KEY (starting_date, ending_date, caretaker_username) REFERENCES Availabilities(starting_date, ending_date,
+	caretaker_username),
+	FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
+	UNIQUE (pet_name, owner_username, caretaker_username, p_start_date, p_end_date),
+	CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
+	CHECK ((is_successful = true) OR (payment_method IS NULL AND is_paid IS NULL AND
+	mode_of_transfer IS NULL)),
+	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
+	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date > p_start_date))
+);
+
+CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps DATE, pe DATE, sd DATE, ed DATE, ct VARCHAR, ts VARCHAR) AS
+$$ DECLARE tot_p NUMERIC;
+BEGIN
+tot_p := (pe - ps + 1) * (SELECT daily_price FROM Charges WHERE username = ct AND cat_name IN (SELECT cat_name FROM ownsPets WHERE username = ou AND name = pn));
+IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE p_start_date = ps AND p_end_date = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+INSERT INTO Bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
+END; $$
+LANGUAGE plpgsql;
+
 -- USERS, OWNERS, CARETAKERS, CATEGORIES, OWNSPETS
 
 CREATE TABLE Categories (
@@ -82,43 +129,6 @@ FOR EACH ROW EXECUTE PROCEDURE update_disable();
 
 --------------------------------------------------------
 
-
-
-CREATE TABLE Timings (
-	p_start_date DATE,
-	p_end_date DATE,
-	PRIMARY KEY (p_start_date, p_end_date),
-	CHECK (p_end_date >= p_start_date)
-);
-
-CREATE TABLE Bids (
-	owner_username VARCHAR,
-	pet_name VARCHAR,
-	p_start_date DATE,
-	p_end_date DATE,
-	starting_date DATE,
-	ending_date DATE,
-	username VARCHAR,
-	rating NUMERIC,
-	review VARCHAR,
-	is_successful BOOLEAN,
-	payment_method VARCHAR,
-	mode_of_transfer VARCHAR,
-	is_paid BOOLEAN,
-	total_price NUMERIC NOT NULL CHECK (total_price > 0),
-	type_of_service VARCHAR NOT NULL,
-	PRIMARY KEY (pet_name, owner_username, p_start_date, p_end_date, starting_date, ending_date, username),
-	FOREIGN KEY (p_start_date, p_end_date) REFERENCES Timings(p_start_date, p_end_date),
-	--FOREIGN KEY (starting_date, ending_date, username) REFERENCES Availabilities(starting_date, ending_date, username),
-	FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
-	UNIQUE (pet_name, owner_username, username, p_start_date, p_end_date),
-	CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
-	CHECK ((is_successful = true) OR (payment_method IS NULL AND is_paid IS NULL AND
-	mode_of_transfer IS NULL)),
-	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
-	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date >= p_start_date))
-);
-
 CREATE TABLE isPaidSalaries (
 	caretaker_id VARCHAR REFERENCES caretakers(username)
 	ON DELETE cascade,
@@ -134,43 +144,6 @@ CREATE TABLE Administrators (
 	last_login_time TIMESTAMP
 );
 
-CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps DATE, pe DATE, sd DATE, ed DATE, ct VARCHAR, ts VARCHAR) AS
-$$ DECLARE tot_p NUMERIC;
-BEGIN
-tot_p := (pe - ps + 1) * (SELECT daily_price FROM Charges WHERE username = ct AND cat_name IN (SELECT cat_name FROM ownsPets WHERE username = ou AND name = pn));
-INSERT INTO Bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
-END; $$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE PROCEDURE choose_bids() AS
-$$ BEGIN
-UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END)
-WHERE is_successful IS NULL;
-END; $$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE PROCEDURE rate_or_review(rat NUMERIC, rev VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
-$$ BEGIN
-UPDATE Bids SET rating = rat, review = rev WHERE owner_username = ou AND pet_name = pn AND
-username = ct AND p_start_date = ps AND p_end_date = pe;
-END; $$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE PROCEDURE set_transac_details(pm VARCHAR, mot VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
-$$ BEGIN
-UPDATE Bids SET payment_method = pm, mode_of_transfer = mot WHERE owner_username = ou AND pet_name = pn AND
-username = ct AND p_start_date = ps AND p_end_date = pe;
-END; $$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE PROCEDURE pay_bid(ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
-$$ BEGIN
-UPDATE Bids SET is_paid = true WHERE owner_username = ou AND pet_name = pn AND username = ct AND
-p_start_date = ps AND p_end_date = pe;
-END; $$
-LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 										password 		VARCHAR(64),
 										last_login_time TIMESTAMP 
@@ -180,8 +153,6 @@ CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 	   VALUES (admin_id, password, last_login_time ); 
 	   END; $$
 	LANGUAGE plpgsql;
-
-<<<<<<< HEAD
 
 -- SEED VALUES
 --Owners
@@ -1185,5 +1156,3 @@ insert into Users (username, first_name, last_name, password, email, dob, credit
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hsharlandrp', 'Helen', 'Sharland', '3k6oyzbqP5', 'hsharlandrp@merriam-webster.com', '1988-11-17', '36786476630902', null, '799251', 'https://robohash.org/quimolestiaeperspiciatis.bmp?size=50x50&set=set1', '2020-07-17');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('eemettrq', 'Ewen', 'Emett', '0FLKPIQ7g7re', 'eemettrq@google.com', '1984-08-16', '4911432579397543146', '25-672', '506471', 'https://robohash.org/voluptatemconsecteturvoluptatum.jpg?size=50x50&set=set1', '2020-08-13');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('vjandacrr', 'Violet', 'Jandac', 'QWNbqFKM2R', 'vjandacrr@smh.com.au', '1981-11-11', '3564289361243299', null, '836817', 'https://robohash.org/saepemagniqui.png?size=50x50&set=set1', '2020-07-22');
-=======
->>>>>>> master

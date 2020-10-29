@@ -19,17 +19,22 @@
   </head>
 	<body id="page-top">
 		<%- include navbar.ejs %>
-		<div id="wrapper">
+		<div id="wrapper" class="bg">
 			<% if(!auth) { %>
 				<%- include loginsidebar.ejs %>
 			<% } else { %>
 				<%- include sidebar.ejs %>
 			<% } %>
-			
 			<div id="content-wrapper">
 				<div class="container-fluid">
 					<div class="card mb-3">
 						<div class="card-footer small text-muted">CS2102 Database Project</div>
+					</div>
+					<h1><p style="color:white">Join Us Today!</p></h1>&nbsp;
+					<div class="center">
+						<a class="btn btn-primary btn-lg btn-block" href="/register">Start pampering your pet</a>&nbsp;
+						<p class="center"style="color:white">OR</p>&nbsp;
+						<a class="btn btn-outline-light btn-lg btn-block" href="/caretaker_register">Help provide the services</a>
 					</div>
 				</div>
 			</div>

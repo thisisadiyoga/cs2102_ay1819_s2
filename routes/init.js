@@ -26,7 +26,7 @@ const salt  = bcrypt.genSaltSync(round);
 
 function initRouter(app) {
 	/* GET */
-	app.get('/'      , index );
+	app.get('/', index );
 	
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
@@ -48,6 +48,7 @@ function initRouter(app) {
 
 	/*Search*/
 	app.get('/rating.js', search_caretaker);
+	app.get('/location', passport.authMiddleware(), location);
 
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
@@ -115,7 +116,11 @@ function msg(req, fld, pass, fail) {
 
 // GET
 function index(req, res, next) {
-    res.render('index', { page: 'index', auth: false });
+	if (typeof req.user == 'undefined') {
+		res.render('index', { page: 'index', auth: false });
+	} else {
+		basic(req, res, 'index', { auth: true });
+	}
 }
 
 function dashboard(req, res, next) {
@@ -185,15 +190,27 @@ function add_pets(req, res, next) {
 	});
 }
 
-function ct_from_owner (req, res, next) {
-	var is_full_time = req.body.is_full_time;
+function location (req, res, next) {
+	var user_list;
+	var location;
 
-	pool.query(sql_query.query.add_caretaker, [req.user.username, is_full_time], (err, data) => {
-		if(err) {
-			console.error("Error in update info", err);
-			res.redirect('/dashboard?join=fail');
+	pool.query(sql_query.query.get_location, [req.user.username], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			console.error('User postal_code not found', err);
+			res.redirect('/dashboard');
 		} else {
-			res.redirect('/dashboard?join=pass');
+			location = data.rows[0].postal_code;
+
+			pool.query(sql_query.query.filter_location, [req.user.username, location.substr(0, 2) + "____"], (err, data) => {
+				if (err || !data.rows || data.rows.length == 0) {
+					console.error('No entries found');
+					user_list = [];
+				} else {
+					user_list = data.rows;
+					
+				}
+				basic(req, res, 'location', {user_list : user_list, auth: true});
+			})
 		}
 	});
 }
@@ -335,6 +352,19 @@ function reg_user(req, res, next) {
 					res.redirect('/add_pets');
 				}
 			});
+		}
+	});
+}
+
+function ct_from_owner (req, res, next) {
+	var is_full_time = req.body.is_full_time;
+
+	pool.query(sql_query.query.add_caretaker, [req.user.username, is_full_time], (err, data) => {
+		if(err) {
+			console.error("Error in update info", err);
+			res.redirect('/dashboard?join=fail');
+		} else {
+			res.redirect('/dashboard?join=pass');
 		}
 	});
 }
@@ -481,6 +511,7 @@ function search_caretaker (req, res, next) {
 		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
 	});
 }
+
 
 
 

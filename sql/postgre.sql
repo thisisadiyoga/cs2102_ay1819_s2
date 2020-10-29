@@ -34,62 +34,53 @@ CREATE TABLE Bids (
 	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date > p_start_date))
 );
 
-CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP, pe TIMESTAMP, sd TIMESTAMP, ed TIMESTAMP, ct VARCHAR, ts VARCHAR) AS
-$$ DECLARE tot_p NUMERIC;
-BEGIN
-tot_p := (EXTRACT(DAY FROM AGE(pe, ps)) + 1) * (SELECT daily_price FROM Charges WHERE username = ct AND cat_name IN (SELECT cat_name FROM ownsPets WHERE username = ou AND name = pn));
-IF NOT EXISTS (SELECT 1 FROM Timings WHERE p_start_date = ps AND p_end_date = pe) THEN INSERT INTO Timings VALUES (ps, pe); END IF;
-INSERT INTO Bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
-END; $$
-LANGUAGE plpgsql;
-
 CREATE TABLE Categories (
-	cat_name		VARCHAR(10) 	PRIMARY KEY, 
-	base_price		NUMERIC
+	cat_name VARCHAR(10) PRIMARY KEY, 
+	base_price NUMERIC
 );
 
 CREATE TABLE Owners(
-	username		VARCHAR		PRIMARY KEY,
-	first_name		NAME		NOT NULL,
-	last_name		NAME		NOT NULL,
-	password		VARCHAR(64)	NOT NULL, 
-	email			VARCHAR		NOT NULL UNIQUE, 
-	dob				DATE		NOT NULL CHECK (CURRENT_DATE - dob >= 6570),
-	credit_card_no	VARCHAR		NOT NULL,
-	unit_no			VARCHAR,
-	postal_code		VARCHAR(6)	NOT NULL,
-	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE,
-	avatar			BYTEA		NOT NULL
+	username VARCHAR PRIMARY KEY,
+	first_name NAME NOT NULL,
+	last_name NAME NOT NULL,
+	password VARCHAR(64) NOT NULL, 
+	email VARCHAR NOT NULL UNIQUE, 
+	dob DATE NOT NULL CHECK (CURRENT_DATE - dob >= 6570),
+	credit_card_no VARCHAR NOT NULL,
+	unit_no VARCHAR,
+	postal_code VARCHAR(6) NOT NULL,
+	reg_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	avatar BYTEA NOT NULL
 );
 
 CREATE TABLE ownsPets(
-	username		VARCHAR		NOT NULL REFERENCES Owners(username) ON DELETE CASCADE, -- username of owner
-	name 			NAME		NOT NULL, --name of pet
-	description		TEXT, 
-	cat_name		VARCHAR(10)	NOT NULL REFERENCES Categories(cat_name),
-	size			VARCHAR		NOT NULL, 
-	sociability		VARCHAR,
-	special_req		VARCHAR,
-	img				BYTEA		NOT NULL, 
+	username VARCHAR NOT NULL REFERENCES Owners(username) ON DELETE CASCADE, -- username of owner
+	name NAME NOT NULL, --name of pet
+	description TEXT, 
+	cat_name VARCHAR(10) NOT NULL REFERENCES Categories(cat_name),
+	size VARCHAR NOT NULL, 
+	sociability VARCHAR,
+	special_req VARCHAR,
+	img BYTEA NOT NULL, 
 	PRIMARY KEY (username, name)
 );
 
 CREATE TABLE Caretakers(
-	username		VARCHAR		PRIMARY KEY,
-	first_name		NAME		NOT NULL,
-	last_name		NAME		NOT NULL,
-	password		VARCHAR(64)	NOT NULL, 
-	email			VARCHAR		NOT NULL UNIQUE, 
-	dob				DATE		NOT NULL CHECK (CURRENT_DATE - dob >= 6570),
-	credit_card_no	VARCHAR		NOT NULL,
-	unit_no			VARCHAR,
-	postal_code		VARCHAR(6)	NOT NULL,
-	reg_date		DATE		NOT NULL DEFAULT CURRENT_DATE, 
-	is_full_time	BOOLEAN		NOT NULL, 
-	avg_rating		FLOAT		NOT NULL, 
-	no_of_reviews	INT			NOT NULL, 
-	avatar			BYTEA		NOT NULL,
-	no_of_pets_taken INTEGER    CHECK(no_of_pets_taken > 0)
+	username VARCHAR PRIMARY KEY,
+	first_name NAME NOT NULL,
+	last_name NAME NOT NULL,
+	password VARCHAR(64) NOT NULL, 
+	email VARCHAR NOT NULL UNIQUE, 
+	dob DATE NOT NULL CHECK (CURRENT_DATE - dob >= 6570),
+	credit_card_no VARCHAR NOT NULL,
+	unit_no VARCHAR,
+	postal_code VARCHAR(6) NOT NULL,
+	reg_date DATE NOT NULL DEFAULT CURRENT_DATE, 
+	is_full_time BOOLEAN NOT NULL, 
+	avg_rating FLOAT NOT NULL, 
+	no_of_reviews INT NOT NULL, 
+	avatar BYTEA NOT NULL,
+	no_of_pets_taken INTEGER CHECK(no_of_pets_taken > 0)
 );
 
 CREATE VIEW Users AS (
@@ -129,24 +120,24 @@ VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALz
 
 
 -- INSERT categories
-CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 
-							  			 base_price		NUMERIC) AS
+CREATE OR REPLACE PROCEDURE add_category(cat_name VARCHAR(10), 
+							  			 base_price NUMERIC) AS
 	$$ BEGIN
 	   INSERT INTO Categories (cat_name, base_price) 
 	   VALUES (cat_name, base_price);
 	   END; $$
 	LANGUAGE plpgsql;
 
-CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
-									   first_name		NAME,
-									   last_name		NAME,
-									   password			VARCHAR(64),
-									   email			VARCHAR,
-									   dob				DATE,
-									   credit_card_no	VARCHAR,
-									   unit_no			VARCHAR,
-									   postal_code		VARCHAR(6), 
-									   avatar			BYTEA
+CREATE OR REPLACE PROCEDURE add_owner (username VARCHAR,
+									   first_name NAME,
+									   last_name NAME,
+									   password VARCHAR(64),
+									   email VARCHAR,
+									   dob DATE,
+									   credit_card_no VARCHAR,
+									   unit_no VARCHAR,
+									   postal_code VARCHAR(6), 
+									   avatar BYTEA
 									   ) AS
 	$$ BEGIN
 	   INSERT INTO Owners
@@ -154,14 +145,14 @@ CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
 	   END; $$
 	LANGUAGE plpgsql;
 	
-CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
-									 name 				NAME, 
-									 description		VARCHAR, 
-									 cat_name			VARCHAR(10),
-									 size				VARCHAR, 
-									 sociability		VARCHAR,
-									 special_req		VARCHAR, 
-									 img 				BYTEA
+CREATE OR REPLACE PROCEDURE add_pet (username VARCHAR,
+									 name NAME, 
+									 description VARCHAR, 
+									 cat_name VARCHAR(10),
+									 size VARCHAR, 
+									 sociability VARCHAR,
+									 special_req VARCHAR, 
+									 img BYTEA
 									 ) AS
 	$$ BEGIN
 	   INSERT INTO ownsPets
@@ -169,8 +160,8 @@ CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
 	   END; $$
 	LANGUAGE plpgsql;
 
-CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
-										password 		VARCHAR(64),
+CREATE OR REPLACE PROCEDURE add_admin(	admin_id VARCHAR ,
+										password VARCHAR(64),
 										last_login_time TIMESTAMP 
 										) AS
 	$$ BEGIN

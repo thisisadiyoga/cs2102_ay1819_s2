@@ -425,7 +425,7 @@ function view_bids (req, res, next) {
 }
 
 function rate_review_form (req, res, next) {
-	res.redirect('/rate_review');
+	res.render('rate_review');
 }
 
 function rate_review (req, res, next) {
@@ -446,8 +446,7 @@ function rate_review (req, res, next) {
 }
 
 function newbid (req, res, next) {
-	basic(req, res, 'bid_form', {auth:true});
-	res.redirect('/bid_form');
+	res.render('bid_form');
 }
 
 function insert_bid (req, res, next) {

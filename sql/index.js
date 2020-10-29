@@ -5,7 +5,11 @@ sql.query = {
 	add_pet : "INSERT INTO ownsPets VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", 
 	add_cat : "INSERT INTO Categories VALUES ($1, $2);", 
 	add_admin : "INSERT INTO Administrators VALUES ($1, $2, $3);", 
-	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
+	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);",
+
+	//BIDS
+  read_bids: 'SELECT p_start_date AS start, p_end_date AS end, \'Caretaker: \" || username AS title, total_price, rating, review, is_paid is_successful FROM bids WHERE owner_username = $1', //TODO: cast $2 to 12am of the day
+
 	
 	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
 
@@ -52,11 +56,9 @@ sql.query = {
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
 	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;", 
 
+	//AVAILABILITIES
 	// Information
 	read_availabilities: 'SELECT start_timestamp AS start, end_timestamp AS end FROM declares_availabilities WHERE caretaker_username = $1', //TODO: cast $2 to 12am of the day
-	read_monthly_availabilities: 'SELECT start_date, end_date FROM declares_availabilities WHERE caretaker_username = $1 AND  (start_timestamp >= $2 AND start_timestamp <= interval \'1  month\' ) ORDER BY start_timestamp ASC', //TODO: cast $2 to 12am of the day
-	read_yearly_availabilities: 'SELECT start_date, end_date FROM declares_availabilities WHERE caretaker_username = $1 AND  (start_timestamp >= $2 AND start_timestamp <= interval \'1  year\' ) ORDER BY start_timestamp ASC', //TODO: cast $2 to 12am of the day
-
 	// Insertion
 	add_availability: 'INSERT INTO declares_availabilities (start_timestamp, end_timestamp, caretaker_username) VALUES($1::timestamp AT TIME ZONE \'UTC\',$2::timestamp AT TIME ZONE \'UTC\',$3)',
 

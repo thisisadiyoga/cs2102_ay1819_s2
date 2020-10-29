@@ -1,19 +1,18 @@
+
 const sql_query = require('../sql');
 const postgres_details = require('../config')
 const passport = require('passport');
-const bcrypt = require('bcrypt')
-const flash = require('connect-flash');
+const bcrypt = require('bcrypt');
 const multer = require("multer");
 const upload = multer({dest: "../uploads"});
 const fs = require('fs');
-const postgres_details = require("../config.js");
+const flash = require('connect-flash');
+
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
-const { RSA_NO_PADDING } = require('constants');
-const { allowedNodeEnvironmentFlags } = require('process');
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+
     //ssl: true
      user: postgres_details.user,
     database: postgres_details.database,
@@ -25,14 +24,16 @@ const salt  = bcrypt.genSaltSync(round);
 
 
 function initRouter(app) {
-	/* GET */
+/* GET */
 	app.get('/'      , index );
-	
+
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
-	app.get('/calendar'   , passport.authMiddleware(), calendar);
+
+    app.get('/caretaker_calendar'   , passport.authMiddleware(), caretaker_calendar);
+    app.get('/owner_calendar'   , passport.authMiddleware(), owner_calendar);
 
 	/* admin pages*/
 	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
@@ -43,7 +44,7 @@ function initRouter(app) {
 	app.post('/add_cat', passport.authMiddleware(), add_cat);
 	app.post('/del_admin', del_admin);
 
-	/*Registration*/ 
+	/*Registration*/
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
 
@@ -67,38 +68,38 @@ function initRouter(app) {
     app.post('/add_availability'   , passport.authMiddleware(), add_availability);
     app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
 
-	/* LOGIN */
-	app.post('/login', passport.authenticate('user', {
-		successRedirect: '/dashboard',
-		failureRedirect: '/'
-	}));
+    /* LOGIN */
+ 	app.post('/login', passport.authenticate('user', {
+ 		successRedirect: '/dashboard',
+ 		failureRedirect: '/'
+ 	}));
 
-	/* LOGIN */
-	app.post('/loginAdmin', passport.authenticate('admin', {
-		successRedirect: '/adminDashboard',
-		failureRedirect: '/admin?login=failed'
-	}));
-	
-	/* LOGOUT */
-	app.get('/logout', passport.authMiddleware(), logout);
+ 	/* LOGIN */
+ 	app.post('/loginAdmin', passport.authenticate('admin', {
+ 		successRedirect: '/adminDashboard',
+ 		failureRedirect: '/admin?login=failed'
+ 	}));
 
-	/*ADMIN*/
-	app.get('/admin', admin);
+ 	/* LOGOUT */
+ 	app.get('/logout', passport.authMiddleware(), logout);
 
-}
+ 	/*ADMIN*/
+ 	app.get('/admin', admin);
+
+ }
 
 // Render Function
 function basic(req, res, page, other) {
-    var info = {
-        page: page,
-        //user: req.user.username,
-    };
-    if(other) {
-        for(var fld in other) {
-            info[fld] = other[fld];
-        }
-    }
-    res.render(page, info);
+	var info = {
+		page: page,
+		user: req.user.username,
+	};
+	if(other) {
+		for(var fld in other) {
+			info[fld] = other[fld];
+		}
+	}
+	res.render(page, info);
 }
 
 function admin(req, res, next) {
@@ -106,19 +107,17 @@ function admin(req, res, next) {
 }
 
 function query(req, fld) {
-    return req.query[fld] ? req.query[fld] : '';
+	return req.query[fld] ? req.query[fld] : '';
 }
 
 function msg(req, fld, pass, fail) {
-    var info = query(req, fld);
-    return info ? (info=='pass' ? pass : fail) : '';
+	var info = query(req, fld);
+	return info ? (info=='pass' ? pass : fail) : '';
 }
 
 // GET
 function index(req, res, next) {
-   // res.render('register', { page: 'register', auth: false });
-   res.render('register', { page: 'register', auth: false });
-
+    res.render('index', { auth: false, page:'index' });
 }
 
 function dashboard(req, res, next) {
@@ -134,26 +133,26 @@ function dashboard(req, res, next) {
 }
 
 function adminDashboard(req, res, next) {
-	basic(req, res, 'adminDashboard', { 
+	basic(req, res, 'adminDashboard', {
 		auth: true });
 }
 
 function register(req, res, next) {
-    res.render('register', { page: 'register', auth: false });
+	res.render('register', { page: 'register', auth: false });
 }
 function retrieve(req, res, next) {
-    res.render('retrieve', { page: 'retrieve', auth: false });
+	res.render('retrieve', { page: 'retrieve', auth: false });
 }
 
 function pets (req, res, next) {
-    var pet;
+	var pet;
 
-    pool.query(sql_query.query.list_pets, [req.user.username], (err, data) => {
-        if(err || !data.rows || data.rows.length == 0) {
-            pet = [];
-        } else {
-            pet = data.rows;
-        }
+	pool.query(sql_query.query.list_pets, [req.user.username], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			pet = [];
+		} else {
+			pet = data.rows;
+		}
 
 		basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), edit_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), del_msg: msg(req, 'del', 'Pet deleted successfully', 'Error in deleting pet'), auth: true });
 	});
@@ -178,6 +177,7 @@ function add_pets(req, res, next) {
 	var cat_list;
 	pool.query(sql_query.query.list_cats, [], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
+		    console.log('Error adding pet: ', err);
 			cat_list = [];
 		} else {
 			cat_list = data.rows;
@@ -200,13 +200,61 @@ function ct_from_owner (req, res, next) {
 	});
 }
 
+function owner_calendar(req, res, next) {
+    var bids;
+    var error_message, success_message;
 
-// POST 
+
+    pool.query(sql_query.query.read_bids,[req.user.username], (err, data) => { //TODO req.user.username
+            if(err || !data.rows || data.rows.length == 0) {
+                        bids = [];
+                        console.log('Error reading bids: ' + err);
+            } else {
+                        bids = data.rows;
+            }
+                      error_message = req.flash('error');
+                      success_message = req.flash('success');
+            basic(req, res, 'owner_calendar', { bids: bids, error_message: error_message, success_message: success_message, bids_msg: msg(req, 'add', 'Bids displayed successfully', 'Error in displaying all bids'), auth: true });
+
+        });
+}
+
+function caretaker_calendar(req, res, next) {
+    var availabilities, bids;
+    var error_message, success_message;
+
+
+    pool.query(sql_query.query.read_availabilities,[req.user.username], (err, data) => { //TODO req.user.username
+            if(err || !data.rows || data.rows.length == 0) {
+                        availabilities = [];
+                        console.log('Error reading availabilities: ' + err);
+            } else {
+                        availabilities = data.rows;
+                    }
+
+
+    pool.query(sql_query.query.read_bids, [req.user.username], (err, data) => {
+           if(err || !data.rows || data.rows.length == 0) {
+                          bids = [];
+                           console.log('Error reading bids: ' + err);
+          } else {
+                    bids = data.rows;
+          }
+
+                      error_message = req.flash('error');
+                      success_message = req.flash('success');
+
+            basic(req, res, 'caretaker_calendar', { bids: bids, availabilities: availabilities, error_message: error_message, success_message: success_message, availability_msg: msg(req, 'add', 'Availability period added successfully', 'Invalid parameters in availability period'), auth: true });
+        })
+        });
+}
+
+// POST
 function update_info(req, res, next) {
-    var username  = req.user.username;
+	var username  = req.user.username;
     var email = req.body.email;
 	pool.query(sql_query.query.update_info, [username, email], (err, data) => {
-		if(err) {	
+		if(err) {
 			console.error("Error in update info");
 			res.redirect('/dashboard?info=fail');
 		} else {
@@ -215,16 +263,16 @@ function update_info(req, res, next) {
 	});
 }
 function update_pass(req, res, next) {
-    var username = req.user.username;
-    var password = bcrypt.hashSync(req.body.password, salt);
-    pool.query(sql_query.query.update_pass, [username, password], (err, data) => {
-        if(err) {
-            console.error("Error in update pass");
-            res.redirect('/dashboard?pass=fail');
-        } else {
-            res.redirect('/dashboard?pass=pass');
-        }
-    });
+	var username = req.user.username;
+	var password = bcrypt.hashSync(req.body.password, salt);
+	pool.query(sql_query.query.update_pass, [username, password], (err, data) => {
+		if(err) {
+			console.error("Error in update pass");
+			res.redirect('/dashboard?pass=fail');
+		} else {
+			res.redirect('/dashboard?pass=pass');
+		}
+	});
 }
 
 function update_avatar(req, res, next) {
@@ -248,7 +296,7 @@ function update_pet (req, res, next) {
 	var description = req.body.description;
 	var sociability = req.body.sociability;
 	var special_req = req.body.special_req;
-	
+
 
 	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req], (err, data) => {
 		if(err) {
@@ -266,7 +314,7 @@ function update_pet (req, res, next) {
 						res.redirect('/pets?edit=pass')
 					}
 				});
-			} else 
+			} else
 			{
 				res.redirect('/pets?edit=pass');
 			}
@@ -326,6 +374,7 @@ function reg_user(req, res, next) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
+		console.error("Successfully added owner");
 			req.login({
 				username    : username,
 				passwordHash: password,
@@ -421,7 +470,7 @@ function reg_pet(req, res, next) {
 	var sociability		= req.body.sociability;
 	var special_req		= req.body.special_req;
 	var img				= fs.readFileSync(req.file.path).toString('base64');
-	
+
 	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req, img], (err, data) => {
 		if(err) {
 			console.error("Error in adding pet", err);
@@ -434,7 +483,7 @@ function reg_pet(req, res, next) {
 
 function del_user (req, res, next) {
 	var username = req.user.username;
-	
+
 	req.session.destroy()
 	req.logout()
 
@@ -457,7 +506,7 @@ function del_user (req, res, next) {
 
 function del_admin (req, res, next) {
 	var admin_id = req.user.admin_username;
-	
+
 	req.session.destroy()
 	req.logout()
 
@@ -470,6 +519,66 @@ function del_admin (req, res, next) {
 		}
 	});
 }
+
+// POST
+function update_availability(req, res, next) {
+    var old_start_timestamp = req.body.old_start_timestamp;
+    var old_end_timestamp = req.body.old_end_timestamp;
+    var start_timestamp = req.body.start_timestamp;
+    var end_timestamp  = req.body.end_timestamp;
+
+    pool.query(sql_query.query.update_availability, [start_timestamp, end_timestamp, old_start_timestamp, req.user.username], (err, data) => { //TODO: username
+        if(err) {
+              req.flash('error', 'The period cannot be updated. Check that there are scheduled pet-care jobs that are outside of the new period.');
+
+             res.redirect('/availabilities?update=fail');
+        } else {
+              req.flash('success', 'The period is successfully updated.');
+             res.redirect('/availabilities?update=pass');
+        }
+    });
+}
+
+function add_availability(req, res, next) {
+
+    var start_timestamp = req.body.start_timestamp ;
+    var end_timestamp = req.body.end_timestamp;
+
+
+
+    pool.query(sql_query.query.add_availability, [start_timestamp, end_timestamp, req.user.username], (err, data) => {
+        if(err) {
+
+               req.flash('error', 'The new period cannot be added.');
+                res.redirect('/availabilities?add=fail');
+
+        } else {
+            req.flash('success', 'The period is successfully added. It may merge with existing availability schedule.');
+             res.redirect('/availabilities?add=pass');
+        }
+    });
+}
+
+function delete_availability(req, res, next) {
+    var start_timestamp = req.body.old_start_timestamp;
+    var end_timestamp = req.body.old_end_timestamp;
+
+    pool.query(sql_query.query.delete_availability, [start_timestamp, req.user.username], (err, data) => {
+        if(err) {
+
+            req.flash('error', 'The period cannot be deleted as there is a scheduled pet-care job within that period.');
+
+             res.redirect('/availabilities?delete=fail');
+
+
+        } else {
+        req.flash('success', 'The period is successfully deleted.');
+             res.redirect('/availabilities?delete=pass');
+        }
+    });
+}
+
+
 
 function search_caretaker (req, res, next) {
 	var caretaker;
@@ -488,9 +597,9 @@ function search_caretaker (req, res, next) {
 
 // LOGOUT
 function logout(req, res, next) {
-    req.session.destroy()
-    req.logout()
-    res.redirect('/')
+	req.session.destroy()
+	req.logout()
+	res.redirect('/')
 }
 
 module.exports = initRouter;
@@ -505,9 +614,8 @@ module.exports = initRouter;
 	var username = req.user.username;
 	var filter;
 	var nearby;
-
 	console.log(username);
-	
+
 	pool.query(sql_query.query.get_area, [username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			filter = [];
@@ -515,7 +623,6 @@ module.exports = initRouter;
 			res.redirect("/display");
 		} else {
 			filter = data.rows[0].postal_code
-
 			pool.query(sql_query.query.find_nearby, [username, filter[0, 2] + "____"], (err, data) => {
 				if(err) {
 					console.error("Error in deleting account", err);
@@ -523,7 +630,7 @@ module.exports = initRouter;
 				} else if (!data.rows || data.rows.length == 0){
 					console.info("No nearby caretaker found");
 					nearby = []
-					
+
 					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'No nearby caretaker found', 'Error in searching caretaker'), auth: true });
 				} else {
 					console.log("Caretaker found");
@@ -534,3 +641,7 @@ module.exports = initRouter;
 		}
 	});
 }*/
+
+
+
+

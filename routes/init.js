@@ -157,9 +157,6 @@ function retrieve(req, res, next) {
 	res.render('retrieve', { page: 'retrieve', auth: false });
 }
 
-function review(req, res, next) {
-	res.render('review', { page: 'review', auth: false });
-}
 function ctregister(req, res, next) {
 	res.render('ctregister', { page: 'ctregister', auth: false });
 }

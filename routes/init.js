@@ -26,7 +26,7 @@ const salt  = bcrypt.genSaltSync(round);
 
 function initRouter(app) {
 	/* GET */
-	app.get('/'      , index );
+	app.get('/', index );
 	
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
@@ -49,6 +49,7 @@ function initRouter(app) {
 
 	/*Search*/
 	app.get('/rating.js', search_caretaker);
+	app.get('/location', passport.authMiddleware(), location);
 
 	/* PROTECTED POST */
 	app.post('/update_info', passport.authMiddleware(), update_info);
@@ -82,6 +83,12 @@ function initRouter(app) {
 	/*ADMIN*/
 	app.get('/admin', admin);
 
+	/*BIDS*/
+	app.get('/viewbids', passport.authMiddleware(), view_bids);
+	app.get('/feedback', passport.authMiddleware(), rate_review_form);
+	app.post('/rate_review', passport.authMiddleware(), rate_review);
+	app.get('/newbid', passport.authMiddleware(), newbid);
+	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
 }
 
 // Render Function
@@ -89,6 +96,9 @@ function basic(req, res, page, other) {
 	var info = {
 		page: page,
 		user: req.user.username,
+		avatar : req.user.avatar, 
+		is_owner : req.user.is_owner, 
+		is_caretaker : req.user.is_caretaker
 	};
 	if(other) {
 		for(var fld in other) {
@@ -113,7 +123,11 @@ function msg(req, fld, pass, fail) {
 
 // GET
 function index(req, res, next) {
-    res.render('index', { page: 'index', auth: false });
+	if (typeof req.user == 'undefined') {
+		res.render('index', { page: 'index', auth: false });
+	} else {
+		basic(req, res, 'index', { auth: true });
+	}
 }
 
 function dashboard(req, res, next) {
@@ -136,6 +150,7 @@ function adminDashboard(req, res, next) {
 function register(req, res, next) {
 	res.render('register', { page: 'register', auth: false });
 }
+
 function retrieve(req, res, next) {
 	res.render('retrieve', { page: 'retrieve', auth: false });
 }
@@ -189,15 +204,27 @@ function add_pets(req, res, next) {
 	});
 }
 
-function ct_from_owner (req, res, next) {
-	var is_full_time = req.body.is_full_time;
+function location (req, res, next) {
+	var user_list;
+	var location;
 
-	pool.query(sql_query.query.add_caretaker, [req.user.username, is_full_time], (err, data) => {
-		if(err) {
-			console.error("Error in update info", err);
-			res.redirect('/dashboard?join=fail');
+	pool.query(sql_query.query.get_location, [req.user.username], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			console.error('User postal_code not found', err);
+			res.redirect('/dashboard');
 		} else {
-			res.redirect('/dashboard?join=pass');
+			location = data.rows[0].postal_code;
+
+			pool.query(sql_query.query.filter_location, [req.user.username, location.substr(0, 2) + "____"], (err, data) => {
+				if (err || !data.rows || data.rows.length == 0) {
+					console.error('No entries found');
+					user_list = [];
+				} else {
+					user_list = data.rows;
+					
+				}
+				basic(req, res, 'location', {user_list : user_list, auth: true});
+			})
 		}
 	});
 }
@@ -334,9 +361,9 @@ function reg_user(req, res, next) {
 				isUser: true
 			}, function(err) {
 				if(err) {
-					return res.redirect('/register?reg=fail');
+					res.redirect('/register?reg=fail');
 				} else {
-					return res.redirect('/add_pets');
+					res.redirect('/add_pets');
 				}
 			});
 		}
@@ -372,6 +399,19 @@ function reg_ct(req, res, next) {
 					return res.redirect('/ctregister?reg=pass');
 				}
 			});
+function ct_from_owner (req, res, next) {
+	var is_full_time = req.body.is_full_time;
+
+	pool.query(sql_query.query.add_caretaker, [req.user.username, is_full_time], (err, data) => {
+		if(err) {
+			console.error("Error in update info", err);
+			res.redirect('/dashboard?join=fail');
+		} else {
+			res.redirect('/dashboard?join=pass');
+		}
+	});
+}
+
 function category (req, res, next) {
 	var category;
 
@@ -504,17 +544,77 @@ function del_admin (req, res, next) {
 
 function search_caretaker (req, res, next) {
 	var caretaker;
-	pool.query(sql_query.query.search_caretaker, ["%" + req.body.name + "%"], (err, data) => {
+	pool.query(sql_query.query.search_caretaker, [req.user.username, "%" + req.body.name + "%"], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			caretaker = [];
 		} else {
 			caretaker = data.rows;
 		}
-
 		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
 	});
 }
 
+function view_bids (req, res, next) {
+	var owner = req.user.username;
+	var bids;
+	pool.query(sql_query.query.view_bids, [owner], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			bids = [];
+		} else {
+			bids = data.rows;
+		}
+		basic(req, res, 'bids', {auth : true});
+	});
+}
+
+function rate_review_form (req, res, next) {
+	res.render('rate_review');
+}
+
+function rate_review (req, res, next) {
+    var owner = req.body.ownername;
+    var pet = req.body.petname;
+    var start = req.body.startdate;
+    var end = req.body.enddate;
+    var caretaker = req.body.caretakername;
+    var rating = req.body.rating;
+	var review = req.body.review;
+	pool.query(sql_query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
+		if (err) {
+			console.error("Error in creating rating/review", err);
+		} else {
+			basic(req, res, 'bids', {auth:true})
+		}
+	});
+}
+
+function newbid (req, res, next) {
+	res.render('bid_form');
+}
+
+function insert_bid (req, res, next) {
+	var owner = req.body.ownername;
+	var pet = req.body.petname;
+	var p_start = req.body.pstartdate;
+	var p_end = req.body.penddate;
+	var start = req.body.startdate;
+	var end = req.body.enddate;
+	var caretaker = req.body.caretakername;
+	var service = req.body.servicetype;
+	pool.query(sql_query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+		if (err) {
+			console.error("Error in creating bid", err);
+		} else {
+			basic(req, res, 'bids', {auth:true});
+		}
+	});
+
+	pool.query(sql_query.choose_bids, (err, data) => {
+		if (err) {
+			console.error("Error in choosing bids", err);
+		}
+	});
+}
 
 
 // LOGOUT
@@ -525,43 +625,3 @@ function logout(req, res, next) {
 }
 
 module.exports = initRouter;
-
-
-
-
-
-
-
-/*function search_nearby (req, res, next) {
-	var username = req.user.username;
-	var filter;
-	var nearby;
-
-	console.log(username);
-	
-	pool.query(sql_query.query.get_area, [username], (err, data) => {
-		if(err || !data.rows || data.rows.length == 0) {
-			filter = [];
-			console.error("postal code not found");
-			res.redirect("/display");
-		} else {
-			filter = data.rows[0].postal_code
-
-			pool.query(sql_query.query.find_nearby, [username, filter[0, 2] + "____"], (err, data) => {
-				if(err) {
-					console.error("Error in deleting account", err);
-					res.redirect("/display?found=pass")
-				} else if (!data.rows || data.rows.length == 0){
-					console.info("No nearby caretaker found");
-					nearby = []
-					
-					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'No nearby caretaker found', 'Error in searching caretaker'), auth: true });
-				} else {
-					console.log("Caretaker found");
-					nearby = data.rows
-					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'Caretakers found', 'Error in searching caretaker'), auth: true });
-				}
-			});
-		}
-	});
-}*/

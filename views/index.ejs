@@ -30,16 +30,18 @@
 					<div class="card mb-3">
 						<div class="card-footer small text-muted">CS2102 Database Project</div>
 					</div>
-					<h1><p style="color:white">Join Us Today!</p></h1>&nbsp;
-					<div class="center">
-						<a class="btn btn-primary btn-lg btn-block" href="/register">Start pampering your pet</a>&nbsp;
-						<p class="center"style="color:white">OR</p>&nbsp;
-						<a class="btn btn-outline-light btn-lg btn-block" href="/caretaker_register">Help provide the services</a>
+					<% var hide = (auth == 1) ? "display:none;" : "" %>
+					<div style="float:none; <%= hide %>">
+						<h1><p style="color:white">Join Us Today!</p></h1>
+						<div class="center">
+							<a class="btn btn-primary btn-lg btn-block" href="/register"><i class="fas fa-dog"></i>&nbsp;Pet Owner</a>&nbsp;
+							<p class="center"style="color:white"><b>OR</b></p>&nbsp;
+							<a class="btn btn-outline-light btn-lg btn-block" href="/caretaker_register"><i class="fas fa-walking"></i>&nbsp;Caretaker</a>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		
 		<%- include bottomscript.ejs %>
   </body>
 </html>

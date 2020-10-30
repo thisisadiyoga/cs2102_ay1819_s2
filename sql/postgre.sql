@@ -1,7 +1,7 @@
 CREATE TABLE declares_availabilities(
     start_timestamp TIMESTAMP NOT NULL,
     end_timestamp TIMESTAMP NOT NULL,
-    caretaker_username VARCHAR, --REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    caretaker_username VARCHAR, --TODO: REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
@@ -12,7 +12,7 @@ CREATE TABLE declares_availabilities(
 
 
 
-	---Availabilities Trigger
+---Availabilities Trigger
 
 --Merge availabilities if they coincide
 CREATE OR REPLACE FUNCTION merge_availabilities()
@@ -78,7 +78,7 @@ CREATE OR REPLACE FUNCTION update_availabilities()
 RETURNS TRIGGER AS
 $$ DECLARE first_result INTEGER := 0;
   DECLARE second_result INTEGER := 0;
-  DEClare total_result INTEGER;
+  DECLARE total_result INTEGER;
   BEGIN
   RAISE NOTICE 'update avail function is called ...';
 
@@ -123,52 +123,6 @@ CREATE TRIGGER update_availabilities
 BEFORE UPDATE ON declares_availabilities
 FOR EACH ROW EXECUTE PROCEDURE update_availabilities();
 
--- TIMINGS, BIDS
-
-CREATE TABLE Timings (
-	p_start_date TIMESTAMP,
-	p_end_date TIMESTAMP,
-	PRIMARY KEY (p_start_date, p_end_date),
-	CHECK (p_end_date > p_start_date)
-);
-
-CREATE TABLE Bids (
-	owner_username VARCHAR,
-	pet_name VARCHAR,
-	p_start_date TIMESTAMP,
-	p_end_date TIMESTAMP,
-	starting_date TIMESTAMP,
-	ending_date TIMESTAMP,
-	caretaker_username VARCHAR,
-	rating NUMERIC,
-	review VARCHAR,
-	is_successful BOOLEAN,
-	payment_method VARCHAR,
-	mode_of_transfer VARCHAR,
-	is_paid BOOLEAN,
-	total_price NUMERIC NOT NULL CHECK (total_price > 0),
-	type_of_service VARCHAR NOT NULL,
-	PRIMARY KEY (pet_name, owner_username, p_start_date, p_end_date, starting_date, ending_date, caretaker_username),
-	FOREIGN KEY (p_start_date, p_end_date) REFERENCES Timings(p_start_date, p_end_date),
-	FOREIGN KEY (starting_date, ending_date, caretaker_username) REFERENCES Availabilities(starting_date, ending_date,
-	caretaker_username),
-	FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
-	UNIQUE (pet_name, owner_username, caretaker_username, p_start_date, p_end_date),
-	CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
-	CHECK ((is_successful = true) OR (payment_method IS NULL AND is_paid IS NULL AND
-	mode_of_transfer IS NULL)),
-	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
-	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date > p_start_date))
-);
-
-CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps DATE, pe DATE, sd DATE, ed DATE, ct VARCHAR, ts VARCHAR) AS
-$$ DECLARE tot_p NUMERIC;
-BEGIN
-tot_p := (pe - ps + 1) * (SELECT daily_price FROM Charges WHERE username = ct AND cat_name IN (SELECT cat_name FROM ownsPets WHERE username = ou AND name = pn));
-IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE p_start_date = ps AND p_end_date = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
-INSERT INTO Bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
-END; $$
-LANGUAGE plpgsql;
 
 -- USERS, OWNERS, CARETAKERS, CATEGORIES, OWNSPETS
 
@@ -278,6 +232,87 @@ CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 	   VALUES (admin_id, password, last_login_time );
 	   END; $$
 	LANGUAGE plpgsql;
+
+
+-- TIMINGS, BIDS
+CREATE TABLE Timings (
+	start_timestamp TIMESTAMP,
+	end_timestamp TIMESTAMP,
+	PRIMARY KEY (start_timestamp, end_timestamp),
+	CHECK (end_timestamp > start_timestamp)
+);
+
+CREATE TABLE bids (
+	owner_username VARCHAR,
+      pet_name VARCHAR,
+      bid_start_timestamp TIMESTAMP,
+      bid_end_timestamp TIMESTAMP,
+      avail_start_timestamp TIMESTAMP,
+      avail_end_timestamp TIMESTAMP,
+      caretaker_username VARCHAR,
+      rating NUMERIC,
+      review VARCHAR,
+      is_successful BOOLEAN,
+      payment_method VARCHAR,
+      mode_of_transfer VARCHAR,
+      is_paid BOOLEAN,
+      total_price NUMERIC NOT NULL CHECK (total_price > 0),
+      type_of_service VARCHAR NOT NULL,
+      PRIMARY KEY (pet_name, owner_username, bid_start_timestamp,  caretaker_username, avail_start_timestamp),
+      FOREIGN KEY (bid_start_timestamp, bid_end_timestamp) REFERENCES Timings(start_timestamp, end_timestamp),
+      FOREIGN KEY (avail_start_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, caretaker_username),
+      FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
+      CHECK (bid_start_timestamp >= avail_start_timestamp),
+      CHECK (bid_end_timestamp <= avail_end_timestamp)
+);
+
+CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP, pe TIMESTAMP, sd TIMESTAMP, ed TIMESTAMP, ct VARCHAR, ts VARCHAR) AS
+$$ DECLARE tot_p NUMERIC;
+BEGIN
+SELECT DATE_PART('day', pe - ps) INTO tot_p;
+tot_p := tot_p * 10;
+IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
+END; $$
+LANGUAGE plpgsql;
+
+--delete bids only if they are in the future and unsuccessful (pending bids). Cannot delete confirmed or expired bids.
+CREATE OR REPLACE FUNCTION check_deletable_bid()
+RETURNS TRIGGER AS
+$$
+   BEGIN
+    IF (OLD.is_successful IS TRUE OR OLD.bid_start_timestamp <= CURRENT_TIMESTAMP) THEN
+   RAISE EXCEPTION 'The bid cannot be deleted as it is accepted by caretaker or it is expired.';
+   ELSE
+   RETURN OLD;
+   END IF;
+   END $$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER check_deletable_bid
+BEFORE DELETE ON bids
+FOR EACH ROW EXECUTE PROCEDURE check_deletable_bid();
+
+
+--Update bids
+-- Check that the new bid period coincide with availability period
+-- TODO: Check that pet belongs ot a category that caretaker can care for
+CREATE OR REPLACE FUNCTION update_bids()
+RETURNS TRIGGER AS
+$$ DECLARE first_result INTEGER := 0;
+  DECLARE second_result INTEGER := 0;
+  DECLARE total_result INTEGER;
+  BEGIN
+
+  END $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_bids
+BEFORE UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE update_bids();
+
+
 
 -- SEED VALUES
 --Owners

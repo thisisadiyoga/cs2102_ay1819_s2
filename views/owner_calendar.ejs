@@ -53,7 +53,7 @@
     <%- include sidebar.ejs %>
     <% } %>
     <div class="content-wrapper">
-        <div class="container-fluid">>
+        <div class="container-fluid">
 
             <div class="container-fluid">
                 <div>
@@ -74,49 +74,77 @@
 
 
                 <!-- Modal -->
-                <div class="modal fade" id="updateDateTimePickerModal" tabindex="-1" role="dialog"
-                     aria-labelledby="updateDateTimePickerModalLabel" aria-hidden="true">
+                <div class="modal fade" id="bidInfoModal" tabindex="-1" role="dialog"
+                     aria-labelledby="pendingBidInfoModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="updateDateTimePickerModalLabel">Update your
-                                    availability</h5>
+                                <h5 class="modal-title" id="pendingBidInfoModalLabel">Bid Details</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                            <div class="modal-body">
+                            <div class="modal-body bid-info">
+                                <div class="section-container bid-info">
+                                    <text>Bid Date:</text>
+                                    <span class="bidStartTimestamp"></span>
+                                    <span>-</span>
+                                    <span class="bidEndTimestamp"></span>
+                                </div>
 
-                                <form class="update-availability-form" action="/update_availability" method="POST">
-                                    <input type="hidden" class="oldStartTimestamp" name="old_start_timestamp"
-                                           type="text">
-                                    <input type="hidden" class="oldEndTimestamp" name="old_end_timestamp" type="text">
-                                    <div class="input-container">
-                                        <text>Start Date:</text>
-                                        <input type="text" name='start_timestamp' class="startTimestamp input-box"
-                                               data-input>
-                                    </div>
-                                    <div class="input-container">
-                                        <text>End Date:</text>
-                                        <input type="text" name='end_timestamp' class="endTimestamp input-box"
-                                               data-input>
-                                    </div>
+
+
+                                <div class="section-container bid-info">
+                                    <text>Caretaker:</text>
+                                    <span class="caretakerUsername"></span>
+                                </div>
+
+                                <div class="section-container bid-info">
+                                    <text>Pet Name:</text>
+                                    <span class="petName"></span>
+                                </div>
+
+                                <div class="section-container bid-info service-section">
+                                    <text>Type of Service:</text>
+                                    <span class="typeOfService"></span>
+                                </div>
+
+
+                                <div class="section-container bid-info is-paid-section">
+                                    <text>is Paid:</text>
+                                    <span class="isPaid"></span>
+                                </div>
+
+                                <div class="section-container bid-info mode-of-transfer-section">
+                                    <text>Mode of Transfer:</text>
+                                    <span class="modeOfTransfer"></span>
+                                </div>
+
+                                <div class="section-container bid-info">
+                                    <text>Total Price:</text>
+                                    <span class="totalPrice"></span>
+                                </div>
+
+
 
 
                             </div>
                             <div class="modal-footer">
-                                <input type="submit" class="btn btn-primary button" value="Save">
-                                </form>
-                                <form class="delete-availability-form" action="/delete_availability" method="POST">
-                                    <input type="hidden" class="oldStartTimestamp " name="old_start_timestamp"
-                                           type="text">
-                                    <input type="hidden" class="oldEndTimestamp " name="old_end_timestamp" type="text">
-                                    <input type="submit" value="Delete" class="btn btn-primary button">
+                                <form class="delete-bid-form" action="/delete_bid" method="POST">
+                                    <input type="hidden" class="oldBidStartTimestamp " name="old_bid_start_timestamp" type="text">
+                                    <input type="hidden" class="oldAvailStartTimestamp " name="old_avail_start_timestamp" type="text">
+                                    <input type="hidden" class="oldCaretakerUsername" name="old_caretaker_username" type="text">
+                                    <input type="hidden" class="oldPetName" name="old_pet_name" type="text">
+                                    <input type="submit" value="Delete" class="btn btn-primary button delete-button">
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
+
+
+
+
 
                 <div id="calendar"></div>
 

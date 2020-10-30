@@ -67,13 +67,14 @@ function initRouter(app) {
     app.post('/update_availability', passport.authMiddleware(), update_availability);
     app.post('/add_availability'   , passport.authMiddleware(), add_availability);
 	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
-	
-	/*BIDS*/
-	app.get('/viewbids', passport.authMiddleware(), view_bids);
-	app.get('/feedback', passport.authMiddleware(), rate_review_form);
+
+    /*BIDS*/
+	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
 	app.get('/newbid', passport.authMiddleware(), newbid);
 	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
+
+	app.post('/delete_bid', passport.authMiddleware(), delete_bid);
 
     /* LOGIN */
  	app.post('/login', passport.authenticate('user', {
@@ -210,6 +211,7 @@ function ct_from_owner (req, res, next) {
 }
 
 function owner_calendar(req, res, next) {
+   console.log('In owner calendar method');
     var bids;
     var error_message, success_message;
 
@@ -538,7 +540,7 @@ function update_availability(req, res, next) {
 
     pool.query(sql_query.query.update_availability, [start_timestamp, end_timestamp, old_start_timestamp, req.user.username], (err, data) => { //TODO: username
         if(err) {
-              req.flash('error', 'The period cannot be updated. Check that there are scheduled pet-care jobs that are outside of the new period.');
+              req.flash('error', 'The period cannot be updated. Check that there are no scheduled pet-care jobs that are outside of the new period.');
 
              res.redirect('/availabilities?update=fail');
         } else {
@@ -610,12 +612,12 @@ function view_bids (req, res, next) {
 		} else {
 			bids = data.rows;
 		}
-		basic(req, res, 'bids', {auth : true});
+		basic(req, res, 'owner_calendar', {data: bids, auth : true});
 	});
 }
 
 function rate_review_form (req, res, next) {
-	res.render('rate_review');
+	res.render('rate_review', {auth:true});
 }
 
 function rate_review (req, res, next) {
@@ -626,20 +628,21 @@ function rate_review (req, res, next) {
     var caretaker = req.body.caretakername;
     var rating = req.body.rating;
 	var review = req.body.review;
-	pool.query(sql_query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
+	pool.query(sql_query.query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
 		if (err) {
 			console.error("Error in creating rating/review", err);
 		} else {
-			basic(req, res, 'bids', {auth:true})
+			res.redirect('/viewbids');
 		}
 	});
 }
 
 function newbid (req, res, next) {
-	res.render('bid_form');
+   res.render('newbid', {auth:true});
 }
 
 function insert_bid (req, res, next) {
+console.log("in insert bid method ");
 	var owner = req.body.ownername;
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
@@ -648,20 +651,59 @@ function insert_bid (req, res, next) {
 	var end = req.body.enddate;
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
-	pool.query(sql_query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
+	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
 		if (err) {
 			console.error("Error in creating bid", err);
 		} else {
-			basic(req, res, 'bids', {auth:true});
+		     console.log("gg to bids.ejs");
+			basic(req, res, 'viewbids', {auth:true});
 		}
 	});
 
-	pool.query(sql_query.choose_bids, (err, data) => {
+	pool.query(sql_query.query.choose_bids, (err, data) => {
 		if (err) {
 			console.error("Error in choosing bids", err);
 		}
 	});
+
 }
+
+
+function delete_bid(req, res, next) {
+    var old_bid_start_timestamp = req.body.old_bid_start_timestamp;
+    var old_avail_start_timestamp = req.body.old_avail_start_timestamp;
+    var old_caretaker_username = req.body.old_caretaker_username;
+    var old_pet_name = req.body.old_pet_name;
+
+    console.log("bids and avail start tiemstmap is " + old_bid_start_timestamp + old_avail_start_timestamp);
+
+
+    var owner_username = req.user.username;
+
+    console.log("caretaker and pet_name and pet-owner name is " + old_caretaker_username + old_pet_name + owner_username);
+
+
+    pool.query(sql_query.query.delete_bid, [old_bid_start_timestamp, old_avail_start_timestamp, old_caretaker_username, old_pet_name], (err, data) => {
+        if(err) {
+
+            req.flash('error', 'The bid cannot be deleted');
+
+
+             res.redirect('/owner_calendar?delete=fail');
+
+
+        } else {
+        console.log("delete the bid: " + data.rows[0]);
+        req.flash('success', 'The bid is successfully deleted.');
+              res.redirect('/owner_calendar?delete=pass');
+        }
+    });
+}
+
+
+
+
 
 // LOGOUT
 function logout(req, res, next) {

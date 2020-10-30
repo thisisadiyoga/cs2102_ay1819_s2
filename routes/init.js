@@ -41,6 +41,7 @@ function initRouter(app) {
 	app.post('/edit_cat', passport.authMiddleware(), edit_cat);
 	app.post('/add_cat', passport.authMiddleware(), add_cat);
 	app.post('/del_admin', del_admin);
+	app.get('/adminStatistics', passport.authMiddleware(), adminStatistics)
 
 	/*Registration*/ 
 	app.get('/register' , passport.antiMiddleware(), register );
@@ -130,6 +131,12 @@ function dashboard(req, res, next) {
 function adminDashboard(req, res, next) {
 	basic(req, res, 'adminDashboard', { 
 		auth: true });
+}
+
+function adminStatistics(req, res, next) {
+	basic(req, res, 'adminStatistics', {
+		auth: true
+	});
 }
 
 function register(req, res, next) {

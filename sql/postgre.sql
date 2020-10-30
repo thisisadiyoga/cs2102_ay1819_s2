@@ -82,8 +82,6 @@ FOR EACH ROW EXECUTE PROCEDURE update_disable();
 
 --------------------------------------------------------
 
-
-
 CREATE TABLE Timings (
 	p_start_date DATE,
 	p_end_date DATE,
@@ -181,14 +179,25 @@ CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 	   END; $$
 	LANGUAGE plpgsql;
 
-<<<<<<< HEAD
 
--- SEED VALUES
---Owners
+/* SELECT extract(year from p_start_date) as year, to_char(p_start_date,'Mon') as month, SUM(total_price) FROM Bids WHERE p_start_date>= '2020-01-01' AND p_start_date <= '2020-12-31' GROUP BY year, month, username */
+
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('zkid0', 'Zoe', 'Kid', 'Vc6GPt', 'zkid0@ow.ly', '1953-11-18', '3571623145294718', '21-292', '194267', 'https://robohash.org/situtquo.png?size=50x50&set=set1', '2020-08-06');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hchilcotte1', 'Hannah', 'Chilcotte', 'VxyTOEHQQ', 'hchilcotte1@bigcartel.com', '2000-01-19', '5048372273574703', null, '688741', 'https://robohash.org/expeditaquiaea.png?size=50x50&set=set1', '2020-01-27');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('mlongridge2', 'Maynard', 'Longridge', 'Wwa1uuMOUiB2', 'mlongridge2@nih.gov', '1956-09-27', '4041378363311', null, '760607', 'https://robohash.org/consequaturquasiet.jpg?size=50x50&set=set1', '2020-09-19');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('dmarwick3', 'Darill', 'Marwick', 'nN1DsSouYEsy', 'dmarwick3@webeden.co.uk', '1985-12-15', '6759563749207541', null, '234219', 'https://robohash.org/quisquamreiciendisdolores.bmp?size=50x50&set=set1', '2020-10-17');
+
+insert into Caretakers (username, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken,is_disabled) values ('hchilcotte1', TRUE, 4.45, 1, 1, FALSE);
+insert into categories(cat_name, base_price) values ('dog', 3.10);
+
+insert into Owners (username, is_disabled) values ('mlongridge2', FALSE);
+INSERT INTO ownsPets (username, name, description,	cat_name, size, sociability, special_req, img) values ('mlongridge2', 'pet1', 'asdasdasd', 'dog', 'Large', 'very', 'none', 'https://robohash.org/atareiciendis.png?size=50x50&set=set1');
+INSERT INTO Timings (p_start_date ,p_end_date) values ('2020-10-10', '2020-10-15');
+insert into Bids(owner_username ,pet_name ,p_start_date ,p_end_date ,starting_date ,ending_date ,username ,rating ,review ,is_successful ,payment_method ,mode_of_transfer ,is_paid ,total_price,type_of_service) 
+          values ( 'mlongridge2', 'pet1', '2020-10-10', '2020-10-15', '2020-10-05', '2020-10-20', 'hchilcotte1', null, null, TRUE, null, null, FALSE, 30, 'something' );
+-- SEED VALUES
+--Owners
+/*
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('chort4', 'Christyna', 'Hort', 'z4rKbQh', 'chort4@123-reg.co.uk', '1993-12-13', '30231151815045', '23-654', '044339', 'https://robohash.org/atareiciendis.png?size=50x50&set=set1', '2020-06-21');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('msouttar5', 'Marcela', 'Souttar', 'V6hiuF0TCQsA', 'msouttar5@state.tx.us', '1964-04-01', '4508185833323387', '12-288', '507398', 'https://robohash.org/expeditacorruptiquae.bmp?size=50x50&set=set1', '2020-08-21');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('kbolletti6', 'Katherine', 'Bolletti', 'aGOOzm2tM', 'kbolletti6@jigsy.com', '1977-05-12', '5641822537057724646', null, '367980', 'https://robohash.org/quiarerumvoluptas.bmp?size=50x50&set=set1', '2020-04-10');
@@ -1185,5 +1194,4 @@ insert into Users (username, first_name, last_name, password, email, dob, credit
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hsharlandrp', 'Helen', 'Sharland', '3k6oyzbqP5', 'hsharlandrp@merriam-webster.com', '1988-11-17', '36786476630902', null, '799251', 'https://robohash.org/quimolestiaeperspiciatis.bmp?size=50x50&set=set1', '2020-07-17');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('eemettrq', 'Ewen', 'Emett', '0FLKPIQ7g7re', 'eemettrq@google.com', '1984-08-16', '4911432579397543146', '25-672', '506471', 'https://robohash.org/voluptatemconsecteturvoluptatum.jpg?size=50x50&set=set1', '2020-08-13');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('vjandacrr', 'Violet', 'Jandac', 'QWNbqFKM2R', 'vjandacrr@smh.com.au', '1981-11-11', '3564289361243299', null, '836817', 'https://robohash.org/saepemagniqui.png?size=50x50&set=set1', '2020-07-22');
-=======
->>>>>>> master
+*/

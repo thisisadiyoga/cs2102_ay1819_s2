@@ -1,4 +1,7 @@
 <!-- Sidebar -->
+<!--for non-owmers-->
+<% var owner = (!is_owner) ? "display:none" : "" %> 
+<% var caretaker = (!is_caretaker) ? "display:none" : "" %> 
 
 <ul class="sidebar navbar-nav">
 	<li class="nav-item" <%= page==="dashboard" ? "active" : "" %>>
@@ -7,9 +10,29 @@
 			<span>My Profile</span>
 		</a>
 	</li>
-	<li class="nav-item" <%= page==="pets" ? "active" : "" %>>
+	<li class="nav-item" <%= page==="pets" ? "active" : "" %> style="<%= owner%>">
 		<a class="nav-link" href="<%= page==="pets" ? "#" : "/pets" %>">
 			<i class="fas fa-fw fa-paw"></i>
 			<span>My Pets</span></a>
+	</li>
+	<li class="nav-item" <%= page==="location" ? "active" : "" %>>
+		<a class="nav-link" href="<%= page==="location" ? "#" : "/location" %>">
+			<i class="fas fa-fw fa-search-location"></i>
+			<span>Find Nearby</span>
+		</a>
+	<li class="nav-item" <%= page==="pets" ? "active" : "" %>>
+		<a class="nav-link" href="<%= page==="pets" ? "#" : "/viewbids" %>">
+			<i class="fas fa-fw fa-dog"></i>
+			<span>My Bids</span></a>
+	</li>
+	<li class="nav-item" <%= page==="pets" ? "active" : "" %>>
+		<a class="nav-link" href="<%= page==="pets" ? "#" : "/feedback" %>">
+			<i class="fas fa-fw fa-dog"></i>
+			<span>Feedback Page</span></a>
+	</li>
+	<li class="nav-item" <%= page==="pets" ? "active" : "" %>>
+		<a class="nav-link" href="<%= page==="pets" ? "#" : "/newbid" %>">
+			<i class="fas fa-fw fa-dog"></i>
+			<span>New Bid</span></a>
 	</li>
 </ul>

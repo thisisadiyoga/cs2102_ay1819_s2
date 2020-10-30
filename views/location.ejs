@@ -15,6 +15,7 @@
 		<!-- Custom styles for this template-->
         <link href="stylesheets/index.css" rel="stylesheet">
         <link href="stylesheets/picture.css" rel="stylesheet">
+        <link href="stylesheets/location.css" rel="stylesheet">
     </head>
 
     <body id="page-top">
@@ -47,19 +48,23 @@
                                     </thead>
                                     
                                     <tbody>
-                                        <% for(var i=0; i<user_list.length; i++) { %>
-                                        <tr>
-                                            <td><img src="data:image/png;base64, <%= user_list[i].avatar%>" class="crop" width="50" height="50"></td>
-                                            <td><%= user_list[i].username%></td>
-                                            <td><%= user_list[i].first_name%></td>
-                                            <td><%= user_list[i].last_name%></td>
-                                            <% var owner = (user_list[i].is_owner == 1) ? "⚫": "⚪"%>
-                                            <td><%= owner%></td>
+                                        <div class="container">
+                                            <% for(var i=0; i<user_list.length; i++) { %>
+                                            <div>
+                                                <tr>
+                                                    <td><img src="data:image/png;base64, <%= user_list[i].avatar%>" class="crop" width="50" height="50"></td>
+                                                    <td><%= user_list[i].username%></td>
+                                                    <td><%= user_list[i].first_name%></td>
+                                                    <td><%= user_list[i].last_name%></td>
+                                                    <% var owner = (user_list[i].is_owner == 1) ? "⚫": "⚪"%>
+                                                    <td><%= owner%></td>
 
-                                            <% var caretaker = (user_list[i].is_caretaker == 1) ? "⚫": "⚪"%>
-                                            <td><%= caretaker%></td>
-                                        </tr>
-                                        <% } %>
+                                                    <% var caretaker = (user_list[i].is_caretaker == 1) ? "⚫": "⚪"%>
+                                                    <td><%= caretaker%></td>
+                                                </tr>
+                                            </div>
+                                            <% } %>
+                                        </div>
                                     </tbody>
                                 </table>
                             </div>

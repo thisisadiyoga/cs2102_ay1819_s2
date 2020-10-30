@@ -32,8 +32,9 @@
                         <div class="card-header">
                             <i class="fas fa-id-badge"></i> &nbsp; Caretaker Information
 
+                            <% var display = (is_caretaker == 1) ? "display:none" : "" %>
                             <!-- Button trigger modal -->
-                            <button class="btn btn-sm btn-outline-dark" style="float:right" type="submit" id="ctsignup" name="ctsignup" data-toggle="modal" data-target="#confirmModal">Join as caretaker</i></button>
+                            <button class="btn btn-sm btn-outline-dark" style="float:right; <%= display%>" type="submit" id="ctsignup" name="ctsignup" data-toggle="modal" data-target="#confirmModal">Join as caretaker</i></button>
                             
                             <!--modal information-->
                             <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

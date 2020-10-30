@@ -35,7 +35,7 @@ sql.query = {
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
 	list_caretakers: "SELECT username, first_name, last_name, is_full_time, avg_rating, no_of_pets_taken FROM caretakers NATURAL JOIN Users WHERE NOT is_disabled;",
-	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers NATURAL JOIN Users WHERE username LIKE $1 OR first_name LIKE $1 OR last_name LIKE $1;", 
+	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers NATURAL JOIN Users WHERE username <> $1 AND (username LIKE $2 OR first_name LIKE $2 OR last_name LIKE $2);", 
 
 	filter_location:"SELECT * FROM Users WHERE postal_code LIKE $2 AND username <> $1;", 
 

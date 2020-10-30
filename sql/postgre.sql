@@ -13,7 +13,7 @@ CREATE TABLE Users (
 	email			VARCHAR			NOT NULL UNIQUE CHECK(email LIKE '%@%.%'),
 	dob				DATE			NOT NULL CHECK (CURRENT_DATE - dob >= 6750), 
 	credit_card_no	VARCHAR			NOT NULL, 
-	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-___') OR NULL), 
+	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-%') OR NULL), 
 	postal_code		VARCHAR			NOT NULL, 
 	avatar			BYTEA			NOT NULL, 
 	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE, 
@@ -90,8 +90,8 @@ RETURNS TRIGGER AS
 	$$ DECLARE is_caretaker BOOLEAN;
 	BEGIN
 		SELECT 1 INTO is_caretaker FROM Caretakers WHERE username = NEW.username;
-		IF is_caretaker THEN UPDATE Users SET is_caretaker = TRUE;
-		ELSE UPDATE Users SET is_caretaker = FALSE;
+		IF is_caretaker THEN UPDATE Users SET is_caretaker = TRUE WHERE username = NEW.username;
+		ELSE UPDATE Users SET is_caretaker = FALSE WHERE username = NEW.username;
 		END IF;
 
 		RETURN NEW;
@@ -107,8 +107,8 @@ RETURNS TRIGGER AS
 	$$ DECLARE is_owner BOOLEAN;
 	BEGIN
 		SELECT 1 INTO is_owner FROM Owners WHERE username = NEW.username;
-		IF is_owner THEN UPDATE Users SET is_owner = TRUE;
-		ELSE UPDATE Users SET is_owner = FALSE;
+		IF is_owner THEN UPDATE Users SET is_owner = TRUE WHERE username = NEW.username;
+		ELSE UPDATE Users SET is_owner = FALSE WHERE username = NEW.username;
 		END IF;
 
 		RETURN NEW;

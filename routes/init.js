@@ -1,3 +1,4 @@
+
 const sql_query = require('../sql');
 const postgres_details = require('../config')
 const passport = require('passport');
@@ -5,34 +6,35 @@ const bcrypt = require('bcrypt');
 const multer = require("multer");
 const upload = multer({dest: "../uploads"});
 const fs = require('fs');
+const flash = require('connect-flash');
+
 
 // Postgre SQL Connection
 const { Pool } = require('pg');
-const { RSA_NO_PADDING } = require('constants');
-const { allowedNodeEnvironmentFlags } = require('process');
 const pool = new Pool({
-	
-	user: postgres_details.user,
-	host: postgres_details.host,
-	database: postgres_details.database,
-	password: postgres_details.password,
-	port: postgres_details.port,
-	connectionString: process.env.DATABASE_URL,
-	//ssl: true 
+
+    //ssl: true
+     user: postgres_details.user,
+    database: postgres_details.database,
+    idleTimeoutMillis: 2000
 });
 
 const round = 10;
 const salt  = bcrypt.genSaltSync(round);
 
+
 function initRouter(app) {
 	/* GET */
 	app.get('/', index );
-	
+
 	/* PROTECTED GET */
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 	app.get('/caretaker' , passport.authMiddleware(), caretaker );
+
+    app.get('/caretaker_calendar'   , passport.authMiddleware(), caretaker_calendar);
+    app.get('/owner_calendar'   , passport.authMiddleware(), owner_calendar);
 
 	/* admin pages*/
 	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
@@ -43,7 +45,7 @@ function initRouter(app) {
 	app.post('/add_cat', passport.authMiddleware(), add_cat);
 	app.post('/del_admin', del_admin);
 
-	/*Registration*/ 
+	/*Registration*/
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
 	app.get('/ctregister' , passport.antiMiddleware(), ctregister );
@@ -65,6 +67,12 @@ function initRouter(app) {
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/display', passport.authMiddleware(), search_caretaker);
 	app.post('/ctsignup', passport.authMiddleware(), ct_from_owner);
+    app.post('/update_availability', passport.authMiddleware(), update_availability);
+    app.post('/add_availability'   , passport.authMiddleware(), add_availability);
+	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
+
+    /*BIDS*/
+	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 
 	/* LOGIN */
@@ -78,7 +86,7 @@ function initRouter(app) {
 		successRedirect: '/adminDashboard',
 		failureRedirect: '/admin?login=failed'
 	}));
-	
+
 	/* LOGOUT */
 	app.get('/logout', passport.authMiddleware(), logout);
 
@@ -91,15 +99,38 @@ function initRouter(app) {
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
 	app.get('/newbid', passport.authMiddleware(), newbid);
 	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
-}
+
+	app.post('/delete_bid', passport.authMiddleware(), delete_bid);
+
+    /* LOGIN */
+ 	app.post('/login', passport.authenticate('user', {
+ 		successRedirect: '/dashboard',
+ 		failureRedirect: '/'
+ 	}));
+
+ 	/* LOGIN */
+ 	app.post('/loginAdmin', passport.authenticate('admin', {
+ 		successRedirect: '/adminDashboard',
+ 		failureRedirect: '/admin?login=failed'
+ 	}));
+
+ 	/* LOGOUT */
+ 	app.get('/logout', passport.authMiddleware(), logout);
+
+ 	/*ADMIN*/
+ 	app.get('/admin', admin);
+
+ }
+
+
 
 // Render Function
 function basic(req, res, page, other) {
 	var info = {
 		page: page,
 		user: req.user.username,
-		avatar : req.user.avatar, 
-		is_owner : req.user.is_owner, 
+		avatar : req.user.avatar,
+		is_owner : req.user.is_owner,
 		is_caretaker : req.user.is_caretaker
 	};
 	if(other) {
@@ -145,7 +176,7 @@ function dashboard(req, res, next) {
 }
 
 function adminDashboard(req, res, next) {
-	basic(req, res, 'adminDashboard', { 
+	basic(req, res, 'adminDashboard', {
 		auth: true });
 }
 
@@ -194,6 +225,7 @@ function add_pets(req, res, next) {
 	var cat_list;
 	pool.query(sql_query.query.list_cats, [], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
+		    console.log('Error adding pet: ', err);
 			cat_list = [];
 		} else {
 			cat_list = data.rows;
@@ -220,7 +252,7 @@ function location (req, res, next) {
 					user_list = [];
 				} else {
 					user_list = data.rows;
-					
+
 				}
 				basic(req, res, 'location', {user_list : user_list, auth: true});
 			})
@@ -228,13 +260,62 @@ function location (req, res, next) {
 	});
 }
 
+function owner_calendar(req, res, next) {
+   console.log('In owner calendar method');
+    var bids;
+    var error_message, success_message;
 
-// POST 
+
+    pool.query(sql_query.query.read_bids,[req.user.username], (err, data) => { //TODO req.user.username
+            if(err || !data.rows || data.rows.length == 0) {
+                        bids = [];
+                        console.log('Error reading bids: ' + err);
+            } else {
+                        bids = data.rows;
+            }
+                      error_message = req.flash('error');
+                      success_message = req.flash('success');
+            basic(req, res, 'owner_calendar', { bids: bids, error_message: error_message, success_message: success_message, bids_msg: msg(req, 'add', 'Bids displayed successfully', 'Error in displaying all bids'), auth: true });
+
+        });
+}
+
+function caretaker_calendar(req, res, next) {
+    var availabilities, bids;
+    var error_message, success_message;
+
+
+    pool.query(sql_query.query.read_availabilities,[req.user.username], (err, data) => { //TODO req.user.username
+            if(err || !data.rows || data.rows.length == 0) {
+                        availabilities = [];
+                        console.log('Error reading availabilities: ' + err);
+            } else {
+                        availabilities = data.rows;
+                    }
+
+
+    pool.query(sql_query.query.read_bids, [req.user.username], (err, data) => {
+           if(err || !data.rows || data.rows.length == 0) {
+                          bids = [];
+                           console.log('Error reading bids: ' + err);
+          } else {
+                    bids = data.rows;
+          }
+
+                      error_message = req.flash('error');
+                      success_message = req.flash('success');
+
+            basic(req, res, 'caretaker_calendar', { bids: bids, availabilities: availabilities, error_message: error_message, success_message: success_message, availability_msg: msg(req, 'add', 'Availability period added successfully', 'Invalid parameters in availability period'), auth: true });
+        })
+        });
+}
+
+// POST
 function update_info(req, res, next) {
 	var username  = req.user.username;
     var email = req.body.email;
 	pool.query(sql_query.query.update_info, [username, email], (err, data) => {
-		if(err) {	
+		if(err) {
 			console.error("Error in update info");
 			res.redirect('/dashboard?info=fail');
 		} else {
@@ -276,7 +357,7 @@ function update_pet (req, res, next) {
 	var description = req.body.description;
 	var sociability = req.body.sociability;
 	var special_req = req.body.special_req;
-	
+
 
 	pool.query(sql_query.query.update_pet, [username, name, cat_name, size, description, sociability, special_req], (err, data) => {
 		if(err) {
@@ -294,7 +375,7 @@ function update_pet (req, res, next) {
 						res.redirect('/pets?edit=pass')
 					}
 				});
-			} else 
+			} else
 			{
 				res.redirect('/pets?edit=pass');
 			}
@@ -354,6 +435,7 @@ function reg_user(req, res, next) {
 			console.error("Error in adding user", err);
 			res.redirect('/register?reg=fail');
 		} else {
+		console.error("Successfully added owner");
 			req.login({
 				username    : username,
 				passwordHash: password,
@@ -381,9 +463,9 @@ function reg_ct(req, res, next) {
 	var postal_code  = req.body.postal_code;
 	var avatar   = fs.readFileSync(req.file.path).toString('base64');
 	var is_full_time  = req.body.is_full_time;
-	
+
 	console.log(username, is_full_time);
-   
+
 	pool.query(sql_query.query.add_ct, [username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, is_full_time], (err, data) => {
 	 if(err) {
 		console.error("Error in adding caretaker", err);
@@ -497,7 +579,7 @@ function reg_pet(req, res, next) {
 	var sociability		= req.body.sociability;
 	var special_req		= req.body.special_req;
 	var img				= fs.readFileSync(req.file.path).toString('base64');
-	
+
 	pool.query(sql_query.query.add_pet, [username, name, description, cat_name, size, sociability, special_req, img], (err, data) => {
 		if(err) {
 			console.error("Error in adding pet", err);
@@ -510,7 +592,7 @@ function reg_pet(req, res, next) {
 
 function del_user (req, res, next) {
 	var username = req.user.username;
-	
+
 	req.session.destroy()
 	req.logout()
 
@@ -533,7 +615,7 @@ function del_user (req, res, next) {
 
 function del_admin (req, res, next) {
 	var admin_id = req.user.admin_username;
-	
+
 	req.session.destroy()
 	req.logout()
 
@@ -546,6 +628,66 @@ function del_admin (req, res, next) {
 		}
 	});
 }
+
+// POST
+function update_availability(req, res, next) {
+    var old_start_timestamp = req.body.old_start_timestamp;
+    var old_end_timestamp = req.body.old_end_timestamp;
+    var start_timestamp = req.body.start_timestamp;
+    var end_timestamp  = req.body.end_timestamp;
+
+    pool.query(sql_query.query.update_availability, [start_timestamp, end_timestamp, old_start_timestamp, req.user.username], (err, data) => { //TODO: username
+        if(err) {
+              req.flash('error', 'The period cannot be updated. Check that there are no scheduled pet-care jobs that are outside of the new period.');
+
+             res.redirect('/availabilities?update=fail');
+        } else {
+              req.flash('success', 'The period is successfully updated.');
+             res.redirect('/availabilities?update=pass');
+        }
+    });
+}
+
+function add_availability(req, res, next) {
+
+    var start_timestamp = req.body.start_timestamp ;
+    var end_timestamp = req.body.end_timestamp;
+
+
+
+    pool.query(sql_query.query.add_availability, [start_timestamp, end_timestamp, req.user.username], (err, data) => {
+        if(err) {
+
+               req.flash('error', 'The new period cannot be added.');
+                res.redirect('/availabilities?add=fail');
+
+        } else {
+            req.flash('success', 'The period is successfully added. It may merge with existing availability schedule.');
+             res.redirect('/availabilities?add=pass');
+        }
+    });
+}
+
+function delete_availability(req, res, next) {
+    var start_timestamp = req.body.old_start_timestamp;
+    var end_timestamp = req.body.old_end_timestamp;
+
+    pool.query(sql_query.query.delete_availability, [start_timestamp, req.user.username], (err, data) => {
+        if(err) {
+
+            req.flash('error', 'The period cannot be deleted as there is a scheduled pet-care job within that period.');
+
+             res.redirect('/availabilities?delete=fail');
+
+
+        } else {
+        req.flash('success', 'The period is successfully deleted.');
+             res.redirect('/availabilities?delete=pass');
+        }
+    });
+}
+
+
 
 function search_caretaker (req, res, next) {
 	var caretaker;
@@ -586,12 +728,12 @@ function view_bids (req, res, next) {
 		} else {
 			bids = data.rows;
 		}
-		basic(req, res, 'bids', {auth : true});
+		basic(req, res, 'owner_calendar', {data: bids, auth : true});
 	});
 }
 
 function rate_review_form (req, res, next) {
-	res.render('rate_review');
+	res.render('rate_review', {auth:true});
 }
 
 function rate_review (req, res, next) {
@@ -602,20 +744,21 @@ function rate_review (req, res, next) {
     var caretaker = req.body.caretakername;
     var rating = req.body.rating;
 	var review = req.body.review;
-	pool.query(sql_query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
+	pool.query(sql_query.query.rate_review, [rating, review, owner, pet, start, end, caretaker], (err, data) => {
 		if (err) {
 			console.error("Error in creating rating/review", err);
 		} else {
-			basic(req, res, 'bids', {auth:true})
+			res.redirect('/viewbids');
 		}
 	});
 }
 
 function newbid (req, res, next) {
-	res.render('bid_form');
+   res.render('newbid', {auth:true});
 }
 
 function insert_bid (req, res, next) {
+console.log("in insert bid method ");
 	var owner = req.body.ownername;
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
@@ -624,19 +767,54 @@ function insert_bid (req, res, next) {
 	var end = req.body.enddate;
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
-	pool.query(sql_query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
+	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
 		if (err) {
 			console.error("Error in creating bid", err);
 		} else {
-			basic(req, res, 'bids', {auth:true});
+		     console.log("gg to bids.ejs");
+			basic(req, res, 'owner_calendar', {auth:true});
 		}
 	});
 
-	pool.query(sql_query.choose_bids, (err, data) => {
+	pool.query(sql_query.query.choose_bids, (err, data) => {
 		if (err) {
 			console.error("Error in choosing bids", err);
 		}
 	});
+
+}
+
+
+function delete_bid(req, res, next) {
+    var old_bid_start_timestamp = req.body.old_bid_start_timestamp;
+    var old_avail_start_timestamp = req.body.old_avail_start_timestamp;
+    var old_caretaker_username = req.body.old_caretaker_username;
+    var old_pet_name = req.body.old_pet_name;
+
+    console.log("bids and avail start tiemstmap is " + old_bid_start_timestamp + old_avail_start_timestamp);
+
+
+    var owner_username = req.user.username;
+
+    console.log("caretaker and pet_name and pet-owner name is " + old_caretaker_username + old_pet_name + owner_username);
+
+
+    pool.query(sql_query.query.delete_bid, [old_bid_start_timestamp, old_avail_start_timestamp, old_caretaker_username, old_pet_name], (err, data) => {
+        if(err) {
+
+            req.flash('error', 'The bid cannot be deleted');
+
+
+             res.redirect('/owner_calendar?delete=fail');
+
+
+        } else {
+        console.log("delete the bid: " + data.rows[0]);
+        req.flash('success', 'The bid is successfully deleted.');
+              res.redirect('/owner_calendar?delete=pass');
+        }
+    });
 }
 
 
@@ -648,3 +826,45 @@ function logout(req, res, next) {
 }
 
 module.exports = initRouter;
+
+
+
+
+
+
+
+/*function search_nearby (req, res, next) {
+	var username = req.user.username;
+	var filter;
+	var nearby;
+	console.log(username);
+
+	pool.query(sql_query.query.get_area, [username], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			filter = [];
+			console.error("postal code not found");
+			res.redirect("/display");
+		} else {
+			filter = data.rows[0].postal_code
+			pool.query(sql_query.query.find_nearby, [username, filter[0, 2] + "____"], (err, data) => {
+				if(err) {
+					console.error("Error in deleting account", err);
+					res.redirect("/display?found=pass")
+				} else if (!data.rows || data.rows.length == 0){
+					console.info("No nearby caretaker found");
+					nearby = []
+
+					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'No nearby caretaker found', 'Error in searching caretaker'), auth: true });
+				} else {
+					console.log("Caretaker found");
+					nearby = data.rows
+					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'Caretakers found', 'Error in searching caretaker'), auth: true });
+				}
+			});
+		}
+	});
+}*/
+
+
+
+

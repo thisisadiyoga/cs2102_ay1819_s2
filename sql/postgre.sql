@@ -137,12 +137,14 @@ CREATE TABLE Users (
 	last_name		NAME			NOT NULL,
 	password		VARCHAR(64)		NOT NULL,
 	email			VARCHAR			NOT NULL UNIQUE CHECK(email LIKE '%@%.%'),
-	dob				DATE			NOT NULL CHECK (CURRENT_DATE - dob >= 6750),
-	credit_card_no	VARCHAR			NOT NULL,
-	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-___') OR NULL),
-	postal_code		VARCHAR			NOT NULL,
-	avatar			BYTEA			NOT NULL,
-	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE
+	dob				DATE			NOT NULL CHECK (CURRENT_DATE - dob >= 6750), 
+	credit_card_no	VARCHAR			NOT NULL, 
+	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-%') OR NULL), 
+	postal_code		VARCHAR			NOT NULL, 
+	avatar			BYTEA			NOT NULL, 
+	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE, 
+	is_owner		BOOLEAN			NOT NULL DEFAULT FALSE, 
+	is_caretaker	BOOLEAN			NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE Owners (
@@ -160,14 +162,14 @@ CREATE TABLE Caretakers (
 );
 
 CREATE TABLE ownsPets (
-	username		VARCHAR			NOT NULL REFERENCES Owners(username),
-	name			NAME			NOT NULL,
-	description		TEXT,
-	cat_name		VARCHAR(10)		NOT NULL REFERENCES Categories(cat_name),
-	size			VARCHAR 		NOT NULL CHECK (size IN ('Extra Small', 'Small', 'Medium', 'Large', 'Extra Large')),
-	sociability		TEXT,
-	special_req		TEXT,
-	img				BYTEA,
+	username		VARCHAR			NOT NULL REFERENCES Owners(username) ON DELETE CASCADE, 
+	name			NAME			NOT NULL, 
+	description		TEXT, 
+	cat_name		VARCHAR(10)		NOT NULL REFERENCES Categories(cat_name), 
+	size			VARCHAR 		NOT NULL CHECK (size IN ('Extra Small', 'Small', 'Medium', 'Large', 'Extra Large')), 
+	sociability		TEXT, 
+	special_req		TEXT, 
+	img				BYTEA, 
 	PRIMARY KEY (username, name)
 );
 
@@ -185,6 +187,24 @@ CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
 	$$ BEGIN
 	   INSERT INTO Users VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, CURRENT_DATE);
 	   INSERT INTO Owners VALUES (username);
+	   END; $$
+	LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE add_ct (username 		VARCHAR,
+									first_name		NAME,
+									last_name		NAME,
+									password		VARCHAR(64),
+									email			VARCHAR,
+									dob				DATE,
+									credit_card_no	VARCHAR,
+									unit_no			VARCHAR,
+									postal_code		VARCHAR(6), 
+									avatar			BYTEA,
+									is_full_time		BOOLEAN
+									) AS
+	$$ BEGIN
+	   INSERT INTO Users VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, CURRENT_DATE);
+	   INSERT INTO Caretakers VALUES (username, is_full_time);
 	   END; $$
 	LANGUAGE plpgsql;
 
@@ -208,6 +228,77 @@ FOR EACH ROW EXECUTE PROCEDURE update_disable();
 
 --------------------------------------------------------
 
+--trigger to show type of account (caretaker, owner, user)
+CREATE OR REPLACE FUNCTION update_caretaker()
+RETURNS TRIGGER AS 
+	$$ DECLARE is_caretaker BOOLEAN;
+	BEGIN
+		SELECT 1 INTO is_caretaker FROM Caretakers WHERE username = NEW.username;
+		IF is_caretaker THEN UPDATE Users SET is_caretaker = TRUE WHERE username = NEW.username;
+		ELSE UPDATE Users SET is_caretaker = FALSE WHERE username = NEW.username;
+		END IF;
+
+		RETURN NEW;
+	END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_caretaker_status
+AFTER INSERT OR DELETE ON Caretakers
+FOR EACH ROW EXECUTE PROCEDURE update_caretaker();
+
+CREATE OR REPLACE FUNCTION update_owner()
+RETURNS TRIGGER AS 
+	$$ DECLARE is_owner BOOLEAN;
+	BEGIN
+		SELECT 1 INTO is_owner FROM Owners WHERE username = NEW.username;
+		IF is_owner THEN UPDATE Users SET is_owner = TRUE WHERE username = NEW.username;
+		ELSE UPDATE Users SET is_owner = FALSE WHERE username = NEW.username;
+		END IF;
+
+		RETURN NEW;
+	END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_owner_status
+AFTER INSERT OR DELETE ON Owners
+FOR EACH ROW EXECUTE PROCEDURE update_owner();
+--------------------------------------------------------
+
+CREATE TABLE Timings (
+	p_start_date DATE,
+	p_end_date DATE,
+	PRIMARY KEY (p_start_date, p_end_date),
+	CHECK (p_end_date >= p_start_date)
+);
+
+CREATE TABLE Bids (
+	owner_username VARCHAR,
+	pet_name VARCHAR,
+	p_start_date DATE,
+	p_end_date DATE,
+	starting_date DATE,
+	ending_date DATE,
+	username VARCHAR,
+	rating NUMERIC,
+	review VARCHAR,
+	is_successful BOOLEAN,
+	payment_method VARCHAR,
+	mode_of_transfer VARCHAR,
+	is_paid BOOLEAN,
+	total_price NUMERIC NOT NULL CHECK (total_price > 0),
+	type_of_service VARCHAR NOT NULL,
+	PRIMARY KEY (pet_name, owner_username, p_start_date, p_end_date, starting_date, ending_date, username),
+	FOREIGN KEY (p_start_date, p_end_date) REFERENCES Timings(p_start_date, p_end_date),
+	--FOREIGN KEY (starting_date, ending_date, username) REFERENCES Availabilities(starting_date, ending_date, username),
+	FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
+	UNIQUE (pet_name, owner_username, username, p_start_date, p_end_date),
+	CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
+	CHECK ((is_successful = true) OR (payment_method IS NULL AND is_paid IS NULL AND
+	mode_of_transfer IS NULL)),
+	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
+	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date >= p_start_date))
+);
+
 CREATE TABLE isPaidSalaries (
 	caretaker_id VARCHAR REFERENCES caretakers(username)
 	ON DELETE cascade,
@@ -223,6 +314,68 @@ CREATE TABLE Administrators (
 	last_login_time TIMESTAMP
 );
 
+
+INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, 
+						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
+VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_2',
+		'sample_2', 's2@s.com', '02-01-2000', '1231231231231231',
+		'2', '123123', '02-10-2020', 'true', 4.5, 2, 2);
+
+
+-- INSERT categories
+CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 
+							  			 base_price		NUMERIC) AS
+	$$ BEGIN
+	   INSERT INTO Categories (cat_name, base_price) 
+	   VALUES (cat_name, base_price);
+	   END; $$
+	LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
+									   first_name		NAME,
+									   last_name		NAME,
+									   password			VARCHAR(64),
+									   email			VARCHAR,
+									   dob				DATE,
+									   credit_card_no	VARCHAR,
+									   unit_no			VARCHAR,
+									   postal_code		VARCHAR(6), 
+									   avatar			BYTEA
+									   ) AS
+	$$ BEGIN
+	   INSERT INTO Owners
+	   VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, CURRENT_DATE, avatar);
+	   END; $$
+	LANGUAGE plpgsql;
+	
+CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
+									 name 				NAME, 
+									 description		VARCHAR, 
+									 cat_name			VARCHAR(10),
+									 size				VARCHAR, 
+									 sociability		VARCHAR,
+									 special_req		VARCHAR, 
+									 img 				BYTEA
+									 ) AS
+	$$ BEGIN
+	   INSERT INTO ownsPets
+	   VALUES (username, name, description, cat_name, size, sociability, special_req, img);
+	   END; $$
+	LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
+									   first_name		NAME,
+									   last_name		NAME,
+									   password			VARCHAR(64),
+									   email			VARCHAR,
+									   dob				DATE,
+									   credit_card_no	VARCHAR,
+									   unit_no			VARCHAR,
+									   postal_code		VARCHAR(6), 
+									   avatar			BYTEA,
+									   is_full_time		BOOLEAN
+									   ) AS
+
 CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 										password 		VARCHAR(64),
 										last_login_time TIMESTAMP
@@ -232,6 +385,7 @@ CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 	   VALUES (admin_id, password, last_login_time );
 	   END; $$
 	LANGUAGE plpgsql;
+
 
 
 -- TIMINGS, BIDS

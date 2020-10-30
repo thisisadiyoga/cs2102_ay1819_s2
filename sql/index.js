@@ -15,6 +15,9 @@ sql.query = {
 
 
 	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
+	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
+	
+	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
 
     view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
@@ -33,11 +36,16 @@ sql.query = {
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
 	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1;",
 	get_caretaker : "SELECT * FROM Caretakers WHERE username = $1 AND NOT is_disabled;", 
+	get_ct : "SELECT * FROM Caretakers c NATURAL JOIN isPaidSalaries WHERE username = $1 AND NOT is_disabled AND month = $2 AND year = $3;",
+	get_location : "SELECT postal_code FROM Users WHERE username = $1;", 
 
+	list_users: "SELECT * FROM Users;", 
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
 	list_caretakers: "SELECT username, first_name, last_name, is_full_time, avg_rating, no_of_pets_taken FROM caretakers NATURAL JOIN Users WHERE NOT is_disabled;",
-	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers NATURAL JOIN Users WHERE username LIKE $1 OR first_name LIKE $1 OR last_name LIKE $1;", 
+	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers NATURAL JOIN Users WHERE username <> $1 AND (username LIKE $2 OR first_name LIKE $2 OR last_name LIKE $2);", 
+
+	filter_location:"SELECT * FROM Users WHERE postal_code LIKE $2 AND username <> $1;", 
 
 	//edit information
 	update_pass: "UPDATE Users SET password = $2 WHERE username = $1;",
@@ -50,7 +58,7 @@ sql.query = {
 	upload_userpic: "SELECT encode(profile_pic, 'base64') FROM Users where username = $1;", 
 
 	//delete information
-	del_user : "DELETE FROM Users WHERE username = $1", 
+	del_user : "DELETE FROM Users WHERE username = $1;", 
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1;", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
@@ -70,7 +78,7 @@ sql.query = {
 
 
 	get_area : "SELECT postal_code FROM Users WHERE username = $1;", 
-	find_nearby : "SELECT * FROM Caretakers WHERE NOT is_disabled AND username IN (SELECT username FROM Users WHERE postal_code LIKE $2; AND username <> $1",  //where string is extract of first 2 digits of postal code + filter [00]____
+	find_nearby : "SELECT * FROM Caretakers WHERE NOT is_disabled AND username IN (SELECT username FROM Users WHERE postal_code LIKE $2; AND username <> $1);",  //where string is extract of first 2 digits of postal code + filter [00]____
 }
 
 module.exports = sql

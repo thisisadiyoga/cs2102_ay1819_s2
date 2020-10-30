@@ -580,12 +580,6 @@ function caretaker (req, res, next) {
 }
 
 
-
-// LOGOUT
-function logout(req, res, next) {
-	req.session.destroy()
-	req.logout()
-	res.redirect('/')
 function view_bids (req, res, next) {
 	var owner = req.user.username;
 	var bids;

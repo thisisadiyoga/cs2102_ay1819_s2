@@ -6,6 +6,9 @@ sql.query = {
 	add_cat : "INSERT INTO Categories VALUES ($1, $2);", 
 	add_admin : "INSERT INTO Administrators VALUES ($1, $2, $3);", 
 	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
+	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
+	
+	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
 
 	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND p_start_date = $5 AND p_end_date = $6 AND caretaker_username = $7',
@@ -22,6 +25,7 @@ sql.query = {
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
 	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1;",
 	get_caretaker : "SELECT * FROM Caretakers WHERE username = $1 AND NOT is_disabled;", 
+	get_ct : "SELECT * FROM Caretakers c NATURAL JOIN isPaidSalaries WHERE username = $1 AND NOT is_disabled AND month = $2 AND year = $3;",
 	get_location : "SELECT postal_code FROM Users WHERE username = $1;", 
 
 	list_users: "SELECT * FROM Users;", 
@@ -43,14 +47,14 @@ sql.query = {
 	upload_userpic: "SELECT encode(profile_pic, 'base64') FROM Users where username = $1;", 
 
 	//delete information
-	del_user : "DELETE FROM Users WHERE username = $1", 
+	del_user : "DELETE FROM Users WHERE username = $1;", 
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1;", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
 	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;", 
 
 	get_area : "SELECT postal_code FROM Users WHERE username = $1;", 
-	find_nearby : "SELECT * FROM Caretakers WHERE NOT is_disabled AND username IN (SELECT username FROM Users WHERE postal_code LIKE $2; AND username <> $1",  //where string is extract of first 2 digits of postal code + filter [00]____
+	find_nearby : "SELECT * FROM Caretakers WHERE NOT is_disabled AND username IN (SELECT username FROM Users WHERE postal_code LIKE $2; AND username <> $1);",  //where string is extract of first 2 digits of postal code + filter [00]____
 }
 
 module.exports = sql

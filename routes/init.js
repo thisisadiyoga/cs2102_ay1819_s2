@@ -32,6 +32,7 @@ function initRouter(app) {
 	app.get('/dashboard', passport.authMiddleware(), dashboard);
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
+	app.get('/caretaker' , passport.authMiddleware(), caretaker );
 
 	/* admin pages*/
 	app.get('/adminDashboard', passport.authMiddleware(), adminDashboard);
@@ -45,6 +46,7 @@ function initRouter(app) {
 	/*Registration*/ 
 	app.get('/register' , passport.antiMiddleware(), register );
 	app.get('/password' , passport.antiMiddleware(), retrieve );
+	app.get('/ctregister' , passport.antiMiddleware(), ctregister );
 
 	/*Search*/
 	app.get('/rating.js', search_caretaker);
@@ -62,7 +64,8 @@ function initRouter(app) {
 	app.post('/edit_pet', passport.authMiddleware(), edit_pet);
 	app.post('/del_pet', passport.authMiddleware(), del_pet);
 	app.post('/display', passport.authMiddleware(), search_caretaker);
-	app.post('/ctsignup', passport.authMiddleware(), ct_from_owner)
+	app.post('/ctsignup', passport.authMiddleware(), ct_from_owner);
+	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('user', {
@@ -152,6 +155,10 @@ function register(req, res, next) {
 
 function retrieve(req, res, next) {
 	res.render('retrieve', { page: 'retrieve', auth: false });
+}
+
+function ctregister(req, res, next) {
+	res.render('ctregister', { page: 'ctregister', auth: false });
 }
 
 function pets (req, res, next) {
@@ -362,6 +369,41 @@ function reg_user(req, res, next) {
 	});
 }
 
+function reg_ct(req, res, next) {
+	var username  = req.body.username;
+	var first_name  = req.body.firstname;
+	var last_name  = req.body.lastname;
+	var password  = bcrypt.hashSync(req.body.password, salt);
+	var email   = req.body.email;
+	var dob    = req.body.dob;
+	var credit_card_no = req.body.credit_card_no;
+	var unit_no   = req.body.unit_no;
+	var postal_code  = req.body.postal_code;
+	var avatar   = fs.readFileSync(req.file.path).toString('base64');
+	var is_full_time  = req.body.is_full_time;
+	
+	console.log(username, is_full_time);
+   
+	pool.query(sql_query.query.add_ct, [username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, is_full_time], (err, data) => {
+	 if(err) {
+		console.error("Error in adding caretaker", err);
+		return res.redirect('/');
+	 } else {
+		req.login({
+			username    : username,
+			passwordHash: password,
+			isUser: true
+		   }, function(err) {
+			if(err) {
+			 res.redirect('/register?reg=fail');
+			} else {
+				return res.redirect('/dashboard');
+			}
+		});
+	}
+	});
+}
+
 function ct_from_owner (req, res, next) {
 	var is_full_time = req.body.is_full_time;
 
@@ -516,6 +558,24 @@ function search_caretaker (req, res, next) {
 		basic(req, res, 'display', { caretaker : caretaker, add_msg: msg(req, 'search', 'Match found', 'No match found'), auth: true });
 	});
 }
+
+function caretaker (req, res, next) {
+	var caretaker;
+	var date = new Date();
+	var currmonth = date.getMonth();
+	var curryear = date.getFullYear();
+
+	pool.query(sql_query.query.get_ct, [req.user.username, currmonth, curryear], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+			caretaker = [];
+		} else {
+			caretaker = data.rows;
+		}
+
+		basic(req, res, 'caretaker', { caretaker : caretaker, add_msg: msg(req, 'add', 'Caretaker added successfully', 'Error in adding caretaker'), auth: true });
+	});
+}
+
 
 function view_bids (req, res, next) {
 	var owner = req.user.username;

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>The Collar Klub</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+		<!-- Custom styles for this template-->
+        <link href="stylesheets/index.css" rel="stylesheet">
+        <link href="stylesheets/picture.css" rel="stylesheet">
+    </head>
+
+    <body id="page-top">
+        <div id="wrapper">
+            <%- include sidebar.ejs %>
+            <div id="content-wrapper">
+                <div class="container-fluid">		
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="fas fa-dog"></i> &nbsp; Caretaker Overview
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <tr>
+                                        <th>Name</th>
+                                        <td><%= caretaker[0].username%></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Caretaker Type</th>
+                                        <td>
+                                            <% if(caretaker[0].is_full_time) { %> 
+                                                Full-Time
+                                            <% } else { %> 
+                                                Part-Time
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Rating</th>
+                                        <td><%= caretaker[0].avg_rating%></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Expected Salary for the Month</th>
+                                        <td><%= caretaker[0].salary_amount%></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include bottomscript.ejs %>
+    </body>
+</html>

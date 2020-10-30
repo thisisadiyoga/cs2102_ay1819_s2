@@ -1,4 +1,4 @@
-const postgres_details = require('../config.js')
+const postgres_details = require('../config')
 const sql_query = require('../sql');
 
 const passport = require('passport');
@@ -34,6 +34,9 @@ function findUser (username, callback) {
 			return callback(null, {
 				username    : data.rows[0].username,
         passwordHash: data.rows[0].password,
+        avatar      : data.rows[0].avatar, 
+        is_owner    : data.rows[0].is_owner, 
+        is_caretaker: data.rows[0].is_caretaker
 			});
 		} else {
 			console.error("More than one user?");

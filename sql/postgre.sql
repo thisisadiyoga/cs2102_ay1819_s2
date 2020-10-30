@@ -1,3 +1,50 @@
+-- TIMINGS, BIDS
+
+CREATE TABLE Timings (
+	p_start_date TIMESTAMP,
+	p_end_date TIMESTAMP,
+	PRIMARY KEY (p_start_date, p_end_date),
+	CHECK (p_end_date > p_start_date)
+);
+
+CREATE TABLE Bids (
+	owner_username VARCHAR,
+	pet_name VARCHAR,
+	p_start_date TIMESTAMP,
+	p_end_date TIMESTAMP,
+	starting_date TIMESTAMP,
+	ending_date TIMESTAMP,
+	caretaker_username VARCHAR,
+	rating NUMERIC,
+	review VARCHAR,
+	is_successful BOOLEAN,
+	payment_method VARCHAR,
+	mode_of_transfer VARCHAR,
+	is_paid BOOLEAN,
+	total_price NUMERIC NOT NULL CHECK (total_price > 0),
+	type_of_service VARCHAR NOT NULL,
+	PRIMARY KEY (pet_name, owner_username, p_start_date, p_end_date, starting_date, ending_date, caretaker_username),
+	FOREIGN KEY (p_start_date, p_end_date) REFERENCES Timings(p_start_date, p_end_date),
+	FOREIGN KEY (starting_date, ending_date, caretaker_username) REFERENCES Availabilities(starting_date, ending_date,
+	caretaker_username),
+	FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
+	UNIQUE (pet_name, owner_username, caretaker_username, p_start_date, p_end_date),
+	CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
+	CHECK ((is_successful = true) OR (payment_method IS NULL AND is_paid IS NULL AND
+	mode_of_transfer IS NULL)),
+	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
+	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date > p_start_date))
+);
+
+CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps DATE, pe DATE, sd DATE, ed DATE, ct VARCHAR, ts VARCHAR) AS
+$$ DECLARE tot_p NUMERIC;
+BEGIN
+tot_p := (pe - ps + 1) * (SELECT daily_price FROM Charges WHERE username = ct AND cat_name IN (SELECT cat_name FROM ownsPets WHERE username = ou AND name = pn));
+IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE p_start_date = ps AND p_end_date = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+INSERT INTO Bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
+END; $$
+LANGUAGE plpgsql;
+
 -- USERS, OWNERS, CARETAKERS, CATEGORIES, OWNSPETS
 
 CREATE TABLE Categories (
@@ -13,10 +60,12 @@ CREATE TABLE Users (
 	email			VARCHAR			NOT NULL UNIQUE CHECK(email LIKE '%@%.%'),
 	dob				DATE			NOT NULL CHECK (CURRENT_DATE - dob >= 6750), 
 	credit_card_no	VARCHAR			NOT NULL, 
-	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-___') OR NULL), 
+	unit_no			VARCHAR			CHECK (unit_no LIKE ('__-%') OR NULL), 
 	postal_code		VARCHAR			NOT NULL, 
 	avatar			BYTEA			NOT NULL, 
-	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE
+	reg_date		DATE			NOT NULL DEFAULT CURRENT_DATE, 
+	is_owner		BOOLEAN			NOT NULL DEFAULT FALSE, 
+	is_caretaker	BOOLEAN			NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE Owners (
@@ -34,7 +83,7 @@ CREATE TABLE Caretakers (
 );
 
 CREATE TABLE ownsPets (
-	username		VARCHAR			NOT NULL REFERENCES Owners(username), 
+	username		VARCHAR			NOT NULL REFERENCES Owners(username) ON DELETE CASCADE, 
 	name			NAME			NOT NULL, 
 	description		TEXT, 
 	cat_name		VARCHAR(10)		NOT NULL REFERENCES Categories(cat_name), 
@@ -62,6 +111,24 @@ CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
 	   END; $$
 	LANGUAGE plpgsql;
 
+CREATE OR REPLACE PROCEDURE add_ct (username 		VARCHAR,
+									first_name		NAME,
+									last_name		NAME,
+									password		VARCHAR(64),
+									email			VARCHAR,
+									dob				DATE,
+									credit_card_no	VARCHAR,
+									unit_no			VARCHAR,
+									postal_code		VARCHAR(6), 
+									avatar			BYTEA,
+									is_full_time		BOOLEAN
+									) AS
+	$$ BEGIN
+	   INSERT INTO Users VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, CURRENT_DATE);
+	   INSERT INTO Caretakers VALUES (username, is_full_time);
+	   END; $$
+	LANGUAGE plpgsql;
+
 --trigger to enable and disable account
 CREATE OR REPLACE FUNCTION update_disable() 
 RETURNS TRIGGER AS 
@@ -80,6 +147,42 @@ CREATE TRIGGER update_status
 AFTER INSERT OR DELETE ON ownsPets
 FOR EACH ROW EXECUTE PROCEDURE update_disable();
 
+--------------------------------------------------------
+
+--trigger to show type of account (caretaker, owner, user)
+CREATE OR REPLACE FUNCTION update_caretaker()
+RETURNS TRIGGER AS 
+	$$ DECLARE is_caretaker BOOLEAN;
+	BEGIN
+		SELECT 1 INTO is_caretaker FROM Caretakers WHERE username = NEW.username;
+		IF is_caretaker THEN UPDATE Users SET is_caretaker = TRUE WHERE username = NEW.username;
+		ELSE UPDATE Users SET is_caretaker = FALSE WHERE username = NEW.username;
+		END IF;
+
+		RETURN NEW;
+	END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_caretaker_status
+AFTER INSERT OR DELETE ON Caretakers
+FOR EACH ROW EXECUTE PROCEDURE update_caretaker();
+
+CREATE OR REPLACE FUNCTION update_owner()
+RETURNS TRIGGER AS 
+	$$ DECLARE is_owner BOOLEAN;
+	BEGIN
+		SELECT 1 INTO is_owner FROM Owners WHERE username = NEW.username;
+		IF is_owner THEN UPDATE Users SET is_owner = TRUE WHERE username = NEW.username;
+		ELSE UPDATE Users SET is_owner = FALSE WHERE username = NEW.username;
+		END IF;
+
+		RETURN NEW;
+	END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_owner_status
+AFTER INSERT OR DELETE ON Owners
+FOR EACH ROW EXECUTE PROCEDURE update_owner();
 --------------------------------------------------------
 
 CREATE TABLE Timings (
@@ -132,6 +235,7 @@ CREATE TABLE Administrators (
 	last_login_time TIMESTAMP
 );
 
+<<<<<<< HEAD
 CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps DATE, pe DATE, sd DATE, ed DATE, ct VARCHAR, ts VARCHAR) AS
 $$ DECLARE tot_p NUMERIC;
 BEGIN
@@ -169,6 +273,73 @@ END; $$
 LANGUAGE plpgsql;
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, 
+						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
+VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_2',
+		'sample_2', 's2@s.com', '02-01-2000', '1231231231231231',
+		'2', '123123', '02-10-2020', 'true', 4.5, 2, 2);
+
+
+-- INSERT categories
+CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 
+							  			 base_price		NUMERIC) AS
+	$$ BEGIN
+	   INSERT INTO Categories (cat_name, base_price) 
+	   VALUES (cat_name, base_price);
+	   END; $$
+	LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
+									   first_name		NAME,
+									   last_name		NAME,
+									   password			VARCHAR(64),
+									   email			VARCHAR,
+									   dob				DATE,
+									   credit_card_no	VARCHAR,
+									   unit_no			VARCHAR,
+									   postal_code		VARCHAR(6), 
+									   avatar			BYTEA
+									   ) AS
+	$$ BEGIN
+	   INSERT INTO Owners
+	   VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, CURRENT_DATE, avatar);
+	   END; $$
+	LANGUAGE plpgsql;
+	
+CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
+									 name 				NAME, 
+									 description		VARCHAR, 
+									 cat_name			VARCHAR(10),
+									 size				VARCHAR, 
+									 sociability		VARCHAR,
+									 special_req		VARCHAR, 
+									 img 				BYTEA
+									 ) AS
+	$$ BEGIN
+	   INSERT INTO ownsPets
+	   VALUES (username, name, description, cat_name, size, sociability, special_req, img);
+	   END; $$
+	LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
+									   first_name		NAME,
+									   last_name		NAME,
+									   password			VARCHAR(64),
+									   email			VARCHAR,
+									   dob				DATE,
+									   credit_card_no	VARCHAR,
+									   unit_no			VARCHAR,
+									   postal_code		VARCHAR(6), 
+									   avatar			BYTEA,
+									   is_full_time		BOOLEAN
+									   ) AS
+=======
+=======
+>>>>>>> b1c188e058b988b5c70b7aa6a83a8f25593a07c7
+>>>>>>> master
 CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 										password 		VARCHAR(64),
 										last_login_time TIMESTAMP 
@@ -178,6 +349,7 @@ CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
 	   VALUES (admin_id, password, last_login_time ); 
 	   END; $$
 	LANGUAGE plpgsql;
+<<<<<<< HEAD
 
 
 /* SELECT extract(year from p_start_date) as year, to_char(p_start_date,'Mon') as month, SUM(total_price) FROM Bids WHERE p_start_date>= '2020-01-01' AND p_start_date <= '2020-12-31' GROUP BY year, month, username */
@@ -1193,4 +1365,17 @@ insert into Users (username, first_name, last_name, password, email, dob, credit
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('rperaccoro', 'Ros', 'Peracco', 'cmdpHTlDNw2', 'rperaccoro@gizmodo.com', '1958-10-11', '5308840615049225', null, '904685', 'https://robohash.org/reprehenderitpariaturmaxime.png?size=50x50&set=set1', '2020-10-22');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hsharlandrp', 'Helen', 'Sharland', '3k6oyzbqP5', 'hsharlandrp@merriam-webster.com', '1988-11-17', '36786476630902', null, '799251', 'https://robohash.org/quimolestiaeperspiciatis.bmp?size=50x50&set=set1', '2020-07-17');
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('eemettrq', 'Ewen', 'Emett', '0FLKPIQ7g7re', 'eemettrq@google.com', '1984-08-16', '4911432579397543146', '25-672', '506471', 'https://robohash.org/voluptatemconsecteturvoluptatum.jpg?size=50x50&set=set1', '2020-08-13');
+<<<<<<< HEAD
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('vjandacrr', 'Violet', 'Jandac', 'QWNbqFKM2R', 'vjandacrr@smh.com.au', '1981-11-11', '3564289361243299', null, '836817', 'https://robohash.org/saepemagniqui.png?size=50x50&set=set1', '2020-07-22');
+=======
+insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('vjandacrr', 'Violet', 'Jandac', 'QWNbqFKM2R', 'vjandacrr@smh.com.au', '1981-11-11', '3564289361243299', null, '836817', 'https://robohash.org/saepemagniqui.png?size=50x50&set=set1', '2020-07-22');
+=======
+<<<<<<< HEAD
+>>>>>>> master
+=======
+>>>>>>> master
+>>>>>>> 5930f2f179728b127cda8f2e52afbcee8cf36f82
+=======
+>>>>>>> b1c188e058b988b5c70b7aa6a83a8f25593a07c7
+>>>>>>> master
+>>>>>>> master

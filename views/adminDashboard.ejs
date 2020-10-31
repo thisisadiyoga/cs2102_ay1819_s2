@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+  	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -10,12 +10,12 @@
 		<title>The Collar Klub</title>
 
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-	  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-
-	  <!-- Custom styles for this template-->
+	  	<!-- Custom styles for this template-->
 		<link href="stylesheets/index.css" rel="stylesheet">
-  </head>
+  	</head>
+
 	<body id="page-top">
 		<%- include navbar.ejs %>
 		<div id="wrapper">
@@ -29,24 +29,23 @@
 					<!-- Modal -->
 					<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 						<div class="modal-dialog" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h5 class="modal-title" id="exampleModalLabel">Confirm deletion</h5>
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-									<span aria-hidden="true">&times;</span>
-								</button>
-							</div>
-								<div class="modal-body">Confirm the deletion of account <%= user %>?
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="exampleModalLabel">Confirm deletion</h5>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
 								</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-								<form action="del_admin" method="post"><button class="btn btn-primary float-left" type="submit" id="username" name="username" value="<%= user %>">Delete Account</button></form>
+								<div class="modal-body">Confirm the deletion of account <%= user %>?</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+									<form action="del_admin" method="post"><button class="btn btn-primary float-left" type="submit" id="username" name="username" value="<%= user %>">Delete Account</button></form>
+								</div>
 							</div>
-						</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		<%- include bottomscript.ejs %>
-  </body>
+  	</body>
 </html>

@@ -1,4 +1,3 @@
-
 -- USERS, OWNERS, CARETAKERS, CATEGORIES, OWNSPETS
 
 CREATE TABLE Categories (
@@ -50,9 +49,9 @@ CREATE TABLE ownsPets (
 
 
 CREATE TABLE declares_availabilities(
-    start_timestamp TIMESTAMP NOT NULL,
-    end_timestamp TIMESTAMP NOT NULL,
-    caretaker_username VARCHAR, --TODO: REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    start_timestamp 		TIMESTAMP 	NOT NULL,
+    end_timestamp 			TIMESTAMP 	NOT NULL,
+    caretaker_username 		VARCHAR, --TODO: REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
@@ -60,28 +59,28 @@ CREATE TABLE declares_availabilities(
 
 -- TIMINGS, BIDS
 CREATE TABLE Timings (
-	start_timestamp TIMESTAMP,
-	end_timestamp TIMESTAMP,
+	start_timestamp 	TIMESTAMP,
+	end_timestamp 		TIMESTAMP,
 	PRIMARY KEY (start_timestamp, end_timestamp),
 	CHECK (end_timestamp > start_timestamp)
 );
 
 CREATE TABLE bids (
-	owner_username VARCHAR,
-      pet_name VARCHAR,
-      bid_start_timestamp TIMESTAMP,
-      bid_end_timestamp TIMESTAMP,
-      avail_start_timestamp TIMESTAMP,
-      avail_end_timestamp TIMESTAMP,
-      caretaker_username VARCHAR,
-      rating NUMERIC,
-      review VARCHAR,
-      is_successful BOOLEAN,
-      payment_method VARCHAR,
-      mode_of_transfer VARCHAR,
-      is_paid BOOLEAN,
-      total_price NUMERIC NOT NULL CHECK (total_price > 0),
-      type_of_service VARCHAR NOT NULL,
+	owner_username 				VARCHAR,
+      pet_name 					VARCHAR,
+      bid_start_timestamp 		TIMESTAMP,
+      bid_end_timestamp 		TIMESTAMP,
+      avail_start_timestamp 	TIMESTAMP,
+      avail_end_timestamp 		TIMESTAMP,
+      caretaker_username 		VARCHAR,
+      rating 					NUMERIC,
+      review 					VARCHAR,
+      is_successful 			BOOLEAN,
+      payment_method 			VARCHAR,
+      mode_of_transfer 			VARCHAR,
+      is_paid 					BOOLEAN,
+      total_price 				NUMERIC 		NOT NULL CHECK (total_price > 0),
+      type_of_service 			VARCHAR 		NOT NULL,
       PRIMARY KEY (pet_name, owner_username, bid_start_timestamp,  caretaker_username, avail_start_timestamp),
       FOREIGN KEY (bid_start_timestamp, bid_end_timestamp) REFERENCES Timings(start_timestamp, end_timestamp),
       FOREIGN KEY (avail_start_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, caretaker_username),
@@ -91,17 +90,16 @@ CREATE TABLE bids (
 );
 
 CREATE TABLE isPaidSalaries (
-	caretaker_id VARCHAR REFERENCES caretakers(username)
-	ON DELETE cascade,
-	year INTEGER,
-	month INTEGER,
-	salary_amount NUMERIC NOT NULL,
+	caretaker_id 				VARCHAR 		REFERENCES caretakers(username) ON DELETE cascade,
+	year 						INTEGER,
+	month 						INTEGER,
+	salary_amount 				NUMERIC 		NOT NULL,
 	PRIMARY KEY (caretaker_id, year, month)
 );
 
 CREATE TABLE Administrators (
-	admin_id VARCHAR PRIMARY KEY,
-	password VARCHAR(64) NOT NULL,
+	admin_id 					VARCHAR 		PRIMARY KEY,
+	password 					VARCHAR(64) 	NOT NULL,
 	last_login_time TIMESTAMP
 );
 
@@ -142,7 +140,6 @@ CREATE TRIGGER merge_availabilities
 BEFORE INSERT ON declares_availabilities
 FOR EACH ROW EXECUTE PROCEDURE merge_availabilities();
 
-
 --delete availabilities only if there are no pets the caretaker is scheduled to care for
 CREATE OR REPLACE FUNCTION check_deletable()
 RETURNS TRIGGER AS
@@ -160,11 +157,9 @@ $$
    END $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER check_deletable
 BEFORE DELETE ON declares_availabilities
 FOR EACH ROW EXECUTE PROCEDURE check_deletable();
-
 
 --Update availabilities while checking if it can be shrunked and merging if it is expanded
 --Break update down into delete and insertion
@@ -310,7 +305,6 @@ AFTER INSERT OR DELETE ON Owners
 FOR EACH ROW EXECUTE PROCEDURE update_owner();
 --------------------------------------------------------
 
-
 CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP, pe TIMESTAMP, sd TIMESTAMP, ed TIMESTAMP, ct VARCHAR, ts VARCHAR) AS
 $$ DECLARE tot_p NUMERIC;
 BEGIN
@@ -356,9 +350,6 @@ LANGUAGE plpgsql;
 CREATE TRIGGER update_bids
 BEFORE UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE update_bids();
-
-
-
 
 /*
 

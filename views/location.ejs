@@ -19,11 +19,9 @@
     </head>
 
     <body id="page-top">
-    <%- include navbar.ejs %>
-    
+        <%- include navbar.ejs %>
         <div id="wrapper">
             <%- include sidebar.ejs %>
-
             <div id="content-wrapper">
                 <div class="container-fluid">		
                     <div class="card mb-3">
@@ -33,7 +31,6 @@
                         <div class="card-body">
                             <% var text = (user_list.length == 0) ? "No nearby user found" : "" %>
                             <%= text %>
-
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
@@ -46,7 +43,6 @@
                                             <th>Caretaker</th>
                                         </tr>
                                     </thead>
-                                    
                                     <tbody>
                                         <div class="container">
                                             <% for(var i=0; i<user_list.length; i++) { %>

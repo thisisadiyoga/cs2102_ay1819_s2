@@ -19,10 +19,8 @@
 
     <body id="page-top">
     <%- include navbar.ejs %>
-    
         <div id="wrapper">
             <%- include adminSidebar.ejs %>
-
             <div id="content-wrapper">
                 <div class="container-fluid">		
                     <div class="card mb-3">
@@ -51,13 +49,13 @@
                                                 <!-- Modal -->
                                                 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="editLabel">Edit <%= category[i].cat_name%></h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="editLabel">Edit <%= category[i].cat_name%></h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
                                                             <div class="modal-body">
                                                                 <!-- add category information here-->
                                                                 <form action="edit_cat" method="post" id="edit_cat">
@@ -65,11 +63,11 @@
                                                                     <label for="base_price">Base Price:</label>
                                                                     <input type="text" id="base_price" name="base_price" value="<%= category[i].base_price %>">
                                                             </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                            <button class="btn btn-primary" type="submit" id="edit_cat" name="edit_cat">Update</button></form>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                <button class="btn btn-primary" type="submit" id="edit_cat" name="edit_cat">Update</button></form>
+                                                            </div>
                                                         </div>
-                                                    </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -87,13 +85,13 @@
                             <!-- Modal -->
                             <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editLabel">Add</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editLabel">Add</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
                                         <div class="modal-body">
                                             <!-- add category information here-->
                                             <form action="add_cat" method="post" id="add_cat">
@@ -106,13 +104,15 @@
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                             <button class="btn btn-primary" type="submit" id="add_cat" name="add_cat">Add</button>
-                                        </form>
+                                            </form>
                                         </div>
-                                </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div><span class="badge badge-pill badge-info"><%= add_msg %></span><span class="badge badge-pill badge-info"><%= edit_msg %></span><span class="badge badge-pill badge-info"><%= del_msg %></span></div>
+                            <div>
+                                <span class="badge badge-pill badge-info"><%= add_msg %></span><span class="badge badge-pill badge-info"><%= edit_msg %></span><span class="badge badge-pill badge-info"><%= del_msg %></span>
+                            </div>
                         </div>
                     </div>
                 </div>

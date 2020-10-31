@@ -51,7 +51,7 @@ CREATE TABLE ownsPets (
 CREATE TABLE declares_availabilities(
     start_timestamp 		TIMESTAMP 	NOT NULL,
     end_timestamp 			TIMESTAMP 	NOT NULL,
-    caretaker_username 		VARCHAR, --TODO: REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    caretaker_username 		VARCHAR REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
@@ -66,7 +66,7 @@ CREATE TABLE Timings (
 );
 
 CREATE TABLE bids (
-	owner_username 				VARCHAR,
+	  owner_username 			VARCHAR,
       pet_name 					VARCHAR,
       bid_start_timestamp 		TIMESTAMP,
       bid_end_timestamp 		TIMESTAMP,
@@ -240,11 +240,11 @@ CREATE OR REPLACE PROCEDURE add_ct (username 		VARCHAR,
 									unit_no			VARCHAR,
 									postal_code		VARCHAR(6), 
 									avatar			BYTEA,
-									is_full_time		BOOLEAN
+									is_full_time	BOOLEAN
 									) AS
 	$$ BEGIN
 	
-	   INSERT INTO Users VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, CURRENT_DATE, FALSE, TRUE);
+	   INSERT INTO Users VALUES (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, CURRENT_DATE);
 	   INSERT INTO Caretakers VALUES (username, is_full_time);
 	   END; $$
 	LANGUAGE plpgsql;

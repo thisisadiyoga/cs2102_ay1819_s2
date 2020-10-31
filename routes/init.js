@@ -14,8 +14,11 @@ const { Pool } = require('pg');
 const pool = new Pool({
 
     //ssl: true
-     user: postgres_details.user,
-    database: postgres_details.database,
+    user: postgres_details.user,
+	database: postgres_details.database,
+	host: postgres_details.host,
+	port: postgres_details.port,
+	password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
 
@@ -44,6 +47,7 @@ function initRouter(app) {
 	app.post('/edit_cat', passport.authMiddleware(), edit_cat);
 	app.post('/add_cat', passport.authMiddleware(), add_cat);
 	app.post('/del_admin', del_admin);
+	app.get('/adminStatistics', passport.authMiddleware(), adminStatistics)
 
 	/*Registration*/
 	app.get('/register' , passport.antiMiddleware(), register );
@@ -178,6 +182,12 @@ function dashboard(req, res, next) {
 function adminDashboard(req, res, next) {
 	basic(req, res, 'adminDashboard', {
 		auth: true });
+}
+
+function adminStatistics(req, res, next) {
+	basic(req, res, 'adminStatistics', {
+		auth: true
+	});
 }
 
 function register(req, res, next) {

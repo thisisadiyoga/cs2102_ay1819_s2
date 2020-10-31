@@ -11,8 +11,6 @@ const antiMiddleware = require('./antimiddle');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
-  
-  
     //ssl: true
     user: postgres_details.user,
 	database: postgres_details.database,

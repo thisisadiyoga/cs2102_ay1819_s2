@@ -44,29 +44,6 @@
                                     <tbody>
                                         <% for(var i=0; i<category.length; i++) { %>
                                         <tr>
-                                            <!--<td>
-                                                
-                                                <button class="btn" type="submit" id="del_cat" name="del_cat" value="<%= category[i].cat_name%>"><i class="fas fa-trash" title="Delete Pet" data-toggle="modal" data-target="#delModal"></i></button>
-
-                                                <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                    <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="delLabel">Confirm deletion</h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                            <div class="modal-body">Confirm the deletion of <%= category[i].cat_name%>?
-                                                            </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                            <form action="del_cat" method="post"><button class="btn btn-primary" type="submit" id="cat_name" name="cat_name" value="<%= category[i].cat_name%>">Delete Pet</button></form>
-                                                        </div>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                            </td>-->
                                             <td>
                                                 <!-- Button trigger modal -->
                                                 <button class="btn" type="submit" id="edit_cat" name="edit_cat"><i class="fas fa-edit" title="Edit Category" data-toggle="modal" data-target="#editModal"></i></button>

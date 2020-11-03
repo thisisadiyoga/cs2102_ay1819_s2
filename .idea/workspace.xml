@@ -2,30 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e24defb6-26ad-40c9-b96e-475bc117fb15" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/images/blank-avatar.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/javascripts/location.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/seed/Category.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/seed/Users.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/caretaker.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/ctregister.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/location.ejs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/javascripts/newbid.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/auth/init.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/extra/ownerseed.sql" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/init.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/sql/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/postgre.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/postgre.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/uploads/avatar/.haha.png.icloud" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/dashboard.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/dashboard.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/display.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/display.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/index.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/index.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/loginsidebar.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/loginsidebar.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/navbar.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/navbar.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/owner_calendar.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/owner_calendar.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/sidebar.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/sidebar.ejs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/newbid.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/newbid.ejs" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -48,23 +30,23 @@
   </component>
   <component name="ProjectId" id="1iiZRmyfKfQTw3nuXcnSrMbJmem" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/public" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/javascripts" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/public/stylesheets" />
-      <recent name="$PROJECT_DIR$/public" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/public" />
       <recent name="$PROJECT_DIR$/public/javascripts" />
+      <recent name="$PROJECT_DIR$/public" />
       <recent name="$PROJECT_DIR$/views" />
       <recent name="$PROJECT_DIR$/public/stylesheets" />
       <recent name="$PROJECT_DIR$/sql" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public/stylesheets" />
+      <recent name="$PROJECT_DIR$/public" />
     </key>
   </component>
   <component name="RunDashboard">

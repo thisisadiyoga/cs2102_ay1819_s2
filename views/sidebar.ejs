@@ -23,10 +23,16 @@
 		</a>
 	</li>
 
-	<li class="nav-item" <%= page==="pets" ? "active" : "" %> style="<%=owner%>">
+	<li class="nav-item" <%= page==="owner_calendar" ? "active" : "" %> style="<%=owner%>">
 		<a class="nav-link" href="<%= page==="pets" ? "#" : "/owner_calendar" %>">
 			<i class="fas fa-calendar-alt">&nbsp;</i>
 			<span>My Bids</span></a>
+	</li>
+
+	<li class="nav-item" <%= page==="caretaker_calendar" ? "active" : "" %> style="<%=caretaker%>">
+	<a class="nav-link" href="<%= page==="caretaker_calendar" ? "#" : "/caretaker_calendar" %>">
+	<i class="fas fa-calendar-alt">&nbsp;</i>
+	<span>My Availabilities</span></a>
 	</li>
 
 	<li class="nav-item" <%= page==="pets" ? "active" : "" %> style="<%=owner%>">

@@ -16,9 +16,6 @@ const pool = new Pool({
     //ssl: true
     user: postgres_details.user,
 	database: postgres_details.database,
-	host: postgres_details.host,
-	port: postgres_details.port,
-	password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
 
@@ -184,8 +181,8 @@ function adminDashboard(req, res, next) {
 		auth: true });
 }
 
-function adminStatistics(req, res, next) {
-	basic(req, res, 'adminStatistics', {
+function adminInformation(req, res, next) {
+	basic(req, res, 'adminInformation', {
 		auth: true
 	});
 }
@@ -216,18 +213,54 @@ function pets (req, res, next) {
 	});
 }
 
-function adminInformation (req, res, next) {
+function adminStatistics (req, res, next) {
 	var allInformation;
 
 	pool.query(sql_query.query.list_caretakers, (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
-			allInformation = [];
+			allCaretakers = [];
 		} else {
-			allInformation = data.rows;
+			allCaretakers = data.rows;
 		}
-		console.log(allInformation);
+		pool.query(sql_query.query.get_all_pets_in_month, (err,data) => {
+			if(err || !data.rows || data.rows.length == 0) {
+				allPets = [];
+			} else {
+				allPets = data.rows;
+			}
+			
+			pool.query(sql_query.query.get_number_of_jobs_every_month, (err,data) => {
+				if(err || !data.rows || data.rows.length == 0) {
+					allJobs = [];
+				} else {
+					allJobs = data.rows;
+				}
+	
+				pool.query(sql_query.query.get_caretaker_salary_every_month, (err,data) => {
+					if(err || !data.rows || data.rows.length == 0) {
+						allSalary = [];
+					} else {
+						allSalary = data.rows;
+					}
+		
+					pool.query(sql_query.query.get_all_underperforming_caretakers, (err,data) => {
+						if(err || !data.rows || data.rows.length == 0) {
+							allUnderperforming = [];
+						} else {
+							allUnderperforming = data.rows;
+						}
+			
+						basic(req, res, 'adminStatistics', { caretakers : allCaretakers, 
+							allPets: allPets, 
+							allJobs: allJobs, 
+							allSalary: allSalary,
+							allUnderperforming: allUnderperforming,
+							auth: true });
+					})
+				})
+			})
+		})
 
-	basic(req, res, 'adminInformation', { caretakers : allInformation, auth: true });
 	});
 }
 
@@ -650,10 +683,10 @@ function update_availability(req, res, next) {
         if(err) {
               req.flash('error', 'The period cannot be updated. Check that there are no scheduled pet-care jobs that are outside of the new period.');
 
-             res.redirect('/availabilities?update=fail');
+             res.redirect('/caretaker_calendar?update=fail');
         } else {
               req.flash('success', 'The period is successfully updated.');
-             res.redirect('/availabilities?update=pass');
+             res.redirect('/caretaker_calendar?update=pass');
         }
     });
 }
@@ -669,11 +702,11 @@ function add_availability(req, res, next) {
         if(err) {
 
                req.flash('error', 'The new period cannot be added.');
-                res.redirect('/availabilities?add=fail');
+                res.redirect('/caretaker_calendar?add=fail');
 
         } else {
             req.flash('success', 'The period is successfully added. It may merge with existing availability schedule.');
-             res.redirect('/availabilities?add=pass');
+             res.redirect('/caretaker_calendar?add=pass');
         }
     });
 }
@@ -685,14 +718,16 @@ function delete_availability(req, res, next) {
     pool.query(sql_query.query.delete_availability, [start_timestamp, req.user.username], (err, data) => {
         if(err) {
 
+        console.log("Error deleting availability: " + err);
+
             req.flash('error', 'The period cannot be deleted as there is a scheduled pet-care job within that period.');
 
-             res.redirect('/availabilities?delete=fail');
+             res.redirect('/caretaker_calendar?delete=fail');
 
 
         } else {
         req.flash('success', 'The period is successfully deleted.');
-             res.redirect('/availabilities?delete=pass');
+             res.redirect('/caretaker_calendar?delete=pass');
         }
     });
 }
@@ -778,11 +813,14 @@ console.log("in insert bid method ");
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
 	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
+	console.log("calling insert bid query  with avail start and end timestamp " + start + " " + end);
 	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
 		if (err) {
+		  req.flash('error', 'Error creating bids. Check the bid start and end time is within the start and end time of caretaker\'s availability');
 			console.error("Error in creating bid", err);
 		} else {
-		     console.log("gg to bids.ejs");
+		      req.flash('success', 'New bid is successfully added.');
+
 			basic(req, res, 'owner_calendar', {auth:true});
 		}
 	});

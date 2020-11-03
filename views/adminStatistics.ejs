@@ -22,20 +22,125 @@
 			<div id="content-wrapper">
 				<ul class="nav nav-tabs" id="myTab" role="tablist" style="margin-left:20px">
 					<li class="nav-item">
-						<a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+					  <a class="nav-link active" id="pet-tab" data-toggle="tab" href="#pet" role="tab" aria-controls="home" aria-selected="true">Number of Pets every month</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Profile</a>
+					  <a class="nav-link" id="job-tab" data-toggle="tab" href="#job" role="tab" aria-controls="profile" aria-selected="false">Number of Jobs every month</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact</a>
+						<a class="nav-link" id="salary-tab" data-toggle="tab" href="#salary" role="tab" aria-controls="contact" aria-selected="false">Caretaker Salary information</a>
+					  </li>
+					<li class="nav-item">
+					  <a class="nav-link" id="caretaker-tab" data-toggle="tab" href="#caretaker" role="tab" aria-controls="contact" aria-selected="false">All Caretaker Information</a>
 					</li>
-				</ul>
-				<div class="tab-content" id="myTabContent" style="margin-left:20px; margin-top: 20px;">
-					<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab"></div>
-					<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab"></div>
-					<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab"></div>
-				</div>
+					<li class="nav-item">
+						<a class="nav-link" id="underperforming-tab" data-toggle="tab" href="#underperforming" role="tab" aria-controls="contact" aria-selected="false">Underperforming Caretaker information</a>
+					</li>
+				  </ul>
+				  <div class="tab-content" id="myTabContent" style="margin-left:20px; margin-top: 20px;">
+					<div class="tab-pane fade show active" id="pet" role="tabpanel" aria-labelledby="pet-tab">
+
+						<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+							<thead>
+								<tr>
+									<th>Year</th>
+									<th>Month</th>
+									<th>Num of Pets</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% for(var i=0; i< allPets.length; i++) { %>
+								<tr>
+									<td style="max-width:5px;"><%= allPets[i].year%></td>
+									<td style="max-width:200px;"><%= allPets[i].month%></td>
+									<td style="max-width:200px;"><%= allPets[i].count_of_pets%></td>
+								</tr>
+								<% } %>
+							</tbody>
+						</table>
+						
+
+					</div>
+					<div class="tab-pane fade" id="job" role="tabpanel" aria-labelledby="job-tab">
+
+						<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+							<thead>
+								<tr>
+									<th>Year</th>
+									<th>Month</th>
+									<th>Num of Jobs</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% for(var i=0; i< allJobs.length; i++) { %>
+								<tr>
+									<td style="max-width:5px;"><%= allJobs[i].year%></td>
+									<td style="max-width:200px;"><%= allJobs[i].month%></td>
+									<td style="max-width:200px;"><%= allJobs[i].count_of_jobs%></td>
+								</tr>
+								<% } %>
+							</tbody>
+						</table>
+
+
+					</div>
+					<div class="tab-pane fade" id="salary" role="tabpanel" aria-labelledby="salary-tab">
+						<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+							<thead>
+								<tr>
+									<th>Year</th>
+									<th>Month</th>
+									<th>Caretaker</th>
+									<th>Raw Earning</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% for(var i=0; i< allSalary.length; i++) { %>
+								<tr>
+									<td style="max-width:5px;"><%= allSalary[i].year%></td>
+									<td style="max-width:200px;"><%= allSalary[i].month%></td>
+									<td style="max-width:200px;"><%= allSalary[i].caretaker_username%></td>
+									<td style="max-width:200px;"><%= allSalary[i].rawearning%></td>
+								</tr>
+								<% } %>
+							</tbody>
+						</table>
+
+					</div>
+
+					<div class="tab-pane fade" id="caretaker" role="tabpanel" aria-labelledby="caretaker-tab">
+						<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Caretaker Type</th>
+									<th>Rating</th>
+									<th>Number of pets</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% for(var i=0; i< caretakers.length; i++) { %>
+								<tr>
+									<td style="max-width:5px;"><%= caretakers[i].username%></td>
+									<td style="max-width:5px;">
+										<% if(caretakers[i].is_full_time) { %> 
+											Full-Time
+										<% } else { %> 
+											Part-Time
+										<% } %>
+									</td>
+									<td style="max-width:5px;"><%= caretakers[i].avg_rating%></td>
+									<td style="max-width:200px;"><%= caretakers[i].no_of_pets_taken%></td>
+								</tr>
+								<% } %>
+							</tbody>
+						</table>
+					</div>
+					<div class="tab-pane fade" id="underperforming" role="tabpanel" aria-labelledby="underperforming-tab">
+
+
+					</div>
+				  </div>
 			</div>
 		</div>
 		<%- include bottomscript.ejs %>

@@ -17,11 +17,10 @@ sql.query = {
 	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
 	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
 	
-	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
+	insert_bid: 'CALL insert_bid($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5::timestamp AT TIME ZONE \'UTC\', $6::timestamp AT TIME ZONE \'UTC\', $7, $8);',
 
     view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
-	insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
 	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
 	set_transac_details: 'UPDATE Bids SET payment_method = $1, mode_of_transfer = $2 WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND bid_start_timestamp = $6 AND bid_end_timestamp = $7',
     pay_bid: 'UPDATE Bids SET is_paid = true WHERE owner_username = $1 AND pet_name = $2 AND caretaker_username = $3 AND bid_start_timestamp = $4 AND bid_end_timestamp = $5',
@@ -58,11 +57,11 @@ sql.query = {
 	upload_userpic: "SELECT encode(profile_pic, 'base64') FROM Users where username = $1;", 
 
 	//summary information 
-	get_all_pets_in_month: "SELECT extract(year from p_start_date) as year, to_char(p_start_date,'Mon') as month, count(pet_name) FROM Bids WHERE p_start_date>= '2020-01-01' AND p_start_date <= '2020-12-31' GROUP BY year, month;",
-	get_caretaker_salary_every_month: "SELECT extract(year from p_start_date) as year, to_char(p_start_date,'Mon') as month, SUM(total_price) FROM Bids WHERE p_start_date>= '2020-01-01' AND p_start_date <= '2020-12-31' GROUP BY year, month, username;",
+	get_all_pets_in_month: "SELECT extract(year from bid_start_timestamp) as year, to_char(bid_start_timestamp,'Mon') as month, count(pet_name) as count_of_pets FROM Bids WHERE is_successful AND bid_start_timestamp>= '2020-01-01' GROUP BY year, month; ",
+	get_caretaker_salary_every_month: "SELECT extract(year from bid_start_timestamp) as year, to_char(bid_start_timestamp,'Mon') as month, caretaker_username, SUM(total_price) as rawEarning FROM Bids WHERE is_successful AND bid_start_timestamp>= '2020-01-01' AND bid_start_timestamp <= '2020-12-31' GROUP BY year, month, caretaker_username;",
 	// underperforming: caretakers with less than 2 distinct pets
 	get_all_underperforming_caretakers: "",
-	get_number_of_jobs_every_month: " SELECT extract(year from p_start_date) as year, to_char(p_start_date,'Mon') as month, count(*) FROM Bids WHERE is_successful GROUP BY year, month;",
+	get_number_of_jobs_every_month: " SELECT extract(year from bid_start_timestamp) as year, to_char(bid_start_timestamp,'Mon') as month, count(*) as count_of_jobs FROM Bids WHERE is_successful GROUP BY year, month;",
 
 	//delete information
 	del_user : "DELETE FROM Users WHERE username = $1;", 

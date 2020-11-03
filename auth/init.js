@@ -14,9 +14,6 @@ const pool = new Pool({
     //ssl: true
     user: postgres_details.user,
 	database: postgres_details.database,
-	host: postgres_details.host,
-	port: postgres_details.port,
-	password: postgres_details.password,
 	 idleTimeoutMillis: 2000
 });
 

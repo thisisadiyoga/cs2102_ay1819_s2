@@ -100,6 +100,8 @@ function initRouter(app) {
 	app.get('/viewbids', passport.authMiddleware(), viewbids);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
 	app.get('/rate_review_form', passport.authMiddleware(), rate_review_form);
+	app.get('/insert_transac', passport.authMiddleware(), view_transac);
+	app.post('/insert_transac', passport.authMiddleware(), insert_transac);
 	app.get('/newbid', passport.authMiddleware(), newbid);
 	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
 
@@ -797,6 +799,28 @@ function rate_review (req, res, next) {
 			res.redirect('/viewbids');
 		}
 	});
+}
+
+function view_transac (req, res, next) {
+	res.render('insert_transac', {auth:true});
+}
+
+function insert_transac (req, res, next) {
+	console.log("Hello");
+	var owner = req.body.ownername;
+	var pet = req.body.petname;
+	var start = req.body.startdate;
+	var end = req.body.enddate;
+	var caretaker = req.body.caretakername;
+	var payment = req.body.paymentmethod;
+	var mot = req.body.modeoftransfer;
+	pool.query(sql_query.query.set_transac_details, [payment, mot, owner, pet, caretaker, start, end], (err, data) => {
+		if (err) {
+			console.error("Error in setting transaction details", err);
+		} else {
+			res.redirect('/viewbids');
+		}
+	})
 }
 
 function newbid (req, res, next) {

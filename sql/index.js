@@ -17,8 +17,6 @@ sql.query = {
 	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
 	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
 	
-	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
-
 	view_bids: 'SELECT * FROM bids WHERE owner_username = $1',
 	rate_review: 'UPDATE bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
 	insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',

@@ -819,9 +819,11 @@ function insert_bid (req, res, next) {
 		if (err) {
 			console.error("Error in creating bid", err);
 		} else {
-			basic(req, res, 'viewbids', {auth:true});
+			res.render('viewbids', {data:data.rows, auth:true});
 		}
 	});
+
+	console.log('Interlude');
 
 	pool.query(sql_query.query.choose_bids, (err, data) => {
 		if (err) {

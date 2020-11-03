@@ -81,9 +81,9 @@ CREATE TABLE bids (
       is_paid 					BOOLEAN,
       total_price 				NUMERIC 		NOT NULL CHECK (total_price > 0),
       type_of_service 			VARCHAR 		NOT NULL,
-	  PRIMARY KEY (pet_name, owner_username, bid_start_timestamp,  caretaker_username, avail_start_timestamp),
+	  PRIMARY KEY (pet_name, owner_username, bid_start_timestamp, bid_end_timestamp, caretaker_username, avail_start_timestamp, avail_end_timestamp),
       FOREIGN KEY (bid_start_timestamp, bid_end_timestamp) REFERENCES Timings(start_timestamp, end_timestamp),
-      FOREIGN KEY (avail_start_timestamp, avail_end_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, end_timestamp, username),
+      FOREIGN KEY (avail_start_timestamp, avail_end_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, end_timestamp, caretaker_username),
       FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
       UNIQUE (pet_name, owner_username, caretaker_username, bid_start_timestamp, bid_end_timestamp),
 	  CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
@@ -97,10 +97,22 @@ CREATE TABLE Charges (
   daily_price NUMERIC,
   cat_name VARCHAR(10) REFERENCES Categories(cat_name),
   caretaker_username VARCHAR REFERENCES Caretakers(username),
-  PRIMARY KEY (cat_name, caretaker_username),
-  CHECK ((EXISTS (SELECT 1 FROM Caretakers WHERE username = caretaker_username AND is_full_time = false)) OR
-  (daily_price >= (SELECT base_price FROM Categories C WHERE C.cat_name = cat_name)))
-)
+  PRIMARY KEY (cat_name, caretaker_username)
+);
+
+CREATE OR REPLACE FUNCTION is_valid_price() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM Caretakers C WHERE C.username = NEW.caretaker_username AND C.is_full_time = false;
+IF ctx > 0 THEN RETURN NEW; END IF;
+SELECT COUNT(*) INTO ctx FROM Categories A WHERE A.cat_name = NEW.cat_name AND A.base_price > NEW.daily_price;
+IF ctx > 0 THEN RETURN NULL; ELSE RETURN NEW; END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_daily_price
+BEFORE INSERT OR UPDATE ON Charges
+FOR EACH ROW EXECUTE PROCEDURE is_valid_price();
 
 CREATE TABLE isPaidSalaries (
 	caretaker_id 				VARCHAR 		REFERENCES caretakers(username) ON DELETE cascade,
@@ -322,7 +334,7 @@ CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP, pe 
 $$ DECLARE tot_p NUMERIC;
 BEGIN
 SELECT DATE_PART('day', pe - ps) INTO tot_p;
-tot_p := (pe - ps + 1) * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
+tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
 IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
 INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
 END; $$
@@ -356,7 +368,8 @@ $$ DECLARE first_result INTEGER := 0;
   DECLARE second_result INTEGER := 0;
   DECLARE total_result INTEGER;
   BEGIN
-
+  END LOOP;
+  RETURN NULL;
   END $$
 LANGUAGE plpgsql;
 

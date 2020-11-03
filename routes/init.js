@@ -76,7 +76,6 @@ function initRouter(app) {
 	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
 
     /*BIDS*/
-	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 
 	/* LOGIN */
@@ -100,7 +99,7 @@ function initRouter(app) {
 	/*BIDS*/
 	app.get('/viewbids', passport.authMiddleware(), viewbids);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
-	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
+	app.get('/rate_review_form', passport.authMiddleware(), rate_review_form);
 	app.get('/newbid', passport.authMiddleware(), newbid);
 	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
 
@@ -780,7 +779,7 @@ function viewbids (req, res, next) {
 
 function rate_review_form (req, res, next) {
 	console.log("lol");
-	res.render('rate_review', {auth:true});
+	res.render('rate_review_form', {auth:true});
 }
 
 function rate_review (req, res, next) {
@@ -797,14 +796,6 @@ function rate_review (req, res, next) {
 		} else {
 			res.redirect('/viewbids');
 		}
-
-		pool.query(sql_query.query.choose_bids, (err, data) => {
-			if (err) {
-				console.error("Error in choosing bids", err);
-			} else {
-				res.redirect('/viewbids');
-			}
-		});
 	});
 }
 

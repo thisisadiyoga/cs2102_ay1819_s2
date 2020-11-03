@@ -19,16 +19,16 @@ sql.query = {
 	
 	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
 
-    view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
-	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
+	view_bids: 'SELECT * FROM bids WHERE owner_username = $1',
+	rate_review: 'UPDATE bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
 	insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
-	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
-	set_transac_details: 'UPDATE Bids SET payment_method = $1, mode_of_transfer = $2 WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND bid_start_timestamp = $6 AND bid_end_timestamp = $7',
-    pay_bid: 'UPDATE Bids SET is_paid = true WHERE owner_username = $1 AND pet_name = $2 AND caretaker_username = $3 AND bid_start_timestamp = $4 AND bid_end_timestamp = $5',
-    search_reviews: 'SELECT review FROM Bids WHERE caretaker_username = $1 AND review IS NOT NULL',
-	search_avg_rating: 'SELECT AVG(rating) FROM Bids WHERE caretaker_username = $1',
-	search_past_orders: 'SELECT pet_name, bid_start_timestamp, bid_end_timestamp, caretaker_username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true',
-    search_petdays: 'SELECT SUM(duration) FROM (SELECT EXTRACT(DAY FROM AGE(bid_start_timestamp, bid_end_timestamp)) + 1 AS duration FROM Bids WHERE caretaker_username = $1 AND bid_start_timestamp >= $2 AND bid_start_timestamp <= $3 AND is_successful = true)',
+	choose_bids: 'UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
+	set_transac_details: 'UPDATE bids SET payment_method = $1, mode_of_transfer = $2 WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND bid_start_timestamp = $6 AND bid_end_timestamp = $7',
+	pay_bid: 'UPDATE bids SET is_paid = true WHERE owner_username = $1 AND pet_name = $2 AND caretaker_username = $3 AND bid_start_timestamp = $4 AND bid_end_timestamp = $5',
+	search_reviews: 'SELECT review FROM bids WHERE caretaker_username = $1 AND review IS NOT NULL',
+	search_avg_rating: 'SELECT AVG(rating) FROM bids WHERE caretaker_username = $1',
+	search_past_orders: 'SELECT pet_name, bid_start_timestamp, bid_end_timestamp, caretaker_username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM bids WHERE owner_username = $1 AND is_successful = true',
+	search_petdays: 'SELECT SUM(duration) FROM (SELECT EXTRACT(DAY FROM AGE(bid_start_timestamp, bid_end_timestamp)) + 1 AS duration FROM bids WHERE caretaker_username = $1 AND bid_start_timestamp >= $2 AND bid_start_timestamp <= $3 AND is_successful = true)',
 
 
 

@@ -99,8 +99,8 @@ function initRouter(app) {
 
 	/*BIDS*/
 	app.get('/viewbids', passport.authMiddleware(), view_bids);
-	app.get('/feedback', passport.authMiddleware(), rate_review_form);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
+	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.get('/newbid', passport.authMiddleware(), newbid);
 	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
 
@@ -764,9 +764,9 @@ function caretaker (req, res, next) {
 	});
 }
 
-
 function view_bids (req, res, next) {
 	var owner = req.user.username;
+	console.log(owner);
 	var bids;
 	pool.query(sql_query.query.view_bids, [owner], (err, data) => {
 		if (err || !data.rows || data.rows.length == 0) {
@@ -774,11 +774,12 @@ function view_bids (req, res, next) {
 		} else {
 			bids = data.rows;
 		}
-		basic(req, res, 'owner_calendar', {data: bids, auth : true});
+		basic(req, res, 'viewbids', {data: bids, auth : true});
 	});
 }
 
 function rate_review_form (req, res, next) {
+	console.log("lol");
 	res.render('rate_review', {auth:true});
 }
 
@@ -800,11 +801,12 @@ function rate_review (req, res, next) {
 }
 
 function newbid (req, res, next) {
-   res.render('newbid', {auth:true});
+	res.render('newbid', {auth:true});
 }
 
 function insert_bid (req, res, next) {
-console.log("in insert bid method ");
+	console.log("Reached!");
+	console.log(req.body.ownername);
 	var owner = req.body.ownername;
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
@@ -813,13 +815,11 @@ console.log("in insert bid method ");
 	var end = req.body.enddate;
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
-	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
 	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
 		if (err) {
 			console.error("Error in creating bid", err);
 		} else {
-		     console.log("gg to bids.ejs");
-			basic(req, res, 'owner_calendar', {auth:true});
+			basic(req, res, 'viewbids', {auth:true});
 		}
 	});
 
@@ -828,7 +828,6 @@ console.log("in insert bid method ");
 			console.error("Error in choosing bids", err);
 		}
 	});
-
 }
 
 
@@ -838,7 +837,7 @@ function delete_bid(req, res, next) {
     var old_caretaker_username = req.body.old_caretaker_username;
     var old_pet_name = req.body.old_pet_name;
 
-    console.log("bids and avail start tiemstmap is " + old_bid_start_timestamp + old_avail_start_timestamp);
+    console.log("bids and avail start timestamp is " + old_bid_start_timestamp + old_avail_start_timestamp);
 
 
     var owner_username = req.user.username;

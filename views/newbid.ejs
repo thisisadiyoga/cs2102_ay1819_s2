@@ -1,8 +1,7 @@
+[newbid.ejs]
 <!DOCTYPE html>
 <html>
-  	<head>
-		<!-- Page Title -->
-		<title>Create a Bid Here!</title>
+	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,11 +15,11 @@
 
 		<!-- Custom styles for this template-->
 		<link href="stylesheets/index.css" rel="stylesheet">
- 	</head>
-  	<body>
-		<h1>Bid details</h1>
-		<form id="html_form" action = "/insert_bid" role="form" method="post">
-			<div class="form-group">
+  </head>
+  <body>
+    <h1>Bid details</h1>
+        <form id="html_form" action = "/insert_bid" role="form" method="post">
+            <div class="form-group">
 				<label for="ownername">Owner</label>
 				<input type="text" class="form-control" id="ownername" name="ownername" placeholder="Enter your name">
 			</div>
@@ -31,28 +30,28 @@
 			<div class="form-group">
 				<label for="pstartdate">Intended Start Date</label>
 				<input type="text" class="form-control" id="pstartdate" name="pstartdate" placeholder="Enter your intended start date">
-			</div>
-			<div class="form-group">
+            </div>
+            <div class="form-group">
 				<label for="penddate">Intended End Date</label>
 				<input type="text" class="form-control" id="penddate" name="penddate" placeholder="Enter your intended end date">
-			</div>
-			<div class="form-group">
+            </div>
+            <div class="form-group">
 				<label for="startdate">Available Start Date</label>
 				<input type="text" class="form-control" id="startdate" name="startdate" placeholder="Enter the caretaker's start date">
-			</div>
-			<div class="form-group">
+            </div>
+            <div class="form-group">
 				<label for="enddate">Available End Date</label>
 				<input type="text" class="form-control" id="enddate" name="enddate" placeholder="Enter the caretaker's end date">
-			</div>
-			<div class="form-group">
+            </div>
+            <div class="form-group">
 				<label for="caretakername">Caretaker</label>
 				<input type="text" class="form-control" id="caretakername" name="caretakername" placeholder="Enter the caretaker's name">
-			</div>
-			<div class="form-group">
+            </div>
+            <div class="form-group">
 				<label for="servicetype">Service Type</label>
 				<input type="text" class="form-control" id="servicetype" name="servicetype" placeholder="Enter the service type">
-			</div>
+            </div>
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
-  	</body>
+  </body>
 </html>

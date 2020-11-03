@@ -147,7 +147,7 @@ $$
    BEGIN
    IF EXISTS (SELECT 1
               FROM bids b1
-              WHERE b1.caretaker_username = OLD.caretaker_username AND (GREATEST (b1.start_timestamp, NEW.start_timestamp) < LEAST (b1.end_timestamp, NEW.end_timestamp)) ) THEN --There is overlap
+              WHERE b1.caretaker_username = OLD.caretaker_username AND (GREATEST (b1.bid_start_timestamp, NEW.start_timestamp) < LEAST (b1.bid_end_timestamp, NEW.end_timestamp)) ) THEN --There is overlap
 
    RAISE EXCEPTION 'The period cannot be deleted as there is a successful bid within that period';
    ELSE
@@ -176,7 +176,7 @@ $$ DECLARE first_result INTEGER := 0;
     RAISE NOTICE 'entering 1st part';
     IF EXISTS(SELECT 1
               FROM bids b1
-              WHERE b1.caretaker_username = OLD.caretaker_username AND GREATEST(b1.start_timestamp, OLD.start_timestamp) < LEAST(b1.end_timestamp, NEW.start_timestamp)) THEN
+              WHERE b1.caretaker_username = OLD.caretaker_username AND GREATEST(b1.bid_start_timestamp, OLD.start_timestamp) < LEAST(b1.bid_end_timestamp, NEW.start_timestamp)) THEN
                RAISE NOTICE 'there is a bid between the old and new starting timestamp';
     first_result := 1;
     ELSE
@@ -190,7 +190,7 @@ $$ DECLARE first_result INTEGER := 0;
     RAISE NOTICE 'entering 2nd part';
     IF EXISTS(SELECT 1
               FROM bids b2
-              WHERE b2.caretaker_username = OLD.caretaker_username AND GREATEST(b2.start_timestamp, NEW.end_timestamp) < LEAST(b2.end_timestamp, OLD.end_timestamp)) THEN
+              WHERE b2.caretaker_username = OLD.caretaker_username AND GREATEST(b2.bid_start_timestamp, NEW.end_timestamp) < LEAST(b2.bid_end_timestamp, OLD.end_timestamp)) THEN
     RAISE NOTICE 'there is a bid between the old and new ending timestamp';
     second_result := 1;
     ELSE

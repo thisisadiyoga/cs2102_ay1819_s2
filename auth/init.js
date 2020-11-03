@@ -14,9 +14,6 @@ const pool = new Pool({
     //ssl: true
     user: postgres_details.user,
 	database: postgres_details.database,
-	host: postgres_details.host,
-	port: postgres_details.port,
-	password: postgres_details.password,
 	 idleTimeoutMillis: 2000
 });
 
@@ -32,7 +29,7 @@ function findUser (username, callback) {
 			return callback(null)
 		} else if(data.rows.length == 1) {
 			return callback(null, {
-				username    : data.rows[0].username,
+	    username    : data.rows[0].username,
         passwordHash: data.rows[0].password,
         avatar      : data.rows[0].avatar, 
         is_owner    : data.rows[0].is_owner, 

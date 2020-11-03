@@ -114,6 +114,36 @@ CREATE TRIGGER check_daily_price
 BEFORE INSERT OR UPDATE ON Charges
 FOR EACH ROW EXECUTE PROCEDURE is_valid_price();
 
+CREATE OR REPLACE FUNCTION is_pet_covered() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM Charges C WHERE C.cat_name = (SELECT cat_name FROM ownsPets O WHERE O.username = NEW.owner_username AND O.name = NEW.pet_name) AND C.caretaker_username = NEW.caretaker_username;
+IF ctx = 0 THEN RETURN NULL; ELSE RETURN NEW; END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_pet_cover
+BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE is_pet_covered();
+
+CREATE OR REPLACE FUNCTION is_pet_limit_reached() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+DECLARE rate NUMERIC;
+DECLARE is_part_time NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM bids B WHERE B.is_successful = true AND B.caretaker_username = NEW.caretaker_username;
+SELECT AVG(rating) INTO rate FROM bids Bo WHERE Bo.is_successful = true AND Bo.caretaker_username = NEW.caretaker_username;
+SELECT COUNT(*) INTO is_part_time FROM Caretakers C WHERE C.username = NEW.caretaker_username AND is_full_time = false;
+IF (ctx >= 5) THEN RETURN NULL; END IF;
+IF (is_part_time > 0 AND ctx >= 2 AND (rate IS NULL OR rate < 4)) THEN RETURN NULL; END IF;
+RETURN NEW;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_pet_limit
+BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE is_pet_limit_reached();
+
 CREATE TABLE isPaidSalaries (
 	caretaker_id 				VARCHAR 		REFERENCES caretakers(username) ON DELETE cascade,
 	year 						INTEGER,

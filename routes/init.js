@@ -98,7 +98,7 @@ function initRouter(app) {
 	app.get('/admin', admin);
 
 	/*BIDS*/
-	app.get('/viewbids', passport.authMiddleware(), view_bids);
+	app.get('/viewbids', passport.authMiddleware(), viewbids);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
 	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.get('/newbid', passport.authMiddleware(), newbid);
@@ -764,7 +764,7 @@ function caretaker (req, res, next) {
 	});
 }
 
-function view_bids (req, res, next) {
+function viewbids (req, res, next) {
 	var owner = req.user.username;
 	console.log(owner);
 	var bids;
@@ -797,6 +797,14 @@ function rate_review (req, res, next) {
 		} else {
 			res.redirect('/viewbids');
 		}
+
+		pool.query(sql_query.query.choose_bids, (err, data) => {
+			if (err) {
+				console.error("Error in choosing bids", err);
+			} else {
+				res.redirect('/viewbids');
+			}
+		});
 	});
 }
 
@@ -819,15 +827,7 @@ function insert_bid (req, res, next) {
 		if (err) {
 			console.error("Error in creating bid", err);
 		} else {
-			res.render('viewbids', {data:data.rows, auth:true});
-		}
-	});
-
-	console.log('Interlude');
-
-	pool.query(sql_query.query.choose_bids, (err, data) => {
-		if (err) {
-			console.error("Error in choosing bids", err);
+			res.redirect('/viewbids');
 		}
 	});
 }

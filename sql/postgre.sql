@@ -255,8 +255,8 @@ RETURNS TRIGGER AS
 	$$ DECLARE total NUMERIC;
 	BEGIN
 		SELECT COUNT(*) INTO total FROM ownsPets WHERE username = NEW.username;
-		IF total = 0 THEN UPDATE Owners SET is_disabled = TRUE;
-		ELSIF total = 1 THEN UPDATE Owners SET is_disabled = FALSE;
+		IF total = 0 THEN UPDATE Owners SET is_disabled = TRUE WHERE username = NEW.username;
+		ELSIF total = 1 THEN UPDATE Owners SET is_disabled = FALSE WHERE username = NEW.username;
 		END IF;
 
 		RETURN NEW;

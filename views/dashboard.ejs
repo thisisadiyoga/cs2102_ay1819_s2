@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -14,11 +14,10 @@
 
 		<!-- Custom styles for this template-->
 		<link href="stylesheets/index.css" rel="stylesheet">
-		<link href="stylesheets/picture.css" rel="stylesheet">	
-  </head>
+		<link href="stylesheets/picture.css" rel="stylesheet">
+	</head>
+
 	<body id="page-top">
-		<!--scripts-->
-		
 		<%- include navbar.ejs %>
 		<div id="wrapper">
 			<%- include sidebar.ejs %>
@@ -26,8 +25,8 @@
 				<div class="container-fluid">
 					<div class="card mb-3">
 						<div class="card-header">
-							<i class="fas fa-camera"></i> &nbsp; Profile Picture
-						</div>	
+							<i class="fas fa-camera"></i> &nbsp; Profile Picture&nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= join_msg %></span>
+						</div>
 						<form method="post" enctype="multipart/form-data" action="/update_avatar">
 							<div class="card-body">
 								<div class="form-group row">
@@ -43,7 +42,6 @@
 							</div>
 						</form>
 					</div>
-
 					<div class="card mb-3">
 						<div class="card-header">
 							<i class="fas fa-info-circle"></i> &nbsp; Profile Information
@@ -61,13 +59,13 @@
 									<div class="col-sm-10">
 										<input type="text" required="required" class="form-control" id="email" name="email" placeholder="Your new email"/>
 									</div>
-
 								</div>
 							</div>
-							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Email</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= info_msg %></span></div>
+							<div class="card-footer small text-muted">
+								<button type="submit" class="btn btn-secondary">Update Email</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= info_msg %></span>
+							</div>
 						</form>
 					</div>
-					
 					<div class="card mb-3">
 						<div class="card-header">
 							<i class="fas fa-key"></i> &nbsp; Password Change
@@ -87,14 +85,15 @@
 									</div>
 								</div>
 							</div>
-							<div class="card-footer small text-muted"><button type="submit" class="btn btn-secondary">Update Password</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= pass_msg %></span></div>
+							<div class="card-footer small text-muted">
+								<button type="submit" class="btn btn-secondary">Update Password</button> &nbsp;&nbsp;&nbsp; <span class="badge badge-pill badge-info"><%= pass_msg %></span>
+							</div>
 						</form>
 					</div>
 				</div>
 				<div style="padding-left: 35px">
 					<!-- Button trigger modal -->
-					<button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#confirmModal">
-						Delete Account
+					<button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#confirmModal">Delete Account
 					</button>
 					<!-- Modal -->
 					<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -106,9 +105,9 @@
 										<span aria-hidden="true">&times;</span>
 									</button>
 								</div>
-									<div class="modal-body">Confirm the deletion of account <%= user.username %>?
-										<p style="color:red">WARNING: deleting this account permanently removes all account data and this action is irreversible</p>
-									</div>
+								<div class="modal-body">Confirm the deletion of account <%= user.username %>?
+									<p style="color:red">WARNING: deleting this account permanently removes all account data and this action is irreversible</p>
+								</div>
 								<div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 									<form action="del_user" method="post"><button class="btn btn-primary float-left" type="submit" id="username" name="username" value="<%= user %>">Delete Account</button></form>
@@ -120,5 +119,5 @@
 			</div>
 		</div>
 		<%- include bottomscript.ejs %>
-  </body>
+	</body>
 </html>

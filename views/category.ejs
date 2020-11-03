@@ -19,10 +19,8 @@
 
     <body id="page-top">
     <%- include navbar.ejs %>
-    
         <div id="wrapper">
             <%- include adminSidebar.ejs %>
-
             <div id="content-wrapper">
                 <div class="container-fluid">		
                     <div class="card mb-3">
@@ -44,29 +42,6 @@
                                     <tbody>
                                         <% for(var i=0; i<category.length; i++) { %>
                                         <tr>
-                                            <!--<td>
-                                                
-                                                <button class="btn" type="submit" id="del_cat" name="del_cat" value="<%= category[i].cat_name%>"><i class="fas fa-trash" title="Delete Pet" data-toggle="modal" data-target="#delModal"></i></button>
-
-                                                <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                    <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="delLabel">Confirm deletion</h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                            <div class="modal-body">Confirm the deletion of <%= category[i].cat_name%>?
-                                                            </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                            <form action="del_cat" method="post"><button class="btn btn-primary" type="submit" id="cat_name" name="cat_name" value="<%= category[i].cat_name%>">Delete Pet</button></form>
-                                                        </div>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                            </td>-->
                                             <td>
                                                 <!-- Button trigger modal -->
                                                 <button class="btn" type="submit" id="edit_cat" name="edit_cat"><i class="fas fa-edit" title="Edit Category" data-toggle="modal" data-target="#editModal"></i></button>
@@ -74,13 +49,13 @@
                                                 <!-- Modal -->
                                                 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="editLabel">Edit <%= category[i].cat_name%></h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="editLabel">Edit <%= category[i].cat_name%></h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
                                                             <div class="modal-body">
                                                                 <!-- add category information here-->
                                                                 <form action="edit_cat" method="post" id="edit_cat">
@@ -88,11 +63,11 @@
                                                                     <label for="base_price">Base Price:</label>
                                                                     <input type="text" id="base_price" name="base_price" value="<%= category[i].base_price %>">
                                                             </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                            <button class="btn btn-primary" type="submit" id="edit_cat" name="edit_cat">Update</button></form>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                <button class="btn btn-primary" type="submit" id="edit_cat" name="edit_cat">Update</button></form>
+                                                            </div>
                                                         </div>
-                                                    </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -105,18 +80,18 @@
                             </div>
 
                             <!-- Button trigger modal -->
-                            <button class="btn btn-outline-primary" type="submit" id="add_cat" name="add_cat" data-toggle="modal" data-target="#addModal">Add Pet</button>
+                            <button class="btn btn-outline-primary" type="submit" id="add_cat" name="add_cat" data-toggle="modal" data-target="#addModal">Add Category</button>
                                                 
                             <!-- Modal -->
                             <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editLabel">Add</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editLabel">Add</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Cancel">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
                                         <div class="modal-body">
                                             <!-- add category information here-->
                                             <form action="add_cat" method="post" id="add_cat">
@@ -129,13 +104,15 @@
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                             <button class="btn btn-primary" type="submit" id="add_cat" name="add_cat">Add</button>
-                                        </form>
+                                            </form>
                                         </div>
-                                </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div><span class="badge badge-pill badge-info"><%= add_msg %></span><span class="badge badge-pill badge-info"><%= edit_msg %></span><span class="badge badge-pill badge-info"><%= del_msg %></span></div>
+                            <div>
+                                <span class="badge badge-pill badge-info"><%= add_msg %></span><span class="badge badge-pill badge-info"><%= edit_msg %></span><span class="badge badge-pill badge-info"><%= del_msg %></span>
+                            </div>
                         </div>
                     </div>
                 </div>

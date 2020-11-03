@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>The Collar Klub</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+        <link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+		<!-- Custom styles for this template-->
+        <link href="stylesheets/index.css" rel="stylesheet">
+        <link href="stylesheets/picture.css" rel="stylesheet">
+        <link href="stylesheets/location.css" rel="stylesheet">
+    </head>
+
+    <body id="page-top">
+        <%- include navbar.ejs %>
+        <div id="wrapper">
+            <%- include sidebar.ejs %>
+            <div id="content-wrapper">
+                <div class="container-fluid">		
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="fas fa-users"></i> &nbsp; People Nearby
+                        </div>
+                        <div class="card-body">
+                            <% var text = (user_list.length == 0) ? "No nearby user found" : "" %>
+                            <%= text %>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Avatar</th>
+                                            <th>Username</th>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Owner</th>
+                                            <th>Caretaker</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <div class="container">
+                                            <% for(var i=0; i<user_list.length; i++) { %>
+                                            <div>
+                                                <tr>
+                                                    <td><img src="data:image/png;base64, <%= user_list[i].avatar%>" class="crop" width="50" height="50"></td>
+                                                    <td><%= user_list[i].username%></td>
+                                                    <td><%= user_list[i].first_name%></td>
+                                                    <td><%= user_list[i].last_name%></td>
+                                                    <% var owner = (user_list[i].is_owner == 1) ? "⚫": "⚪"%>
+                                                    <td><%= owner%></td>
+
+                                                    <% var caretaker = (user_list[i].is_caretaker == 1) ? "⚫": "⚪"%>
+                                                    <td><%= caretaker%></td>
+                                                </tr>
+                                            </div>
+                                            <% } %>
+                                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include bottomscript.ejs %>
+    </body>
+</html>

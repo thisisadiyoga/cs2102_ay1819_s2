@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>The Collar Klub</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+        <link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+		<!-- Custom styles for this template-->
+        <link href="stylesheets/index.css" rel="stylesheet">
+        <link href="stylesheets/picture.css" rel="stylesheet">
+    </head>
+
+    <body id="page-top">
+        <%- include navbar.ejs %>
+        <div id="wrapper">
+            <%- include sidebar.ejs %>
+            <div id="content-wrapper">
+                <div class="container-fluid">		
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="fas fa-paw"></i> &nbsp; My Pets
+                        </div>
+                        <div class="card-body">
+                            <% var text = (pet.length == 0) ? "Warning! Pet owner features are unusable until a pet is added!" : "" %>
+                            <%= text %>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Picture</th>
+                                            <th>Name</th>
+                                            <th>Pet Type</th>
+                                            <th>Size</th>
+                                            <th>Description</th>
+                                            <th>Sociability</th>
+                                            <th>Special Requests</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for(var i=0; i<pet.length; i++) { %>
+                                        <tr>
+                                            <td>
+                                                <!-- Button trigger modal -->
+                                                <button class="btn" type="submit" id="name" name="name" value="<%= pet[i].name%>"><i class="fas fa-trash" title="Delete Pet" data-toggle="modal" data-target="#confirmModal"></i></button>
+
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="exampleModalLabel">Confirm deletion</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                                <div class="modal-body">Confirm the deletion of <%= pet[i].name%>?
+                                                                </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                <form action="del_pet" method="post">
+                                                                    <button class="btn btn-primary" type="submit" id="name" name="name" value="<%= pet[i].name%>">Delete Pet</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                &nbsp;
+                                                <form action="edit_pet" method="post"><button class="btn" type="submit" id="name" name="name" value="<%= pet[i].name%>"><i class="fas fa-edit" title="Edit Pet"></i></form>
+                                                </td>
+                                            <td><img src="data:image/png;base64, <%= pet[i].img%>" class="crop" width="100" height="100"></td>
+                                            <td><%= pet[i].name%></td>
+                                            <td><%= pet[i].cat_name%></td>
+                                            <td><%= pet[i].size%></td>
+                                            <td><%= pet[i].description%></td>
+                                            <td><%= pet[i].sociability%></td>
+                                            <td><%= pet[i].special_req%></td>
+                                        </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <a class="btn btn-primary" href="/add_pets">Add Pet</a>&nbsp;<span class="badge badge-pill badge-info"><%= add_msg %></span><span class="badge badge-pill badge-info"><%= edit_msg %></span><span class="badge badge-pill badge-info"><%= del_msg %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include bottomscript.ejs %>
+    </body>
+</html>
+          

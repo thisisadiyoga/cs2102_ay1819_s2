@@ -1,72 +1,64 @@
 <!DOCTYPE html>
 <html>
-  <head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<meta name="description" content="">
-		<meta name="author" content="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
 
-		<title>The Collar Klub Admin</title>
+        <title>The Collar Klub Admin</title>
 
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-		<link href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-		<!-- Custom styles for this template-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+        <!-- Custom styles for this template-->
         <link href="stylesheets/index.css" rel="stylesheet">
         <link href="stylesheets/admin.css" rel="stylesheet">
+    </head>
 
-  </head>
-	<body id="page-top">
-		<%- include navbar.ejs %>
-        
+    <body id="page-top">
+        <%- include navbar.ejs %>
         <div class = 'container' >
             <div class="wrapper fadeInDown">
                 <div class="login-container" id="formContent">
-                  <!-- Tabs Titles -->
-              
-                  <!-- Login Form -->
-                  <form class="login-box" action="/loginAdmin" method="post">
-                    <input type="text" id="login" class="login-input second" name="username" placeholder="login">
-                    <input type="password" id="password" class="login-input third" name="password" placeholder="password">
-                    <input type="submit" class="login-input fourth" value="Log In">
-                      <button type="button" class="btn btn-info" style="margin-top: 10px;" data-toggle="modal" data-target="#exampleModal">
-                        Create An Account
-                      </button>
-                  </form>
+                    <form class="login-box" action="/loginAdmin" method="post">
+                        <input type="text" id="login" class="login-input second" name="username" placeholder="login">
+                        <input type="password" id="password" class="login-input third" name="password" placeholder="password">
+                        <input type="submit" class="login-input fourth" value="Log In">
+                            <button type="button" class="btn btn-info" style="margin-top: 10px;" data-toggle="modal" data-target="#exampleModal">
+                              Create An Account
+                            </button>
+                    </form>
 
-                  
-                  <!-- Modal -->
-                  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel">Create An Account</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Create An Account</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="create-account" class="login-box" action="/registerAdmin" method="post">
+                                        <input type="text" id="admin_username" class="login-input second" name="admin_username" placeholder="admin username">
+                                        <input type="password" id="admin_password" class="login-input third" name="admin_password" placeholder="admin password">
+                                        <input type="submit" class="login-input fourth" value="Create Account">
+                                  </form>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                          <form id="create-account" class="login-box" action="/registerAdmin" method="post">
-                            <input type="text" id="admin_username" class="login-input second" name="admin_username" placeholder="admin username">
-                            <input type="text" id="admin_password" class="login-input third" name="admin_password" placeholder="admin password">
-                            <input type="submit" class="login-input fourth" value="Create Account">
-                          </form>
-        
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-              
                 </div>
-              </div>
-		</div>
-		
-		<%- include bottomscript.ejs %>
-  </body>
+            </div>
+        </div>
+        <%- include bottomscript.ejs %>
+    </body>
 </html>

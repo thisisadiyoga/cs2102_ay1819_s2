@@ -799,7 +799,7 @@ function rate_review (req, res, next) {
 }
 
 function newbid (req, res, next) {
-   res.render('newbid', {auth:true});
+   basic(req, res, 'newbid', {auth:true});
 }
 
 function insert_bid (req, res, next) {

@@ -57,6 +57,13 @@ sql.query = {
 
 	upload_userpic: "SELECT encode(profile_pic, 'base64') FROM Users where username = $1;", 
 
+	//summary information 
+	get_all_pets_in_month: "SELECT extract(year from bid_start_timestamp) as year, to_char(bid_start_timestamp,'Mon') as month, count(pet_name) as count_of_pets FROM Bids WHERE is_successful AND bid_start_timestamp>= '2020-01-01' GROUP BY year, month; ",
+	get_caretaker_salary_every_month: "SELECT extract(year from bid_start_timestamp) as year, to_char(bid_start_timestamp,'Mon') as month, caretaker_username, SUM(total_price) as rawEarning FROM Bids WHERE is_successful AND bid_start_timestamp>= '2020-01-01' AND bid_start_timestamp <= '2020-12-31' GROUP BY year, month, caretaker_username;",
+	// underperforming: caretakers with less than 2 distinct pets
+	get_all_underperforming_caretakers: "",
+	get_number_of_jobs_every_month: " SELECT extract(year from bid_start_timestamp) as year, to_char(bid_start_timestamp,'Mon') as month, count(*) as count_of_jobs FROM Bids WHERE is_successful GROUP BY year, month;",
+
 	//delete information
 	del_user : "DELETE FROM Users WHERE username = $1;", 
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 

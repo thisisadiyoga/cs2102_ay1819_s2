@@ -14,8 +14,11 @@ const { Pool } = require('pg');
 const pool = new Pool({
 
     //ssl: true
-     user: postgres_details.user,
-    database: postgres_details.database,
+    user: postgres_details.user,
+	database: postgres_details.database,
+	host: postgres_details.host,
+	port: postgres_details.port,
+	password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
 
@@ -44,6 +47,7 @@ function initRouter(app) {
 	app.post('/edit_cat', passport.authMiddleware(), edit_cat);
 	app.post('/add_cat', passport.authMiddleware(), add_cat);
 	app.post('/del_admin', del_admin);
+	app.get('/adminStatistics', passport.authMiddleware(), adminStatistics)
 
 	/*Registration*/
 	app.get('/register' , passport.antiMiddleware(), register );
@@ -180,6 +184,12 @@ function adminDashboard(req, res, next) {
 		auth: true });
 }
 
+function adminInformation(req, res, next) {
+	basic(req, res, 'adminInformation', {
+		auth: true
+	});
+}
+
 function register(req, res, next) {
 	res.render('register', { page: 'register', auth: false });
 }
@@ -206,18 +216,54 @@ function pets (req, res, next) {
 	});
 }
 
-function adminInformation (req, res, next) {
+function adminStatistics (req, res, next) {
 	var allInformation;
 
 	pool.query(sql_query.query.list_caretakers, (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
-			allInformation = [];
+			allCaretakers = [];
 		} else {
-			allInformation = data.rows;
+			allCaretakers = data.rows;
 		}
-		console.log(allInformation);
+		pool.query(sql_query.query.get_all_pets_in_month, (err,data) => {
+			if(err || !data.rows || data.rows.length == 0) {
+				allPets = [];
+			} else {
+				allPets = data.rows;
+			}
+			
+			pool.query(sql_query.query.get_number_of_jobs_every_month, (err,data) => {
+				if(err || !data.rows || data.rows.length == 0) {
+					allJobs = [];
+				} else {
+					allJobs = data.rows;
+				}
+	
+				pool.query(sql_query.query.get_caretaker_salary_every_month, (err,data) => {
+					if(err || !data.rows || data.rows.length == 0) {
+						allSalary = [];
+					} else {
+						allSalary = data.rows;
+					}
+		
+					pool.query(sql_query.query.get_all_underperforming_caretakers, (err,data) => {
+						if(err || !data.rows || data.rows.length == 0) {
+							allUnderperforming = [];
+						} else {
+							allUnderperforming = data.rows;
+						}
+			
+						basic(req, res, 'adminStatistics', { caretakers : allCaretakers, 
+							allPets: allPets, 
+							allJobs: allJobs, 
+							allSalary: allSalary,
+							allUnderperforming: allUnderperforming,
+							auth: true });
+					})
+				})
+			})
+		})
 
-	basic(req, res, 'adminInformation', { caretakers : allInformation, auth: true });
 	});
 }
 

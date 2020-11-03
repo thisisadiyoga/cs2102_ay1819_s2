@@ -23,22 +23,20 @@
 
     <body id="page-top">
     <%- include navbar.ejs %>
-    
-        <div id="wrapper">
-            <%- include sidebar.ejs %>
-            <div id="content-wrapper">
-                <div class="container-fluid">		
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <i class="fas fa-id-badge"></i> &nbsp; Caretaker Information
-
-                            <% var display = (is_caretaker == 1) ? "display:none" : "" %>
-                            <!-- Button trigger modal -->
-                            <button class="btn btn-sm btn-outline-dark" style="float:right; <%= display%>" type="submit" id="ctsignup" name="ctsignup" data-toggle="modal" data-target="#confirmModal">Join as caretaker</i></button>
-                            
-                            <!--modal information-->
-                            <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
+    <div id="wrapper">
+        <%- include sidebar.ejs %>
+        <div id="content-wrapper">
+            <div class="container-fluid">		
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-id-badge"></i> &nbsp; Caretaker Information
+                        <% var display = (is_caretaker == 1) ? "display:none" : "" %>
+                        <!-- Button trigger modal -->
+                        <button class="btn btn-sm btn-outline-dark" style="float:right; <%= display%>" type="submit" id="ctsignup" name="ctsignup" data-toggle="modal" data-target="#confirmModal">Join as caretaker</i></button>
+                        
+                        <!--modal information-->
+                        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="exampleModalLabel">Sign up as <%= user %></h5>
@@ -46,83 +44,85 @@
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                        <div class="modal-body">
-                                            <form action="ctsignup" method="post">
-                                                <div class="form-group">
-                                                    <div class="form-row">
-                                                        <div class="col-md-12">
-                                                            <label for="is_full_time">As full-time or part time</label>
-                                                            <select class="form-control" id="is_full_time" name="is_full_time" required="required">
-                                                                <option value=1>Full-time</option>
-                                                                <option value=0>Part-time</option>
-                                                            </select>
-                                                        </div>
+                                    <div class="modal-body">
+                                        <form action="ctsignup" method="post">
+                                            <div class="form-group">
+                                                <div class="form-row">
+                                                    <div class="col-md-12">
+                                                        <label for="is_full_time">As full-time or part time</label>
+                                                        <select class="form-control" id="is_full_time" name="is_full_time" required="required">
+                                                            <option value=1>Full-time</option>
+                                                            <option value=0>Part-time</option>
+                                                        </select>
                                                     </div>
                                                 </div>
-                                                <div class="checkbox">
-                                                    <input type="checkbox" required="required">&nbsp;<label>I agree to the <a href="/">terms and conditions</a>. </label>
-                                                </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                            <button class="btn btn-primary btn-block" type="submit">Register</button>
-                                            </form>
-                                        </div>
+                                            </div>
+                                            <div class="checkbox">
+                                                <input type="checkbox" required="required">&nbsp;<label>I agree to the <a href="/">terms and conditions</a>. </label>
+                                            </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                        <button class="btn btn-primary btn-block" type="submit">Register</button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Username</th>
-                                            <th>First Name</th>
-                                            <th>Last Name</th>
-                                            <th>Postal Code</th>
-                                            <th>Full Time</th>
-                                            <th>Average rating</th>
-                                            <th>Number of Ratings</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% for(var i=0; i<caretaker.length; i++) { %>
-                                        <tr>
-                                            <td><%= caretaker[i].username%></td>
-                                            <td><%= caretaker[i].first_name%></td>
-                                            <td><%= caretaker[i].last_name%></td>
-                                            <td><%= caretaker[i].postal_code%></td>
-                                            <% var time = (caretaker[i].is_full_time == 1) ? "⚫": "⚪"%>
-                                            <td><%= time%></td>
-                                            <td id="avg_rating<%=i%>">
-                                                <div>
-                                                  <i class="star star-under fa fa-star">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Postal Code</th>
+                                        <th>Full Time</th>
+                                        <th>Average rating</th>
+                                        <th>Number of Ratings</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% for(var i=0; i<caretaker.length; i++) { %>
+                                    <tr>
+                                        <td><%= caretaker[i].username%></td>
+                                        <td><%= caretaker[i].first_name%></td>
+                                        <td><%= caretaker[i].last_name%></td>
+                                        <td><%= caretaker[i].postal_code%></td>
+                                        <% var time = (caretaker[i].is_full_time == 1) ? "⚫": "⚪"%>
+                                        <td><%= time%></td>
+                                        <td id="avg_rating<%=i%>">
+                                            <div>
+                                                <i class="star star-under fa fa-star">
                                                     <i class="star star-over fa fa-star"></i>
-                                                  </i>
-                                                  <i class="star star-under fa fa-star">
+                                                </i>
+                                                <i class="star star-under fa fa-star">
                                                     <i class="star star-over fa fa-star"></i>
-                                                  </i>
-                                                  <i class="star star-under fa fa-star">
+                                                </i>
+                                                <i class="star star-under fa fa-star">
                                                     <i class="star star-over fa fa-star"></i>
-                                                  </i>
-                                                  <i class="star star-under fa fa-star">
+                                                </i>
+                                                <i class="star star-under fa fa-star">
                                                     <i class="star star-over fa fa-star"></i>
-                                                  </i>
-                                                  <i class="star star-under fa fa-star">
+                                                </i>
+                                                <i class="star star-under fa fa-star">
                                                     <i class="star star-over fa fa-star"></i>
-                                                      </i>
+                                                </i>
                                                 &nbsp;&nbsp;&nbsp;<%= caretaker[i].avg_rating%>
-                                                </div>
-                                            </td>
-                                            <td><%= caretaker[i].no_of_reviews%></td>
-                                        </tr>
-                                        <script>
-                                            rateStyle('<%=caretaker[i].avg_rating%>', 'avg_rating<%=i%>');
-                                        </script>
-                                        <% } %>
-                                    </tbody>
-                                </table>
-                            </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <%= caretaker[i].no_of_reviews%>
+                                        </td>
+                                    </tr>
+                                    <script>
+                                        rateStyle('<%=caretaker[i].avg_rating%>', 'avg_rating<%=i%>');
+                                    </script>
+                                    <% } %>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

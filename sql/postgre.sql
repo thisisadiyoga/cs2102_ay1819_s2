@@ -337,6 +337,7 @@ SELECT DATE_PART('day', pe - ps) INTO tot_p;
 tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
 IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
 INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
+UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
 END; $$
 LANGUAGE plpgsql;
 

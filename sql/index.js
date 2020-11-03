@@ -19,7 +19,8 @@ sql.query = {
 	
 	insert_bid: 'SELECT insert_bid($1, $2, $3, $4, $5, $6, $7, $8);',
 
-    view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
+	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
+	ctview_bids: 'SELECT * FROM Bids WHERE caretaker_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
 	insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
 	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
@@ -36,7 +37,7 @@ sql.query = {
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
 	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1;",
 	get_caretaker : "SELECT * FROM Caretakers WHERE username = $1 AND NOT is_disabled;", 
-	get_ct : "SELECT * FROM Caretakers c NATURAL JOIN isPaidSalaries WHERE username = $1 AND NOT is_disabled AND month = $2 AND year = $3;",
+	get_ct : "SELECT * FROM Caretakers c NATURAL JOIN isPaidSalaries WHERE c.username = $1 AND NOT is_disabled AND month = $2 AND year = $3;",
 	get_location : "SELECT postal_code FROM Users WHERE username = $1;", 
 
 	list_users: "SELECT * FROM Users;", 

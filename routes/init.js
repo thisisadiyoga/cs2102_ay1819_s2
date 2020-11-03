@@ -35,6 +35,7 @@ function initRouter(app) {
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 	app.get('/caretaker' , passport.authMiddleware(), caretaker );
+	app.get('/ctreviews' , passport.authMiddleware(), ctview_bids );
 
     app.get('/caretaker_calendar'   , passport.authMiddleware(), caretaker_calendar);
     app.get('/owner_calendar'   , passport.authMiddleware(), owner_calendar);
@@ -775,6 +776,19 @@ function view_bids (req, res, next) {
 			bids = data.rows;
 		}
 		basic(req, res, 'owner_calendar', {data: bids, auth : true});
+	});
+}
+
+function ctview_bids (req, res, next) {
+	var caretaker = req.user.username;
+	var bids;
+	pool.query(sql_query.query.ctview_bids, [caretaker], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			bids = [];
+		} else {
+			bids = data.rows;
+		}
+		basic(req, res, 'ctreviews', {data: bids, auth : true});
 	});
 }
 

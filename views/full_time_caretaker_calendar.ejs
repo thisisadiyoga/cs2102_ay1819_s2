@@ -29,7 +29,7 @@
 		<!--Flapickr plugin -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.6/flatpickr.min.css">
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.6/flatpickr.min.js"></script>
-		<script type="text/javascript" src="/javascripts/caretaker_calendar.js"></script>
+		<script type="text/javascript" src="/javascripts/full_time_caretaker_calendar.js"></script>
 	</head>
 
 	<body id="page-top">
@@ -57,35 +57,35 @@
 				</div>
 				<div class="container-fluid">
 					<button type="button" class="btn btn-primary new-event-button button" data-toggle="modal"
-							data-target="#dateTimePickerModal">Add new availability
+							data-target="#leaveDateTimePickerModal">Take Leave
 					</button>
 
 					<!-- Modal -->
-					<div class="modal fade" id="dateTimePickerModal" tabindex="-1" role="dialog"
+					<div class="modal fade" id="leaveDateTimePickerModal" tabindex="-1" role="dialog"
 						aria-labelledby="dateTimePickerModalLabel" aria-hidden="true">
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h5 class="modal-title" id="dateTimePickerModalLabel">When can you care for pets?</h5>
+									<h5 class="modal-title" id="dateTimePickerModalLabel">Apply for Leave</h5>
 									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 										<span aria-hidden="true">&times;</span>
 									</button>
 								</div>
 								<div class="modal-body">
-									<form class="add-availability-form" action="/add_availability" method="POST">
+									<form class="take-leave-form" action="/take_leave" method="POST">
 										<div class="input-container">
 											<text>Start Date:</text>
-											<input type="text" name='start_timestamp' class="startTimestamp input-box"
+											<input type="text" name='leave_start_timestamp' class="leaveStartTimestamp input-box"
 												placeholder="Select start date" data-input>
 										</div>
 										<div class="input-container">
 											<text>End Date:</text>
-											<input type="text" name='end_timestamp' class="endTimestamp input-box"
+											<input type="text" name='leave_end_timestamp' class="leaveEndTimestamp input-box"
 												placeholder="Select end date" data-input>
 										</div>
 								</div>
 								<div class="modal-footer">
-									<input type="submit" class="btn btn-primary button" value="Save">
+									<input type="submit" class="btn btn-primary button" value="Apply">
 									</form>
 									<button type="button" class="btn btn-secondary button" data-dismiss="modal">Cancel
 									</button>
@@ -95,75 +95,38 @@
 					</div>
 
 					<!-- Modal -->
-					<div class="modal fade" id="updateDateTimePickerModal" tabindex="-1" role="dialog"
-						aria-labelledby="updateDateTimePickerModalLabel" aria-hidden="true">
+					<div class="modal fade" id="availInfoModal" tabindex="-1" role="dialog"
+						 aria-labelledby="availInfoModalLabel" aria-hidden="true">
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h5 class="modal-title" id="updateDateTimePickerModalLabel">Update your
-										availability</h5>
+									<h5 class="modal-title" id="availInfoModalLabel">Availability Details</h5>
 									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 										<span aria-hidden="true">&times;</span>
 									</button>
 								</div>
-								<div class="modal-body">
-									<form class="update-availability-form" action="/update_availability" method="POST">
-										<input type="hidden" class="oldStartTimestamp" name="old_start_timestamp"
-											type="text">
-										<input type="hidden" class="oldEndTimestamp" name="old_end_timestamp" type="text">
-										<div class="input-container">
-											<text>Start Date:</text>
-											<input type="text" name='start_timestamp' class="startTimestamp input-box"
-												data-input>
-										</div>
+								<div class="modal-body avail-info">
 
-										<div class="input-container">
-											<text>End Date:</text>
-											<input type="text" name='end_timestamp' class="endTimestamp input-box"
-												data-input>
-										</div>
-										<text>*You can only update your availability to a later time than current time*</text>
-									</div>
-								<div class="modal-footer">
-									<input type="submit" class="btn btn-primary button" value="Save">
-									</form>
-									<form class="delete-availability-form" action="/delete_availability" method="POST">
-										<input type="hidden" class="oldStartTimestamp " name="old_start_timestamp"
-											type="text">
-										<input type="hidden" class="oldEndTimestamp " name="old_end_timestamp" type="text">
-										<input type="submit" value="Delete" class="btn btn-primary button">
-									</form>
-								</div>
-							</div>
-						</div>
-					</div>
+										<text>Start Date:</text>
+										<span class="availStartTimestamp"></span>
 
-					<div class="modal fade" id="showDateTimePickerModal" tabindex="-1" role="dialog"
-						 aria-labelledby="showDateTimePickerModalLabel" aria-hidden="true">
-						<div class="modal-dialog" role="document">
-							<div class="modal-content">
-								<div class="modal-header">
-									<h5 class="modal-title" id="showDateTimePickerModalLabel">Availability Details</h5>
-									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-										<span aria-hidden="true">&times;</span>
-									</button>
+
+
+
+
+
+
 								</div>
-								<div class="modal-body">
-										<div class="input-container">
-											<text>Start Date:</text>
-											<input type="text" name='start_timestamp' class="startTimestamp input-box"
-												   placeholder="Select start date" data-input>
-										</div>
-										<div class="input-container">
-											<text>End Date:</text>
-											<input type="text" name='end_timestamp' class="endTimestamp input-box"
-												   placeholder="Select end date" data-input>
-										</div>
+
+								<div class="modal-body avail-info">
+								<text>End Date:</text>
+								<span class="availEndTimestamp"></span>
 								</div>
 
 							</div>
 						</div>
 					</div>
+
 					<div id="calendar"></div>
 					<div class="color-indicator">
 						<div class="color-box availability-color"

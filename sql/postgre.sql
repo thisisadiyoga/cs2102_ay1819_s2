@@ -71,7 +71,7 @@ CREATE TABLE bids (
       bid_start_timestamp 		TIMESTAMP,
       bid_end_timestamp 		TIMESTAMP,
       avail_start_timestamp 	TIMESTAMP,
-      avail_end_timestamp 		TIMESTAMP,
+	  avail_end_timestamp 		TIMESTAMP,
       caretaker_username 		VARCHAR,
       rating 					NUMERIC,
       review 					VARCHAR,
@@ -81,7 +81,7 @@ CREATE TABLE bids (
       is_paid 					BOOLEAN,
       total_price 				NUMERIC 		NOT NULL CHECK (total_price > 0),
       type_of_service 			VARCHAR 		NOT NULL,
-	  PRIMARY KEY (pet_name, owner_username, bid_start_timestamp, bid_end_timestamp, caretaker_username, avail_start_timestamp, avail_end_timestamp),
+	  PRIMARY KEY (pet_name, owner_username, bid_start_timestamp, bid_end_timestamp, caretaker_username, avail_start_timestamp),
       FOREIGN KEY (bid_start_timestamp, bid_end_timestamp) REFERENCES Timings(start_timestamp, end_timestamp),
       FOREIGN KEY (avail_start_timestamp, avail_end_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, end_timestamp, caretaker_username),
       FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
@@ -131,7 +131,7 @@ $$ DECLARE ctx NUMERIC;
 DECLARE rate NUMERIC;
 DECLARE is_part_time NUMERIC;
 BEGIN
-SELECT COUNT(*) INTO ctx FROM bids B WHERE B.is_successful = true AND B.caretaker_username = NEW.caretaker_username;
+SELECT COUNT(*) INTO ctx FROM bids B WHERE B.is_successful = true AND B.caretaker_username = NEW.caretaker_username AND B.bid_end_timestamp > CURRENT_TIMESTAMP;
 SELECT AVG(rating) INTO rate FROM bids Bo WHERE Bo.is_successful = true AND Bo.caretaker_username = NEW.caretaker_username;
 SELECT COUNT(*) INTO is_part_time FROM Caretakers C WHERE C.username = NEW.caretaker_username AND is_full_time = false;
 IF (ctx >= 5) THEN RETURN NULL; END IF;

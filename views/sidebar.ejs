@@ -1,6 +1,8 @@
 <!-- Sidebar -->
 <% var owner = (!is_owner) ? "display:none" : "" %> 
-<% var caretaker = (!is_caretaker) ? "display:none" : "" %> 
+<% var caretaker = (!is_caretaker) ? "display:none" : "" %>
+<% var isFullTime = (!is_full_time) ? "display:none" : "" %>
+<% var isPartTime = is_full_time ? "display:none" : "" %>
 
 <ul class="sidebar navbar-nav">
 	<li class="nav-item" <%= page==="dashboard" ? "active" : "" %>>
@@ -29,8 +31,14 @@
 			<span>My Bids</span></a>
 	</li>
 
-	<li class="nav-item" <%= page==="caretaker_calendar" ? "active" : "" %> style="<%=caretaker%>">
+	<li class="nav-item" <%= page==="caretaker_calendar" ? "active" : "" %> style="<%=isPartTime%>">
 	<a class="nav-link" href="<%= page==="caretaker_calendar" ? "#" : "/caretaker_calendar" %>">
+	<i class="fas fa-calendar-alt">&nbsp;</i>
+	<span>My Availabilities</span></a>
+	</li>
+
+	<li class="nav-item" <%= page==="full_time_caretaker_calendar" ? "active" : "" %> style="<%=isFullTime%>">
+	<a class="nav-link" href="<%= page==="full_time_caretaker_calendar" ? "#" : "/full_time_caretaker_calendar" %>">
 	<i class="fas fa-calendar-alt">&nbsp;</i>
 	<span>My Availabilities</span></a>
 	</li>

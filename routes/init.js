@@ -34,6 +34,7 @@ function initRouter(app) {
 	app.get('/caretaker' , passport.authMiddleware(), caretaker );
 
     app.get('/caretaker_calendar'   , passport.authMiddleware(), caretaker_calendar);
+    app.get('/full_time_caretaker_calendar'   , passport.authMiddleware(), full_time_caretaker_calendar);
     app.get('/owner_calendar'   , passport.authMiddleware(), owner_calendar);
 
 	/* admin pages*/
@@ -71,6 +72,7 @@ function initRouter(app) {
     app.post('/update_availability', passport.authMiddleware(), update_availability);
     app.post('/add_availability'   , passport.authMiddleware(), add_availability);
 	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
+	app.post('/take_leave' , passport.authMiddleware(), take_leave);
 
     /*BIDS*/
 	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
@@ -132,7 +134,8 @@ function basic(req, res, page, other) {
 		user: req.user.username,
 		avatar : req.user.avatar,
 		is_owner : req.user.is_owner,
-		is_caretaker : req.user.is_caretaker
+		is_caretaker : req.user.is_caretaker,
+        is_full_time: req.user.is_full_time == null? false: req.user.is_full_time
 	};
 	if(other) {
 		for(var fld in other) {
@@ -352,6 +355,37 @@ function caretaker_calendar(req, res, next) {
         })
         });
 }
+
+function full_time_caretaker_calendar(req, res, next) {
+    var availabilities, bids;
+    var error_message, success_message;
+
+
+    pool.query(sql_query.query.read_availabilities,[req.user.username], (err, data) => { //TODO req.user.username
+            if(err || !data.rows || data.rows.length == 0) {
+                        availabilities = [];
+                        console.log('Error reading availabilities: ' + err);
+            } else {
+                        availabilities = data.rows;
+                    }
+
+
+    pool.query(sql_query.query.read_bids, [req.user.username], (err, data) => {
+           if(err || !data.rows || data.rows.length == 0) {
+                          bids = [];
+                           console.log('Error reading bids: ' + err);
+          } else {
+                    bids = data.rows;
+          }
+
+                      error_message = req.flash('error');
+                      success_message = req.flash('success');
+
+            basic(req, res, 'full_time_caretaker_calendar', { bids: bids, availabilities: availabilities, error_message: error_message, success_message: success_message, availability_msg: msg(req, 'add', 'Availability period added successfully', 'Invalid parameters in availability period'), auth: true });
+        })
+        });
+}
+
 
 // POST
 function update_info(req, res, next) {
@@ -728,6 +762,23 @@ function delete_availability(req, res, next) {
         } else {
         req.flash('success', 'The period is successfully deleted.');
              res.redirect('/caretaker_calendar?delete=pass');
+        }
+    });
+}
+
+function take_leave(req, res, next) {
+    var leave_start_timestamp = req.body.leave_start_timestamp;
+    var leave_end_timestamp = req.body.leave_end_timestamp;
+
+    pool.query(sql_query.query.take_leave, [leave_start_timestamp, leave_end_timestamp, req.user.username], (err, data) => { //TODO: username
+        if(err) {
+              req.flash('error', 'Leave cannot be applied. Check that there are no scheduled pet-care jobs within the leave period.');
+              console.log("Cannot apply leave. " + err);
+
+             res.redirect('/full_time_caretaker_calendar?update=fail');
+        } else {
+              req.flash('success', 'Leave is successfully applied.');
+             res.redirect('/full_time_caretaker_calendar?update=pass');
         }
     });
 }

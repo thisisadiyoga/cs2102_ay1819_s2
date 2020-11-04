@@ -5,6 +5,8 @@ var availabilities = $('.availabilities-test').attr('data-test-value');
 var  bids = $('.bids-test').attr('data-test-value');
     bids = JSON.parse(bids);
 
+    console.log("THERE IS A BIDS ARRAY" + bids);
+
  //alert(availabilities[0].start);
 
 

@@ -17,8 +17,9 @@ sql.query = {
 	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
 	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
 	
-	insert_bid: 'CALL insert_bid($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5::timestamp AT TIME ZONE \'UTC\', $6::timestamp AT TIME ZONE \'UTC\', $7, $8);',
-	 view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
+	/** insert_bid: 'CALL insert_bid($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5::timestamp AT TIME ZONE \'UTC\', $6::timestamp AT TIME ZONE \'UTC\', $7, $8);', **/
+	insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)',
+	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
 	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
 	set_transac_details: 'UPDATE Bids SET payment_method = $1, mode_of_transfer = $2 WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND bid_start_timestamp = $6 AND bid_end_timestamp = $7',

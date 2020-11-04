@@ -389,25 +389,6 @@ CREATE TRIGGER check_deletable_bid
 BEFORE DELETE ON bids
 FOR EACH ROW EXECUTE PROCEDURE check_deletable_bid();
 
-
---Update bids
--- Check that the new bid period coincide with availability period
--- TODO: Check that pet belongs ot a category that caretaker can care for
-CREATE OR REPLACE FUNCTION update_bids()
-RETURNS TRIGGER AS
-$$ DECLARE first_result INTEGER := 0;
-  DECLARE second_result INTEGER := 0;
-  DECLARE total_result INTEGER;
-  BEGIN
-  END LOOP;
-  RETURN NULL;
-  END $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER update_bids
-BEFORE UPDATE ON bids
-FOR EACH ROW EXECUTE PROCEDURE update_bids();
-
 /*
 
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hchilcotte1', 'Hannah', 'Chilcotte', 'VxyTOEHQQ', 'hchilcotte1@bigcartel.com', '2000-01-19', '5048372273574703', null, '688741', 'https://robohash.org/expeditaquiaea.png?size=50x50&set=set1', '2020-01-27');

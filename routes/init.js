@@ -816,6 +816,7 @@ function insert_transac (req, res, next) {
 	var caretaker = req.body.caretakername;
 	var payment = req.body.paymentmethod;
 	var mot = req.body.modeoftransfer;
+	console.log(owner + pet + start + end + caretaker + payment + mot);
 	pool.query(sql_query.query.set_transac_details, [payment, mot, owner, pet, caretaker, start, end], (err, data) => {
 		if (err) {
 			console.error("Error in setting transaction details", err);

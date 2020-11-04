@@ -687,10 +687,10 @@ function update_availability(req, res, next) {
         if(err) {
               req.flash('error', 'The period cannot be updated. Check that there are no scheduled pet-care jobs that are outside of the new period.');
 
-             res.redirect('/availabilities?update=fail');
+             res.redirect('/caretaker_calendar?update=fail');
         } else {
               req.flash('success', 'The period is successfully updated.');
-             res.redirect('/availabilities?update=pass');
+             res.redirect('/caretaker_calendar?update=pass');
         }
     });
 }
@@ -706,11 +706,11 @@ function add_availability(req, res, next) {
         if(err) {
 
                req.flash('error', 'The new period cannot be added.');
-                res.redirect('/availabilities?add=fail');
+                res.redirect('/caretaker_calendar?add=fail');
 
         } else {
             req.flash('success', 'The period is successfully added. It may merge with existing availability schedule.');
-             res.redirect('/availabilities?add=pass');
+             res.redirect('/caretaker_calendar?add=pass');
         }
     });
 }
@@ -722,14 +722,16 @@ function delete_availability(req, res, next) {
     pool.query(sql_query.query.delete_availability, [start_timestamp, req.user.username], (err, data) => {
         if(err) {
 
+        console.log("Error deleting availability: " + err);
+
             req.flash('error', 'The period cannot be deleted as there is a scheduled pet-care job within that period.');
 
-             res.redirect('/availabilities?delete=fail');
+             res.redirect('/caretaker_calendar?delete=fail');
 
 
         } else {
         req.flash('success', 'The period is successfully deleted.');
-             res.redirect('/availabilities?delete=pass');
+             res.redirect('/caretaker_calendar?delete=pass');
         }
     });
 }
@@ -824,7 +826,7 @@ function insert_transac (req, res, next) {
 }
 
 function newbid (req, res, next) {
-	res.render('newbid', {auth:true});
+   basic(req, res, 'newbid', {auth:true});
 }
 
 function insert_bid (req, res, next) {
@@ -838,11 +840,15 @@ function insert_bid (req, res, next) {
 	var end = req.body.enddate;
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
+	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
+	console.log("calling insert bid query  with avail start and end timestamp " + start + " " + end);
 	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
 		if (err) {
+		  req.flash('error', 'Error creating bids. Check the bid start and end time is within the start and end time of caretaker\'s availability');
 			console.error("Error in creating bid", err);
 		} else {
-			res.redirect('/viewbids');
+		    req.flash('success', 'New bid is successfully added.');
+			basic(req, res, 'owner_calendar', {auth:true});
 		}
 	});
 }

@@ -53,7 +53,7 @@ CREATE TABLE declares_availabilities(
     end_timestamp 			TIMESTAMP 	NOT NULL,
     caretaker_username 		VARCHAR REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
-    PRIMARY KEY(caretaker_username, start_timestamp, end_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
+    PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
 );
 
@@ -83,7 +83,7 @@ CREATE TABLE bids (
       type_of_service 			VARCHAR 		NOT NULL,
 	  PRIMARY KEY (pet_name, owner_username, bid_start_timestamp, bid_end_timestamp, caretaker_username, avail_start_timestamp),
       FOREIGN KEY (bid_start_timestamp, bid_end_timestamp) REFERENCES Timings(start_timestamp, end_timestamp),
-      FOREIGN KEY (avail_start_timestamp, avail_end_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, end_timestamp, caretaker_username),
+      FOREIGN KEY (avail_start_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, caretaker_username),
       FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
       UNIQUE (pet_name, owner_username, caretaker_username, bid_start_timestamp, bid_end_timestamp),
 	  CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
@@ -202,7 +202,7 @@ $$
    BEGIN
    IF EXISTS (SELECT 1
               FROM bids b1
-              WHERE b1.caretaker_username = OLD.caretaker_username AND (GREATEST (b1.start_timestamp, NEW.start_timestamp) < LEAST (b1.end_timestamp, NEW.end_timestamp)) ) THEN --There is overlap
+              WHERE b1.caretaker_username = OLD.caretaker_username AND (GREATEST (b1.bid_start_timestamp, NEW.start_timestamp) < LEAST (b1.bid_end_timestamp, NEW.end_timestamp)) ) THEN --There is overlap
 
    RAISE EXCEPTION 'The period cannot be deleted as there is a successful bid within that period';
    ELSE
@@ -231,7 +231,7 @@ $$ DECLARE first_result INTEGER := 0;
     RAISE NOTICE 'entering 1st part';
     IF EXISTS(SELECT 1
               FROM bids b1
-              WHERE b1.caretaker_username = OLD.caretaker_username AND GREATEST(b1.start_timestamp, OLD.start_timestamp) < LEAST(b1.end_timestamp, NEW.start_timestamp)) THEN
+              WHERE b1.caretaker_username = OLD.caretaker_username AND GREATEST(b1.bid_start_timestamp, OLD.start_timestamp) < LEAST(b1.bid_end_timestamp, NEW.start_timestamp)) THEN
                RAISE NOTICE 'there is a bid between the old and new starting timestamp';
     first_result := 1;
     ELSE
@@ -245,7 +245,7 @@ $$ DECLARE first_result INTEGER := 0;
     RAISE NOTICE 'entering 2nd part';
     IF EXISTS(SELECT 1
               FROM bids b2
-              WHERE b2.caretaker_username = OLD.caretaker_username AND GREATEST(b2.start_timestamp, NEW.end_timestamp) < LEAST(b2.end_timestamp, OLD.end_timestamp)) THEN
+              WHERE b2.caretaker_username = OLD.caretaker_username AND GREATEST(b2.bid_start_timestamp, NEW.end_timestamp) < LEAST(b2.bid_end_timestamp, OLD.end_timestamp)) THEN
     RAISE NOTICE 'there is a bid between the old and new ending timestamp';
     second_result := 1;
     ELSE
@@ -310,8 +310,8 @@ RETURNS TRIGGER AS
 	$$ DECLARE total NUMERIC;
 	BEGIN
 		SELECT COUNT(*) INTO total FROM ownsPets WHERE username = NEW.username;
-		IF total = 0 THEN UPDATE Owners SET is_disabled = TRUE;
-		ELSIF total = 1 THEN UPDATE Owners SET is_disabled = FALSE;
+		IF total = 0 THEN UPDATE Owners SET is_disabled = TRUE WHERE username = NEW.username;
+		ELSIF total = 1 THEN UPDATE Owners SET is_disabled = FALSE WHERE username = NEW.username;
 		END IF;
 
 		RETURN NEW;
@@ -360,7 +360,7 @@ AFTER INSERT OR DELETE ON Owners
 FOR EACH ROW EXECUTE PROCEDURE update_owner();
 --------------------------------------------------------
 
-CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP, pe TIMESTAMP, sd TIMESTAMP, ed TIMESTAMP, ct VARCHAR, ts VARCHAR) AS
+CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH TIME ZONE, pe TIMESTAMP WITH TIME ZONE, sd TIMESTAMP WITH TIME ZONE, ed TIMESTAMP WITH TIME ZONE, ct VARCHAR, ts VARCHAR) AS
 $$ DECLARE tot_p NUMERIC;
 BEGIN
 SELECT DATE_PART('day', pe - ps) INTO tot_p;
@@ -424,55 +424,7 @@ insert into Bids(owner_username ,pet_name ,p_start_date ,p_end_date ,starting_da
 
 
 
-CREATE TABLE Timings (
-	p_start_date DATE,
-	p_end_date DATE,
-	PRIMARY KEY (p_start_date, p_end_date),
-	CHECK (p_end_date >= p_start_date)
-);
-CREATE TABLE Bids (
-	owner_username VARCHAR,
-	pet_name VARCHAR,
-	p_start_date DATE,
-	p_end_date DATE,
-	starting_date DATE,
-	ending_date DATE,
-	username VARCHAR,
-	rating NUMERIC,
-	review VARCHAR,
-	is_successful BOOLEAN,
-	payment_method VARCHAR,
-	mode_of_transfer VARCHAR,
-	is_paid BOOLEAN,
-	total_price NUMERIC NOT NULL CHECK (total_price > 0),
-	type_of_service VARCHAR NOT NULL,
-	PRIMARY KEY (pet_name, owner_username, p_start_date, p_end_date, starting_date, ending_date, username),
-	FOREIGN KEY (p_start_date, p_end_date) REFERENCES Timings(p_start_date, p_end_date),
-	--FOREIGN KEY (starting_date, ending_date, username) REFERENCES Availabilities(starting_date, ending_date, username),
-	FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
-	UNIQUE (pet_name, owner_username, username, p_start_date, p_end_date),
-	CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
-	CHECK ((is_successful = true) OR (payment_method IS NULL AND is_paid IS NULL AND
-	mode_of_transfer IS NULL)),
-	CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
-	CHECK ((p_start_date >= starting_date) AND (p_end_date <= ending_date) AND (p_end_date >= p_start_date))
-); 
 
-
-
-CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps DATE, pe DATE, sd DATE, ed DATE, ct VARCHAR, ts VARCHAR) AS
-$$ DECLARE tot_p NUMERIC;
-BEGIN
-tot_p := (pe - ps + 1) * (SELECT daily_price FROM Charges WHERE username = ct AND cat_name IN (SELECT cat_name FROM ownsPets WHERE username = ou AND name = pn));
-INSERT INTO Bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
-END; $$
-LANGUAGE plpgsql;
-CREATE OR REPLACE PROCEDURE choose_bids() AS
-$$ BEGIN
-UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END)
-WHERE is_successful IS NULL;
-END; $$
-LANGUAGE plpgsql;
 
 CREATE OR REPLACE PROCEDURE rate_or_review(rat NUMERIC, rev VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
 $$ BEGIN

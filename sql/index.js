@@ -68,7 +68,9 @@ sql.query = {
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1;", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
-	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;", 
+	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;",	
+
+	get_all_caretaker_salaries: " SELECT 	extract(year from bid_start_timestamp) as year,	extract(month from bid_start_timestamp) as month, B1.caretaker_username, total_price * 0.75 as salary FROM bids B1 WHERE EXISTS (SELECT 1 From Caretakers c WHERE c.username = B1.caretaker_username AND NOT c.is_full_time) AND is_successful AND bid_start_timestamp>= '2020-01-01' AND bid_start_timestamp <= '2050-12-31' UNION	SELECT 	extract(year from B2.bid_start_timestamp) as year, extract (month from B2.bid_start_timestamp) as month, B2.caretaker_username, 3000 as salary FROM bids B2 WHERE EXISTS (SELECT 1 From Caretakers c WHERE c.username = B2.caretaker_username AND c.is_full_time) AND B2.is_successful GROUP BY year, month, caretaker_username ORDER BY year DESC, month DESC, caretaker_username ASC;",
 
 	//AVAILABILITIES
 	// Information

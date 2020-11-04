@@ -91,16 +91,17 @@
 									<th>Year</th>
 									<th>Month</th>
 									<th>Caretaker</th>
-									<th>Raw Earning</th>
+									<th>Salary</th>
 								</tr>
 							</thead>
 							<tbody>
 								<% for(var i=0; i< allSalary.length; i++) { %>
 								<tr>
 									<td style="max-width:5px;"><%= allSalary[i].year%></td>
-									<td style="max-width:200px;"><%= allSalary[i].month%></td>
+									<% var months = ["None", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];%>
+									<td style="max-width:200px;"><%= months[allSalary[i].month]%></td>
 									<td style="max-width:200px;"><%= allSalary[i].caretaker_username%></td>
-									<td style="max-width:200px;"><%= allSalary[i].rawearning%></td>
+									<td style="max-width:200px;"><%= allSalary[i].salary%></td>
 								</tr>
 								<% } %>
 							</tbody>

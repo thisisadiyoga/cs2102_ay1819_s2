@@ -75,7 +75,7 @@ function initRouter(app) {
     app.post('/add_availability'   , passport.authMiddleware(), add_availability);
 	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
 
-    /*BIDS*/
+	/*BIDS*/
 	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 
@@ -239,7 +239,7 @@ function adminStatistics (req, res, next) {
 					allJobs = data.rows;
 				}
 	
-				pool.query(sql_query.query.get_caretaker_salary_every_month, (err,data) => {
+				pool.query(sql_query.query.get_all_caretaker_salaries, (err,data) => {
 					if(err || !data.rows || data.rows.length == 0) {
 						allSalary = [];
 					} else {
@@ -734,6 +734,18 @@ function delete_availability(req, res, next) {
         }
     });
 }
+
+// function delete_category(req, res, next) {
+// 	console.log(req.body.name);
+// 	pool.query(sql_query.query.del_category, [req.body.name], (err, data) => {
+// 		if(err) {
+// 			console.error("Category not found");
+// 			res.redirect('/category?del=fail');
+// 		} else {
+// 			res.redirect('/category?del=pass');
+// 		}
+// 	});
+// }
 
 
 

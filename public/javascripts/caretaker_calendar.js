@@ -57,13 +57,33 @@ $('#calendar').fullCalendar({
     //Original time is still the same
     var old_start = new Date(event.start);
     old_start.setHours(old_start.getHours() - 8);
-    $('.update-availability-form .startTimestamp').flatpickr({dateFormat: "Y-m-d  H:i:00", enableTime: true, defaultDate: old_start,  minDate: new Date()});
-    $('.update-availability-form .oldStartTimestamp')[0].setAttribute('value', event.start);
-    $('.delete-availability-form .oldStartTimestamp')[0].setAttribute('value', event.start);
 
 
    var old_end = new Date(event.end);
    old_end.setHours(old_end.getHours() - 8);
+
+   if(old_end < current) {//Availability period is over
+    $('.show-availability-form .startTimestamp')[0].setAttribute('value', old_start);
+     $('.show-availability-form .endTimestamp')[0].setAttribute('value', old_end);
+
+        $('#showDateTimePickerModal').modal('show');
+
+        return;
+
+      }
+
+    var current = new Date();
+    var max_future = new Date();
+    max_future.setFullYear(max_future.getFullYear() + 2);
+    if(old_start < current)
+    $('.update-availability-form .startTimestamp').flatpickr({dateFormat: "Y-m-d  H:i:00", enableTime: true, defaultDate: current,  minDate: current, maxDate: max_future});
+    else
+    $('.update-availability-form .startTimestamp').flatpickr({dateFormat: "Y-m-d  H:i:00", enableTime: true, defaultDate: old_start,  minDate: current, maxDate: max_future});
+
+    $('.update-availability-form .oldStartTimestamp')[0].setAttribute('value', event.start);
+    $('.delete-availability-form .oldStartTimestamp')[0].setAttribute('value', event.start);
+
+
     $('.update-availability-form .endTimestamp').flatpickr({dateFormat: "Y-m-d  H:i:00", enableTime: true, defaultDate: old_end,  minDate: new Date()});
      $('.update-availability-form .oldEndTimestamp')[0].setAttribute('value', event.end);
     $('.delete-availability-form .oldEndTimestamp')[0].setAttribute('value', event.end);

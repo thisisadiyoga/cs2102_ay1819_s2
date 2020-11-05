@@ -17,7 +17,7 @@ const pool = new Pool({
     host: postgres_details.host,
     port: postgres_details.port,
     password: postgres_details.password,
-      idleTimeoutMillis: 2000
+    idleTimeoutMillis: 2000
 });
 
 function findUser (username, callback) {
@@ -36,7 +36,8 @@ function findUser (username, callback) {
         passwordHash: data.rows[0].password,
         avatar      : data.rows[0].avatar, 
         is_owner    : data.rows[0].is_owner, 
-        is_caretaker: data.rows[0].is_caretaker
+        is_caretaker: data.rows[0].is_caretaker,
+        is_full_time: data.rows[0].is_full_time
 			});
 		} else {
 			console.error("More than one user?");

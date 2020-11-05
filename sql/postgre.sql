@@ -54,7 +54,7 @@ CREATE TABLE declares_availabilities(
     caretaker_username 		VARCHAR REFERENCES Caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
     CHECK(start_timestamp >= CURRENT_TIMESTAMP),
-    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years')
+    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years'),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
 );
@@ -147,6 +147,18 @@ CREATE TRIGGER check_pet_limit
 BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE is_pet_limit_reached();
 
+CREATE OR REPLACE FUNCTION is_enddate_valid() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM declares_availabilities a WHERE NEW.caretaker_username = a.caretaker_username AND NEW.avail_start_timestamp = a.start_timestamp AND NEW.avail_end_timestamp = a.end_timestamp;
+IF (ctx > 0) THEN RETURN NEW; ELSE RETURN NULL; END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_enddate
+BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE is_enddate_valid();
+
 CREATE TABLE isPaidSalaries (
 	caretaker_id 				VARCHAR 		REFERENCES caretakers(username) ON DELETE cascade,
 	year 						INTEGER,
@@ -206,7 +218,7 @@ FOR EACH ROW EXECUTE PROCEDURE merge_availabilities();
 
 --delete availabilities only if there are no pets the caretaker is scheduled to care for
 --This is only called when the table is manually deleted
-CREATE OR REPLACE PROCEDURE delete_availability(old_username VARCHAR, old_start_timestamp TIMESTAMP WITH TIME ZONE)
+CREATE OR REPLACE PROCEDURE delete_availability(old_username VARCHAR, old_start_timestamp TIMESTAMP WITH TIME ZONE) AS
 $$
    BEGIN
    IF EXISTS (SELECT 1

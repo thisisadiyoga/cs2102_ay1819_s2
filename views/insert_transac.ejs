@@ -39,11 +39,18 @@
             </div>
             <div class="form-group">
 				<label for="paymentmethod">Payment method</label>
-				<input type="text" class="form-control" id="paymentmethod" name="paymentmethod" placeholder="Enter the payment method">
+				<select class="form-control" id="paymentmethod" name="paymentmethod" required = "required">
+						<option>Credit Card</option>
+						<option>Cash</option>
+				</select>
             </div>
             <div class="form-group">
-				<label for="modeoftransfer">Review</label>
-				<input type="text" class="form-control" id="modeoftransfer" name="modeoftransfer" placeholder="Enter the mode of transfer">
+				<label for="modeoftransfer">Mode of Transfer</label>
+				<select class="form-control" id="modeoftransfer" name="modeoftransfer" required = "required">
+					<option>Pet Owner deliver</option>
+					<option>Caretaker pick up</option>
+					<option>Transfer at PCS</option>
+				</select>
 			</div>
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>

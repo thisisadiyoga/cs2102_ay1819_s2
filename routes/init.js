@@ -14,8 +14,11 @@ const { Pool } = require('pg');
 const pool = new Pool({
 
     //ssl: true
-    user: postgres_details.user,
-	database: postgres_details.database,
+	user: postgres_details.user,
+    database: postgres_details.database,
+    host: postgres_details.host,
+    port: postgres_details.port,
+    password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
 
@@ -75,7 +78,6 @@ function initRouter(app) {
 	app.post('/take_leave' , passport.authMiddleware(), take_leave);
 
     /*BIDS*/
-	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 
 	/* LOGIN */
@@ -97,9 +99,11 @@ function initRouter(app) {
 	app.get('/admin', admin);
 
 	/*BIDS*/
-	app.get('/viewbids', passport.authMiddleware(), view_bids);
-	app.get('/feedback', passport.authMiddleware(), rate_review_form);
+	app.get('/viewbids', passport.authMiddleware(), viewbids);
 	app.post('/rate_review', passport.authMiddleware(), rate_review);
+	app.get('/rate_review_form', passport.authMiddleware(), rate_review_form);
+	app.get('/insert_transac', passport.authMiddleware(), view_transac);
+	app.post('/insert_transac', passport.authMiddleware(), insert_transac);
 	app.get('/newbid', passport.authMiddleware(), newbid);
 	app.post('/insert_bid', passport.authMiddleware(), insert_bid);
 
@@ -814,9 +818,9 @@ function caretaker (req, res, next) {
 	});
 }
 
-
-function view_bids (req, res, next) {
+function viewbids (req, res, next) {
 	var owner = req.user.username;
+	console.log(owner);
 	var bids;
 	pool.query(sql_query.query.view_bids, [owner], (err, data) => {
 		if (err || !data.rows || data.rows.length == 0) {
@@ -824,12 +828,13 @@ function view_bids (req, res, next) {
 		} else {
 			bids = data.rows;
 		}
-		basic(req, res, 'owner_calendar', {data: bids, auth : true});
+		basic(req, res, 'viewbids', {data: bids, auth : true});
 	});
 }
 
 function rate_review_form (req, res, next) {
-	res.render('rate_review', {auth:true});
+	console.log("lol");
+	res.render('rate_review_form', {auth:true});
 }
 
 function rate_review (req, res, next) {
@@ -849,12 +854,36 @@ function rate_review (req, res, next) {
 	});
 }
 
+function view_transac (req, res, next) {
+	res.render('insert_transac', {auth:true});
+}
+
+function insert_transac (req, res, next) {
+	console.log("Hello");
+	var owner = req.body.ownername;
+	var pet = req.body.petname;
+	var start = req.body.startdate;
+	var end = req.body.enddate;
+	var caretaker = req.body.caretakername;
+	var payment = req.body.paymentmethod;
+	var mot = req.body.modeoftransfer;
+	console.log(owner + pet + start + end + caretaker + payment + mot);
+	pool.query(sql_query.query.set_transac_details, [payment, mot, owner, pet, caretaker, start, end], (err, data) => {
+		if (err) {
+			console.error("Error in setting transaction details", err);
+		} else {
+			res.redirect('/viewbids');
+		}
+	})
+}
+
 function newbid (req, res, next) {
    basic(req, res, 'newbid', {auth:true});
 }
 
 function insert_bid (req, res, next) {
-console.log("in insert bid method ");
+	console.log("Reached!");
+	console.log(req.body.ownername);
 	var owner = req.body.ownername;
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
@@ -870,18 +899,10 @@ console.log("in insert bid method ");
 		  req.flash('error', 'Error creating bids. Check the bid start and end time is within the start and end time of caretaker\'s availability');
 			console.error("Error in creating bid", err);
 		} else {
-		      req.flash('success', 'New bid is successfully added.');
-
+		    req.flash('success', 'New bid is successfully added.');
 			basic(req, res, 'owner_calendar', {auth:true});
 		}
 	});
-
-	pool.query(sql_query.query.choose_bids, (err, data) => {
-		if (err) {
-			console.error("Error in choosing bids", err);
-		}
-	});
-
 }
 
 
@@ -891,7 +912,7 @@ function delete_bid(req, res, next) {
     var old_caretaker_username = req.body.old_caretaker_username;
     var old_pet_name = req.body.old_pet_name;
 
-    console.log("bids and avail start tiemstmap is " + old_bid_start_timestamp + old_avail_start_timestamp);
+    console.log("bids and avail start timestamp is " + old_bid_start_timestamp + old_avail_start_timestamp);
 
 
     var owner_username = req.user.username;

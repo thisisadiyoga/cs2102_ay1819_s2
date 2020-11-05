@@ -1,0 +1,59 @@
+[viewbids.ejs]
+<!DOCTYPE html>
+<html>
+  <head>
+		<!-- Page Title -->
+    <title>Bids!</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+		
+		<!-- CSS for Styling -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+		
+		<!-- JavaScript for Interactivity -->
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <h1>CS2102: My Bids</h1>
+		<table class="table table-striped table-hover table-bordered">
+			<thead class="thead-dark">
+				<tr>
+                    <th scope="col">Owner</th>
+                    <th scope="col">Pet</th>
+                    <th scope="col">Start Date</th>
+                    <th scope="col">End Date</th>
+                    <th scope="col">Caretaker</th>
+                    <th scope="col">Rating</th>
+                    <th scope="col">Review</th>
+                    <th scope="col">Successful?</th>
+                    <th scope="col">Payment method</th>
+                    <th scope="col">Mode of Transfer</th>
+                    <th scope="col">Paid?</th>
+                    <th scope="col">Total Price</th>
+                    <th scope="col">Type of Service</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% for(var i=0; i<data.length; i++) { %>
+				<tr>
+					<td><%= data[i].owner_username%></td>
+                    <td><%= data[i].pet_name%></td>
+                    <td><%= data[i].bid_start_timestamp%></td>
+                    <td><%= data[i].bid_end_timestamp%></td>
+                    <td><%= data[i].caretaker_username%></td>
+                    <td><%= data[i].rating%></td>
+                    <td><%= data[i].review%></td>
+                    <td><%= data[i].is_successful%></td>
+                    <td><%= data[i].payment_method%></td>
+                    <td><%= data[i].mode_of_transfer%></td>
+                    <td><%= data[i].is_paid%></td>
+                    <td><%= data[i].total_price%></td>
+                    <td><%= data[i].type_of_service%></td>
+				</tr>
+				<% } %>
+			</tbody>
+    </table>
+    <div><a class="btn btn-primary" href="/dashboard">Return to dashboard</a></div>
+  </body>
+</html>

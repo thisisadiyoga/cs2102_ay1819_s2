@@ -54,7 +54,7 @@ CREATE TABLE declares_availabilities(
     caretaker_username 		VARCHAR REFERENCES Caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
     CHECK(start_timestamp >= CURRENT_TIMESTAMP),
-    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years')
+    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years'),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
 );
@@ -74,7 +74,7 @@ CREATE TABLE bids (
       bid_start_timestamp 		TIMESTAMP,
       bid_end_timestamp 		TIMESTAMP,
       avail_start_timestamp 	TIMESTAMP,
-      avail_end_timestamp 		TIMESTAMP,
+	  avail_end_timestamp 		TIMESTAMP,
       caretaker_username 		VARCHAR,
       rating 					NUMERIC,
       review 					VARCHAR,
@@ -84,13 +84,80 @@ CREATE TABLE bids (
       is_paid 					BOOLEAN,
       total_price 				NUMERIC 		NOT NULL CHECK (total_price > 0),
       type_of_service 			VARCHAR 		NOT NULL,
-      PRIMARY KEY (pet_name, owner_username, bid_start_timestamp,  caretaker_username, avail_start_timestamp),
+	  PRIMARY KEY (pet_name, owner_username, bid_start_timestamp, bid_end_timestamp, caretaker_username, avail_start_timestamp),
       FOREIGN KEY (bid_start_timestamp, bid_end_timestamp) REFERENCES Timings(start_timestamp, end_timestamp),
       FOREIGN KEY (avail_start_timestamp, caretaker_username) REFERENCES declares_availabilities(start_timestamp, caretaker_username),
       FOREIGN KEY (pet_name, owner_username) REFERENCES ownsPets(name, username),
-      CHECK (bid_start_timestamp >= avail_start_timestamp),
-      CHECK (bid_end_timestamp <= avail_end_timestamp)
+      UNIQUE (pet_name, owner_username, caretaker_username, bid_start_timestamp, bid_end_timestamp),
+	  CHECK ((is_successful = true) OR (rating IS NULL AND review IS NULL)),
+	  CHECK ((is_successful = true) OR (payment_method IS NULL AND is_paid IS NULL AND
+	  mode_of_transfer IS NULL)),
+	  CHECK ((rating IS NULL) OR (rating >= 0 AND rating <= 5)),
+	  CHECK ((bid_start_timestamp >= avail_start_timestamp) AND (bid_end_timestamp <= avail_end_timestamp) AND (bid_end_timestamp > bid_start_timestamp))
 );
+
+CREATE TABLE Charges (
+  daily_price NUMERIC,
+  cat_name VARCHAR(10) REFERENCES Categories(cat_name),
+  caretaker_username VARCHAR REFERENCES Caretakers(username),
+  PRIMARY KEY (cat_name, caretaker_username)
+);
+
+CREATE OR REPLACE FUNCTION is_valid_price() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM Caretakers C WHERE C.username = NEW.caretaker_username AND C.is_full_time = false;
+IF ctx > 0 THEN RETURN NEW; END IF;
+SELECT COUNT(*) INTO ctx FROM Categories A WHERE A.cat_name = NEW.cat_name AND A.base_price > NEW.daily_price;
+IF ctx > 0 THEN RETURN NULL; ELSE RETURN NEW; END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_daily_price
+BEFORE INSERT OR UPDATE ON Charges
+FOR EACH ROW EXECUTE PROCEDURE is_valid_price();
+
+CREATE OR REPLACE FUNCTION is_pet_covered() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM Charges C WHERE C.cat_name = (SELECT cat_name FROM ownsPets O WHERE O.username = NEW.owner_username AND O.name = NEW.pet_name) AND C.caretaker_username = NEW.caretaker_username;
+IF ctx = 0 THEN RETURN NULL; ELSE RETURN NEW; END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_pet_cover
+BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE is_pet_covered();
+
+CREATE OR REPLACE FUNCTION is_pet_limit_reached() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+DECLARE rate NUMERIC;
+DECLARE is_part_time NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM bids B WHERE B.is_successful = true AND B.caretaker_username = NEW.caretaker_username AND B.bid_end_timestamp > CURRENT_TIMESTAMP;
+SELECT AVG(rating) INTO rate FROM bids Bo WHERE Bo.is_successful = true AND Bo.caretaker_username = NEW.caretaker_username;
+SELECT COUNT(*) INTO is_part_time FROM Caretakers C WHERE C.username = NEW.caretaker_username AND is_full_time = false;
+IF (ctx >= 5) THEN RETURN NULL; END IF;
+IF (is_part_time > 0 AND ctx >= 2 AND (rate IS NULL OR rate < 4)) THEN RETURN NULL; END IF;
+RETURN NEW;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_pet_limit
+BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE is_pet_limit_reached();
+
+CREATE OR REPLACE FUNCTION is_enddate_valid() RETURNS TRIGGER AS
+$$ DECLARE ctx NUMERIC;
+BEGIN
+SELECT COUNT(*) INTO ctx FROM declares_availabilities a WHERE NEW.caretaker_username = a.caretaker_username AND NEW.avail_start_timestamp = a.start_timestamp AND NEW.avail_end_timestamp = a.end_timestamp;
+IF (ctx > 0) THEN RETURN NEW; ELSE RETURN NULL; END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER check_enddate
+BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE is_enddate_valid();
 
 CREATE TABLE isPaidSalaries (
 	caretaker_id 				VARCHAR 		REFERENCES caretakers(username) ON DELETE cascade,
@@ -151,7 +218,7 @@ FOR EACH ROW EXECUTE PROCEDURE merge_availabilities();
 
 --delete availabilities only if there are no pets the caretaker is scheduled to care for
 --This is only called when the table is manually deleted
-CREATE OR REPLACE PROCEDURE delete_availability(old_username VARCHAR, old_start_timestamp TIMESTAMP WITH TIME ZONE)
+CREATE OR REPLACE PROCEDURE delete_availability(old_username VARCHAR, old_start_timestamp TIMESTAMP WITH TIME ZONE) AS
 $$
    BEGIN
    IF EXISTS (SELECT 1
@@ -370,9 +437,10 @@ CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH
 $$ DECLARE tot_p NUMERIC;
 BEGIN
 SELECT DATE_PART('day', pe - ps) INTO tot_p;
-tot_p := tot_p * 10;
+tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
 IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
 INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
+UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
 END; $$
 LANGUAGE plpgsql;
 
@@ -393,24 +461,6 @@ LANGUAGE plpgsql;
 CREATE TRIGGER check_deletable_bid
 BEFORE DELETE ON bids
 FOR EACH ROW EXECUTE PROCEDURE check_deletable_bid();
-
-
---Update bids
--- Check that the new bid period coincide with availability period
--- TODO: Check that pet belongs ot a category that caretaker can care for
-CREATE OR REPLACE FUNCTION update_bids()
-RETURNS TRIGGER AS
-$$ DECLARE first_result INTEGER := 0;
-  DECLARE second_result INTEGER := 0;
-  DECLARE total_result INTEGER;
-  BEGIN
-
-  END $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER update_bids
-BEFORE UPDATE ON bids
-FOR EACH ROW EXECUTE PROCEDURE update_bids();
 
 /*
 

@@ -36,7 +36,6 @@ sql.query = {
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
 	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1;",
 	get_caretaker : "SELECT * FROM Caretakers WHERE username = $1 AND NOT is_disabled;", 
-	get_ct : "SELECT * FROM Caretakers c NATURAL JOIN isPaidSalaries WHERE c.username = $1 AND NOT is_disabled AND month = $2 AND year = $3;",
 	get_location : "SELECT postal_code FROM Users WHERE username = $1;", 
 
 	list_users: "SELECT * FROM Users;", 

@@ -29,11 +29,6 @@
 			<span>My Bids</span></a>
 	</li>
 
-	<li class="nav-item" <%= page==="caretaker_calendar" ? "active" : "" %> style="<%=caretaker%>">
-	<a class="nav-link" href="<%= page==="caretaker_calendar" ? "#" : "/caretaker_calendar" %>">
-	<i class="fas fa-calendar-alt">&nbsp;</i>
-	<span>My Availabilities</span></a>
-	</li>
 
 	<li class="nav-item" <%= page==="pets" ? "active" : "" %> style="<%=owner%>">
 		<a class="nav-link" href="<%= page==="pets" ? "#" : "/feedback" %>">
@@ -47,14 +42,20 @@
 		<span>New Bid</span></a>
 	</li>
 
-	<li class="nav-item" <%= page==="caretaker" ? "active" : "" %>> style="<%=caretaker%>">
+	<li class="nav-item" <%= page==="caretaker_calendar" ? "active" : "" %> style="<%=caretaker%>">
+		<a class="nav-link" href="<%= page==="caretaker_calendar" ? "#" : "/caretaker_calendar" %>">
+		<i class="fas fa-calendar-alt">&nbsp;</i>
+		<span>My Availabilities</span></a>
+	</li>
+
+	<li class="nav-item" <%= page==="caretaker" ? "active" : "" %> style="<%=caretaker%>">
 		<a class="nav-link" href="<%= page==="caretaker" ? "#" : "/caretaker" %>">
 		<i class="fas fa-fw fa-address-card"></i>
 		<span>My Overview</span>
 		</a>
     </li>
     
-    <li class="nav-item" <%= page==="ctreviews" ? "active" : "" %>> style="<%=caretaker%>">
+    <li class="nav-item" <%= page==="ctreviews" ? "active" : "" %> style="<%=caretaker%>">
 		<a class="nav-link" href="<%= page==="ctreviews" ? "#" : "/ctreviews" %>">
 		<i class="fas fa-fw fa-dog"></i>
 		<span>View My Reviews</span>

@@ -31,10 +31,15 @@
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <tr>
                                         <th>Name</th>
+                                        <%if (caretaker.length > 0) { %>
                                         <td><%= caretaker[0].username%></td>
+                                        <% } else { %>
+                                        <td></td>
+                                        <% } %>
                                     </tr>
                                     <tr>
                                         <th>Caretaker Type</th>
+                                        <%if (caretaker.length > 0) { %>
                                         <td>
                                             <% if(caretaker[0].is_full_time) { %> 
                                                 Full-Time
@@ -42,14 +47,25 @@
                                                 Part-Time
                                             <% } %>
                                         </td>
+                                        <% } else { %>
+                                            <td></td>
+                                        <% } %>
                                     </tr>
                                     <tr>
                                         <th>Rating</th>
+                                        <%if (caretaker.length > 0) { %>
                                         <td><%= caretaker[0].avg_rating%></td>
+                                        <% } else { %>
+                                            <td></td>
+                                        <% } %>
                                     </tr>
                                     <tr>
-                                        <th>Expected Salary for the Month</th>
-                                        <td><%= caretaker[0].salary_amount%></td>
+                                        <th>No. of Pet-days for the Month</th>
+                                        <%if (pet_days.length > 0) { %>
+                                        <td><%= pet_days[0].duration%></td>
+                                        <% } else { %>
+                                            <td>No Data Available</td>
+                                        <% } %>
                                     </tr>
                                 </table>
                             </div>

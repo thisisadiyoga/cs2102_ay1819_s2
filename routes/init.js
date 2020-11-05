@@ -15,7 +15,10 @@ const pool = new Pool({
 
     //ssl: true
     user: postgres_details.user,
-	database: postgres_details.database,
+    database: postgres_details.database,
+    host: postgres_details.host,
+    port: postgres_details.port,
+    password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
 
@@ -749,18 +752,28 @@ function search_caretaker (req, res, next) {
 
 function caretaker (req, res, next) {
 	var caretaker;
+	var pet_days = [];
 	var date = new Date();
-	var currmonth = date.getMonth();
-	var curryear = date.getFullYear();
+	//var currmonth = date.getMonth();
+	//var curryear = date.getFullYear();
 
-	pool.query(sql_query.query.get_ct, [req.user.username, currmonth, curryear], (err, data) => {
+	pool.query(sql_query.query.get_caretaker, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			caretaker = [];
 		} else {
 			caretaker = data.rows;
-		}
+			
+			pool.query(sql_query.query.search_petdays, [req.user.username, date, date], (err, data) => {
+				if (err || !data.rows || data.rows.length == 0) {
+					pet_days = [];
+					console.log("Unable to calculate pet_days");
+				} else {
+					pet_days = data.rows;
 
-		basic(req, res, 'caretaker', { caretaker : caretaker, add_msg: msg(req, 'add', 'Caretaker added successfully', 'Error in adding caretaker'), auth: true });
+				}
+			})
+		}
+		basic(req, res, 'caretaker', { caretaker : caretaker, pet_days : pet_days, add_msg: msg(req, 'add', 'Caretaker added successfully', 'Error in adding caretaker'), auth: true });
 	});
 }
 
@@ -779,15 +792,14 @@ function view_bids (req, res, next) {
 }
 
 function ctview_bids (req, res, next) {
-	var caretaker = req.user.username;
 	var bids;
-	pool.query(sql_query.query.ctview_bids, [caretaker], (err, data) => {
+	pool.query(sql_query.query.ctview_bids, [req.user.username], (err, data) => {
 		if (err || !data.rows || data.rows.length == 0) {
 			bids = [];
 		} else {
 			bids = data.rows;
 		}
-		basic(req, res, 'ctreviews', {data: bids, auth : true});
+		basic(req, res, 'ctreviews', {bids: bids, auth : true});
 	});
 }
 

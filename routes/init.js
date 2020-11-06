@@ -12,7 +12,6 @@ const flash = require('connect-flash');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
-
 	// ssl: true
 	user: postgres_details.user,
     database: postgres_details.database,
@@ -919,19 +918,18 @@ function insert_bid (req, res, next) {
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
 	var p_end = req.body.penddate;
-	var start = req.body.startdate;
-	var end = req.body.enddate;
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
+	console.log(p_start);
+	console.log(p_end);
 	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
-	console.log("calling insert bid query  with avail start and end timestamp " + start + " " + end);
-	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+	pool.query(sql_query.query.insert_bids, [owner, pet, p_start, p_end, caretaker, service], (err, data) => {
 		if (err) {
 		  req.flash('error', 'Error creating bids. Check the bid start and end time is within the start and end time of caretaker\'s availability');
 			console.error("Error in creating bid", err);
 		} else {
-		    req.flash('success', 'New bid is successfully added.');
-			basic(req, res, 'owner_calendar', {auth:true});
+			res.redirect('/owner_calendar?error_message=pass');
+
 		}
 	});
 }

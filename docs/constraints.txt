@@ -180,7 +180,7 @@ Administrators
 
 
 * Administrators have separate accounts from users since they are entitled to more privileges.
-* Administrators are identified by their admin_id (i.e. username).
+* Administrators are identified by their admin_username (i.e. username).
 * Administrators have a password.
 * Passwords must be hashed and salted for security purposes.
 * Their last login time must also be recorded for security reasons (in case of unauthorised access).

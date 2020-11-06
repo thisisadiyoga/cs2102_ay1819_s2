@@ -13,8 +13,11 @@ const { Pool } = require('pg');
 const pool = new Pool({
     //ssl: true
     user: postgres_details.user,
-	database: postgres_details.database,
-	 idleTimeoutMillis: 2000
+    database: postgres_details.database,
+    host: postgres_details.host,
+    port: postgres_details.port,
+    password: postgres_details.password,
+    idleTimeoutMillis: 2000
 });
 
 function findUser (username, callback) {
@@ -55,7 +58,7 @@ function findAdmin (username, callback) {
 			return callback(null)
 		} else if(data.rows.length == 1) {
 			return callback(null, {
-				admin_username    : data.rows[0].admin_id,
+				admin_username    : data.rows[0].admin_username,
         passwordHash      : data.rows[0].password,
 			});
 		} else {

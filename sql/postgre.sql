@@ -31,7 +31,8 @@ CREATE TABLE Caretakers (
 	is_full_time		BOOLEAN			NOT NULL,
 	avg_rating			FLOAT			   NOT NULL DEFAULT 0,
 	no_of_reviews		INT				NOT NULL DEFAULT 0,
-	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0) DEFAULT 0
+	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0) DEFAULT 0,
+	is_disabled			BOOLEAN			NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE ownsPets (
@@ -54,7 +55,7 @@ CREATE TABLE declares_availabilities(
     CHECK (end_timestamp > start_timestamp),
     CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours'),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
-                                                --They will be merged
+                                               --They will be merged
 );
 
 
@@ -439,6 +440,22 @@ FOR EACH ROW EXECUTE PROCEDURE update_owner();
 CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH TIME ZONE, pe TIMESTAMP WITH TIME ZONE, sd TIMESTAMP WITH TIME ZONE, ed TIMESTAMP WITH TIME ZONE, ct VARCHAR, ts VARCHAR) AS
 $$ DECLARE tot_p NUMERIC;
 BEGIN
+SELECT DATE_PART('day', pe - ps) INTO tot_p;
+tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
+IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
+UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE PROCEDURE insert_bids(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH TIME ZONE, pe TIMESTAMP WITH TIME ZONE, ct VARCHAR, ts VARCHAR) AS
+$$ DECLARE tot_p NUMERIC;
+DECLARE sd TIMESTAMP WITH TIME ZONE;
+DECLARE ed TIMESTAMP WITH TIME ZONE;
+BEGIN
+IF NOT EXISTS (SELECT 1 FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct) THEN RAISE EXCEPTION "Boo Boo!"; END IF;
+SELECT start_timestamp, end_timestamp INTO sd, ed
+FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct;
 SELECT DATE_PART('day', pe - ps) INTO tot_p;
 tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
 IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;

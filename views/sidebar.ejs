@@ -1,6 +1,7 @@
 <!-- Sidebar -->
 <% var owner = (!is_owner) ? "display: none" : "" %> 
-<% var isFullTime = (!is_full_time) ? "display: none" : "" %>
+<% var caretaker = (!is_caretaker) ? "display: none" : "" %>
+<% var isFullTime = (is_full_time) ? "display: none" : "" %>
 <% var isPartTime = is_full_time ? "display: none" : "" %>
 
 <ul class="sidebar navbar-nav">
@@ -46,7 +47,7 @@
 		</i>
 	</div>
 
-	<div style="<%=isPartTime%>">
+	<div style="<%=isPartTime%> <%=caretaker%>">
 		<li class="nav-item" <%= page==="caretaker_calendar" ? "active" : "" %>>
 			<a class="nav-link" href="<%= page==="caretaker_calendar" ? "#" : "/caretaker_calendar" %>">
 			<i class="fas fa-calendar-alt">&nbsp;</i>
@@ -62,7 +63,7 @@
 		</i>
 	</div>
 
-	<div style="<%=isFullTime%>">
+	<div style="<%=isFullTime%> <%=caretaker%>">
 		<li class="nav-item" <%= page==="full_time_caretaker_calendar" ? "active" : "" %> >
 			<a class="nav-link" href="<%= page==="full_time_caretaker_calendar" ? "#" : "/full_time_caretaker_calendar" %>">
 			<i class="fas fa-calendar-alt">&nbsp;</i>

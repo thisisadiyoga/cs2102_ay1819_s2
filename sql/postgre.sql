@@ -52,10 +52,9 @@ CREATE TABLE declares_availabilities(
     end_timestamp 			TIMESTAMP 	NOT NULL,
     caretaker_username 		VARCHAR REFERENCES Caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
-    /** CHECK(start_timestamp >= CURRENT_TIMESTAMP), **/
     CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours'),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
-                                                --They will be merged
+                                               --They will be merged
 );
 
 
@@ -307,6 +306,9 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE PROCEDURE take_leave(leave_start_timestamp TIMESTAMP WITH TIME ZONE, leave_end_timestamp TIMESTAMP WITH TIME ZONE, username VARCHAR) AS
 $$ DECLARE avail_start_timestamp TIMESTAMP;
 DECLARE avail_end_timestamp TIMESTAMP;
+DECLARE num_consecutive_days_first_period NUMERIC;
+DECLARE num_consecutive_days_second_period NUMERIC;
+
 BEGIN
 RAISE NOTICE 'in take_leave procedure';
 IF EXISTS (SELECT 1 FROM bids WHERE caretaker_username = username AND bid_start_timestamp >= leave_start_timestamp AND bid_start_timestamp <= leave_end_timestamp AND is_successful IS TRUE) THEN
@@ -314,6 +316,8 @@ RAISE EXCEPTION 'Leave cannot be taken as there are scheduled pet-care jobs with
 ELSE
  SELECT MIN(start_timestamp) INTO avail_start_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_start_timestamp > start_timestamp AND leave_start_timestamp <= end_timestamp;
  SELECT MAX(end_timestamp) INTO avail_end_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_end_timestamp < end_timestamp AND leave_end_timestamp >= start_timestamp;
+
+
   CALL delete_coincide_availabilities(leave_start_timestamp, leave_end_timestamp, username); --Delete all availabilties within this period
 INSERT INTO declares_availabilities VALUES (avail_start_timestamp, leave_start_timestamp, username);
 INSERT INTO declares_availabilities VALUES (leave_end_timestamp, avail_end_timestamp, username);
@@ -364,7 +368,7 @@ RETURNS TRIGGER AS
 $$
   BEGIN
   IF NEW.is_full_time IS TRUE THEN
-  INSERT INTO declares_availabilities VALUES (CURRENT_TIMESTAMP + INTERVAL '8 hours', CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours' , NEW.username); --To account for Singapore time
+  INSERT INTO declares_availabilities VALUES (CURRENT_TIMESTAMP + INTERVAL '8 hours', CURRENT_TIMESTAMP + INTERVAL '2 year 8 hours' , NEW.username); --To account for Singapore time
   END IF;
   RETURN NEW;
   END $$

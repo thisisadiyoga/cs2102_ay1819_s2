@@ -77,12 +77,8 @@ function initRouter(app) {
 	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
 	app.post('/take_leave' , passport.authMiddleware(), take_leave);
 
-<<<<<<< HEAD
 	/*BIDS*/
 	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
-=======
-    /*BIDS*/
->>>>>>> master
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 
 	/* LOGIN */

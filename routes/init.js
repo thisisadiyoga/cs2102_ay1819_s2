@@ -769,7 +769,6 @@ function delete_availability(req, res, next) {
     });
 }
 
-<<<<<<< HEAD
 // function delete_category(req, res, next) {
 // 	console.log(req.body.name);
 // 	pool.query(sql_query.query.del_category, [req.body.name], (err, data) => {
@@ -781,7 +780,6 @@ function delete_availability(req, res, next) {
 // 		}
 // 	});
 // }
-=======
 function take_leave(req, res, next) {
     var leave_start_timestamp = req.body.leave_start_timestamp;
     var leave_end_timestamp = req.body.leave_end_timestamp;
@@ -798,7 +796,6 @@ function take_leave(req, res, next) {
         }
     });
 }
->>>>>>> master
 
 
 

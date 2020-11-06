@@ -167,7 +167,7 @@ function msg(req, fld, pass, fail) {
 // GET
 function index(req, res, next) {
 	if (typeof req.user == 'undefined') {
-		res.render('index', { page: 'index', auth: false });
+		res.render('index', {page: 'index', auth: false });
 	} else {
 		basic(req, res, 'index', { auth: true });
 	}
@@ -516,7 +516,7 @@ function reg_user(req, res, next) {
 	pool.query(sql_query.query.add_owner, [username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar], (err, data) => {
 		if(err) {
 			console.error("Error in adding user", err);
-			res.redirect('/register?reg=fail');
+			res.redirect('/?reg=fail');
 		} else {
 		console.error("Successfully added owner");
 			req.login({
@@ -525,7 +525,7 @@ function reg_user(req, res, next) {
 				isUser: true
 			}, function(err) {
 				if(err) {
-					res.redirect('/register?reg=fail');
+					res.redirect('/?reg=fail');
 				} else {
 					res.redirect('/add_pets');
 				}
@@ -977,44 +977,3 @@ function logout(req, res, next) {
 }
 
 module.exports = initRouter;
-
-
-
-
-
-
-
-/*function search_nearby (req, res, next) {
-	var username = req.user.username;
-	var filter;
-	var nearby;
-	console.log(username);
-	pool.query(sql_query.query.get_area, [username], (err, data) => {
-		if(err || !data.rows || data.rows.length == 0) {
-			filter = [];
-			console.error("postal code not found");
-			res.redirect("/display");
-		} else {
-			filter = data.rows[0].postal_code
-			pool.query(sql_query.query.find_nearby, [username, filter[0, 2] + "____"], (err, data) => {
-				if(err) {
-					console.error("Error in deleting account", err);
-					res.redirect("/display?found=pass")
-				} else if (!data.rows || data.rows.length == 0){
-					console.info("No nearby caretaker found");
-					nearby = []
-					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'No nearby caretaker found', 'Error in searching caretaker'), auth: true });
-				} else {
-					console.log("Caretaker found");
-					nearby = data.rows
-					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'Caretakers found', 'Error in searching caretaker'), auth: true });
-				}
-			});
-		}
-	});
-}*/
-
-
-
-
-

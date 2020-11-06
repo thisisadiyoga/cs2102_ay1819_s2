@@ -770,6 +770,7 @@ function delete_availability(req, res, next) {
     });
 }
 
+
 function take_leave(req, res, next) {
     var leave_start_timestamp = req.body.leave_start_timestamp;
     var leave_end_timestamp = req.body.leave_end_timestamp;

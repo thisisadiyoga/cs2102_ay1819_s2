@@ -4,7 +4,7 @@ sql.query = {
 	add_owner: "CALL add_owner ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);",
 	add_pet : "INSERT INTO ownsPets VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", 
 	add_cat : "INSERT INTO Categories VALUES ($1, $2);", 
-	add_admin : "INSERT INTO Administrators VALUES ($1, $2, $3);", 
+	add_admin : "INSERT INTO Administrators VALUES ($1, $2);", 
 	//BIDS
 	//Information
 	read_bids: 'SELECT bid_start_timestamp AS start, bid_end_timestamp AS end, \'Caretaker: \' || caretaker_username AS title, total_price, rating, review, is_paid, is_successful, caretaker_username, pet_name, avail_start_timestamp, avail_end_timestamp, type_of_service, mode_of_transfer FROM Bids WHERE owner_username = $1', //TODO: cast $2 to 12am of the day
@@ -30,9 +30,10 @@ sql.query = {
 	search_past_orders: 'SELECT pet_name, bid_start_timestamp, bid_end_timestamp, caretaker_username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true',
     search_petdays: 'SELECT SUM(duration) FROM (SELECT EXTRACT(DAY FROM AGE(bid_start_timestamp, bid_end_timestamp)) + 1 AS duration FROM Bids WHERE caretaker_username = $1 AND bid_start_timestamp >= $2 AND bid_start_timestamp <= $3 AND is_successful = true)',
 
+	get_user_old : "SELECT * FROM Users WHERE username = $1;",
 	get_user : "SELECT username, password, avatar, is_owner, is_caretaker, (SELECT is_full_time FROM Caretakers WHERE username = $1) FROM Users WHERE username = $1;",
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
-	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1;",
+	get_admin: "SELECT * FROM Administrators WHERE admin_username = $1;",
 	get_caretaker : "SELECT * FROM Caretakers WHERE username = $1 AND NOT is_disabled;", 
 	get_location : "SELECT postal_code FROM Users WHERE username = $1;", 
 
@@ -66,7 +67,9 @@ sql.query = {
 	del_owner : "DELETE FROM Owners WHERE username = $1;", 
 	del_caretaker: "DELETE FROM Caretakers WHERE username = $1;", 
 	del_pet : "DELETE FROM ownsPets WHERE username = $1 AND name = $2;",
-	del_admin : "DELETE FROM Administrators WHERE admin_id = $1;", 
+	del_admin : "DELETE FROM Administrators WHERE admin_username = $1;",	
+
+	get_all_caretaker_salaries: " SELECT 	extract(year from bid_start_timestamp) as year,	extract(month from bid_start_timestamp) as month, B1.caretaker_username, total_price * 0.75 as salary FROM bids B1 WHERE EXISTS (SELECT 1 From Caretakers c WHERE c.username = B1.caretaker_username AND NOT c.is_full_time) AND is_successful AND bid_start_timestamp>= '2020-01-01' AND bid_start_timestamp <= '2050-12-31' UNION	SELECT 	extract(year from B2.bid_start_timestamp) as year, extract (month from B2.bid_start_timestamp) as month, B2.caretaker_username, 3000 as salary FROM bids B2 WHERE EXISTS (SELECT 1 From Caretakers c WHERE c.username = B2.caretaker_username AND c.is_full_time) AND B2.is_successful GROUP BY year, month, caretaker_username ORDER BY year DESC, month DESC, caretaker_username ASC;",
 
 	//AVAILABILITIES
 	// Information

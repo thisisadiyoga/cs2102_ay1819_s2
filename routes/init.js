@@ -13,7 +13,7 @@ const flash = require('connect-flash');
 const { Pool } = require('pg');
 const pool = new Pool({
 
-    //ssl: true
+	//ssl: true
 	user: postgres_details.user,
     database: postgres_details.database,
     host: postgres_details.host,
@@ -77,7 +77,12 @@ function initRouter(app) {
 	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
 	app.post('/take_leave' , passport.authMiddleware(), take_leave);
 
+<<<<<<< HEAD
+	/*BIDS*/
+	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
+=======
     /*BIDS*/
+>>>>>>> master
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 
 	/* LOGIN */
@@ -243,7 +248,7 @@ function adminStatistics (req, res, next) {
 					allJobs = data.rows;
 				}
 	
-				pool.query(sql_query.query.get_caretaker_salary_every_month, (err,data) => {
+				pool.query(sql_query.query.get_all_caretaker_salaries, (err,data) => {
 					if(err || !data.rows || data.rows.length == 0) {
 						allSalary = [];
 					} else {
@@ -627,9 +632,7 @@ function reg_admin(req, res, next) {
 	// console.log(req.body);
 	var admin_username  = req.body.admin_username;
 	var admin_password  = bcrypt.hashSync(req.body.admin_password, salt);
-	// var last_login_time = Date.now();
-	var last_login_time = "2020-10-17 04:05:06";
-	pool.query(sql_query.query.add_admin, [admin_username, admin_password, last_login_time], (err, data) => {
+	pool.query(sql_query.query.add_admin, [admin_username, admin_password], (err, data) => {
 		if(err) {
 			console.error("Error in adding admin", err);
 			res.redirect('/admin?reg=fail');
@@ -695,12 +698,12 @@ function del_user (req, res, next) {
 }
 
 function del_admin (req, res, next) {
-	var admin_id = req.user.admin_username;
+	var admin_username = req.user.admin_username;
 
 	req.session.destroy()
 	req.logout()
 
-	pool.query(sql_query.query.del_admin, [admin_id], (err, data) => {
+	pool.query(sql_query.query.del_admin, [admin_username], (err, data) => {
 		if(err) {
 			console.error("Error in deleting admin account", err);
 		} else {
@@ -770,6 +773,19 @@ function delete_availability(req, res, next) {
     });
 }
 
+<<<<<<< HEAD
+// function delete_category(req, res, next) {
+// 	console.log(req.body.name);
+// 	pool.query(sql_query.query.del_category, [req.body.name], (err, data) => {
+// 		if(err) {
+// 			console.error("Category not found");
+// 			res.redirect('/category?del=fail');
+// 		} else {
+// 			res.redirect('/category?del=pass');
+// 		}
+// 	});
+// }
+=======
 function take_leave(req, res, next) {
     var leave_start_timestamp = req.body.leave_start_timestamp;
     var leave_end_timestamp = req.body.leave_end_timestamp;
@@ -786,6 +802,7 @@ function take_leave(req, res, next) {
         }
     });
 }
+>>>>>>> master
 
 
 

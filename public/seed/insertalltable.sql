@@ -27,7 +27,7 @@ CALL add_owner ('fdecruse5', 'Fredia', 'Decruse', 'fJ4BG9E', 'fdecruse5@google.p
 
 --caretakers
 CALL add_ct ('pswoffer2', 'Porty', 'Swoffer', 'tieycEFvNzwp', 'pswoffer2@lycos.com', '1963-05-03', '6304859207771006', null, '831064', 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJrSURBVDjLdVNLaxNRFJ6VP6GgG7eCuBAEN65LFwUXLlyIEsUqKLgQdwXBhaal1YiYNK8mNCXBPBqIMYJJE/IqWeRlkyYpDc2DBJMmpU4TSqNJ+nnPpS06qRc+5s6Zc77vu+fcEQAIUoTD4Tdut7tuMpmOCLSn2Fm5I4GVlZUxq9X6G5JFMYvFcuFMgmPFMlMbMsDlciGfz2M4HGIwGCCbzfIYfaMcyj1xxAkYe+9vtUqlAofDgfX1dQ673c5jEkc9TuB0Oo0MyOVyXJEQi8Xg8XiwvLzMQXuKkZt+v49MJgOqWVxctAhMqb+5uYlkMolUKsUVSV26ThwlEgmEQiEEAgHodLq+wOyJ3W4XOzs72N7eRqlUAjsftra2Th3RPhKJoFAowOfzcaTTaWi1WlGw2WycYH9/H3t7e6hWq9xuPB4/7QGpUhOpMBgMcpBbjUYjUgM5gSiK2N3dRavVQr1e56p0tGg0ygvJMjkjJ0RAAmq1WhTYbH8dHByg0+mg0Wjw4nK5jGKxyEdJyVSodSjwXHUXj97dxD35OOZML6FUKnuC2Wz2EXutVuPHIBLqBTkgAvr28dMsXtnv48uGEt9/eKHwPcFtxRXcmZ6oCWxM59jlmFpaWipSd5vNJtrtNm8mEZB92ewEXNn3cOU/8InMr05BsfoY15+ePzy9kkajccxgMLxms/25trbGSYiMGjg5fRVfN/T/jPVzRkkEoz+HXq+/zOZrZiM6orvh9/tx49lFzHkfQO6V8WL5N9moAylYh8cXFhYCKpUqOvnimvXW/CW89T7kyvSkd0Yw/18CKVjyDEOHbB8/Zyj+B1XaG3VPBqIRAAAAAElFTkSuQmCC', true);
-CALL add_ct ('lrumbold3', 'Lyda', 'Rumbold', '0Ot4mGppUyT', 'lrumbold3@liveinternet.ru', '1972-04-17', '5219707012117327', null, '959833', 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAALbSURBVDjLfZHrM5RhGMb9A33uq7ERq7XsOry7y2qlPqRFDsVk0c4wZZgRckjJeWMQRhkju5HN6V1nERa7atJMw0zMNLUow1SOUby7mNmrdzWJWn245nnumee+7vt3PRYALI6SZy8fnt08kenu0eoW4E666v9+c6gQDQgYB2thJwGPNrfOmBJfK0GTSxT/qfP3/xqcNk3s4SX9rt1VbgZBs+tq9N1zSv98vp5fwzWG3BAUHGkg7CLWPToIw97KJLHBb3QBT+kMXq0zMrQJ0M63IbUoAuIozk2zBjSnyL3FFcImYt2HPAvVlBx97+pRMpoH1n1bRPT6oXmsEk7Fp+BYYA+HPCY9tYPYoDn32WlOo6eSh8bxUuQ+lyK9MwTJnZEQVhJgFdhBWn8Z3v42uv0NaM4dmhP8Bpc6oZJYuqTyh/JNMTJ7wpGo8oPkiRfyO4IxOXId1cOFcMixgyDUuu0QAq/e+RVRywUh54KcqEBGdxgSSF9IakUIb/DD24FIrOpaoO6PBSuDCWaazaZdsnXcoQyIR1xDaFMAigbjEN8sRpjCC0F1F9A3EIdlOofdzWlMtgfDN5sN28QTxpPxDNjEWv0J0O0BZ+uaSoqyoRRIHnsjUOGDqu4ETLRehGG5G4bPJVib6YHioRDiVPvjph5GtOXtfQN+uYuMU8RCdk8KguRiFHelobVBjJX3JAzz2dDe42JnlcSE/IxxvFoUaPYbuTK2hpFkiZqRClSRUnxUp2N7qQ7U9FVoZU7Qz6VgffYZBkuJxddlxLF/DExySGdqOLfsMag4j290cPpPSdj6EPJLOgmNUoo5TTnac9mlZg1MypJxx+a0Jdj+Wrk3fUt3hUbg7J3UbAyoLx3Q5rAWNVn2TLMG9HoL1MoMttfUMCzRGSy1HJAKuz+msDBWj6F0mxazBi8LOSsvZI7UaB6boidRA5lM9GfYYfiOLUU3Ueo0a0qdwqAGk61GfwIga508Gu46TQAAAABJRU5ErkJggg==', true);
+CALL add_ct ('lrumbold3', 'Lyda', 'Rumbold', '0Ot4mGppUyT', 'lrumbold3@liveinternet.ru', '1972-04-17', '5219707012117327', null, '959833', 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAALbSURBVDjLfZHrM5RhGMb9A33uq7ERq7XsOry7y2qlPqRFDsVk0c4wZZgRckjJeWMQRhkju5HN6V1nERa7atJMw0zMNLUow1SOUby7mNmrdzWJWn245nnumee+7vt3PRYALI6SZy8fnt08kenu0eoW4E666v9+c6gQDQgYB2thJwGPNrfOmBJfK0GTSxT/qfP3/xqcNk3s4SX9rt1VbgZBs+tq9N1zSv98vp5fwzWG3BAUHGkg7CLWPToIw97KJLHBb3QBT+kMXq0zMrQJ0M63IbUoAuIozk2zBjSnyL3FFcImYt2HPAvVlBx97+pRMpoH1n1bRPT6oXmsEk7Fp+BYYA+HPCY9tYPYoDn32WlOo6eSh8bxUuQ+lyK9MwTJnZEQVhJgFdhBWn8Z3v42uv0NaM4dmhP8Bpc6oZJYuqTyh/JNMTJ7wpGo8oPkiRfyO4IxOXId1cOFcMixgyDUuu0QAq/e+RVRywUh54KcqEBGdxgSSF9IakUIb/DD24FIrOpaoO6PBSuDCWaazaZdsnXcoQyIR1xDaFMAigbjEN8sRpjCC0F1F9A3EIdlOofdzWlMtgfDN5sN28QTxpPxDNjEWv0J0O0BZ+uaSoqyoRRIHnsjUOGDqu4ETLRehGG5G4bPJVib6YHioRDiVPvjph5GtOXtfQN+uYuMU8RCdk8KguRiFHelobVBjJX3JAzz2dDe42JnlcSE/IxxvFoUaPYbuTK2hpFkiZqRClSRUnxUp2N7qQ7U9FVoZU7Qz6VgffYZBkuJxddlxLF/DExySGdqOLfsMag4j290cPpPSdj6EPJLOgmNUoo5TTnac9mlZg1MypJxx+a0Jdj+Wrk3fUt3hUbg7J3UbAyoLx3Q5rAWNVn2TLMG9HoL1MoMttfUMCzRGSy1HJAKuz+msDBWj6F0mxazBi8LOSsvZI7UaB6boidRA5lM9GfYYfiOLUU3Ueo0a0qdwqAGk61GfwIga508Gu46TQAAAABJRU5ErkJggg==', false);
 INSERT INTO Caretakers VALUES ('fdecruse5', true);
 
 -- pets
@@ -51,7 +51,7 @@ insert into declares_availabilities (start_timestamp, end_timestamp, caretaker_u
 --timings 
 insert into Timings (start_timestamp, end_timestamp ) values ('2020-01-10 04:05:06', '2020-01-31 04:05:06');
 insert into Timings (start_timestamp, end_timestamp ) values ('2020-01-11 04:05:06', '2020-01-31 04:05:06');
-insert into Timings (start_timestamp, end_timestamp ) values ('2020-11-30 04:05:06', '2020-12-15 04:05:06');
+insert into Timings (start_timestamp, end_timestamp ) values ('2020-10-09 04:05:06', '2020-12-27 04:05:06');
 insert into Timings (start_timestamp, end_timestamp ) values ('2020-05-03 04:05:06', '2020-06-05 04:05:06');
 insert into Timings (start_timestamp, end_timestamp ) values ('2020-06-01 04:05:06', '2020-06-06 04:05:06');
 insert into Timings (start_timestamp, end_timestamp ) values ('2020-01-08 04:05:06', '2020-01-31 04:05:06');
@@ -75,11 +75,11 @@ insert into bids (owner_username,
       type_of_service )
       values 
       ( 'fdecruse5', 'Ansell',
-      '2020-11-30 04:05:06', '2020-12-15 04:05:06',
+      '2020-10-09 04:05:06', '2020-12-27 04:05:06',
      '2020-10-08 04:05:06', '2020-12-28 04:05:06' ,
       'pswoffer2', null, null, true, 'smth', 'smth', false, 30, 'smth'
        );
-
+/*
 insert into bids (owner_username, 
       pet_name ,
       bid_start_timestamp ,
@@ -141,8 +141,9 @@ insert into bids (owner_username,
       total_price ,
       type_of_service )
       values 
-      ( 'mcouser1', 'Abbey'
+      ( 'mcouser1', 'Abbey',
       '2020-01-10 04:05:06', '2020-01-31 04:05:06',
       '2020-01-08 04:05:06', '2020-02-08 04:05:06', 
       'pswoffer2', null, null, true, 'smth', 'smth', false, 30, 'smth'
        );
+       */

@@ -314,6 +314,7 @@ RAISE NOTICE 'in take_leave procedure';
 IF EXISTS (SELECT 1 FROM bids WHERE caretaker_username = username AND bid_start_timestamp >= leave_start_timestamp AND bid_start_timestamp <= leave_end_timestamp AND is_successful IS TRUE) THEN
 RAISE EXCEPTION 'Leave cannot be taken as there are scheduled pet-care jobs within the leave period';
 ELSE
+ 
  SELECT MIN(start_timestamp) INTO avail_start_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_start_timestamp > start_timestamp AND leave_start_timestamp <= end_timestamp;
  SELECT MAX(end_timestamp) INTO avail_end_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_end_timestamp < end_timestamp AND leave_end_timestamp >= start_timestamp;
 

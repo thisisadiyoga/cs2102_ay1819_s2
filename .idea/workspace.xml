@@ -3,9 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="e24defb6-26ad-40c9-b96e-475bc117fb15" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/bottomscript.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/bottomscript.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/caretaker_calendar.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/caretaker_calendar.ejs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/newbid.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/newbid.ejs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/auth/init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/postgre.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/postgre.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/sidebar.ejs" beforeDir="false" afterPath="$PROJECT_DIR$/views/sidebar.ejs" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

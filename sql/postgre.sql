@@ -52,8 +52,8 @@ CREATE TABLE declares_availabilities(
     end_timestamp 			TIMESTAMP 	NOT NULL,
     caretaker_username 		VARCHAR REFERENCES Caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
-    CHECK(start_timestamp >= CURRENT_TIMESTAMP),
-    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years'),
+    /** CHECK(start_timestamp >= CURRENT_TIMESTAMP), **/
+    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours'),
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
 );

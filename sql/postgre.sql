@@ -51,11 +51,14 @@ CREATE TABLE ownsPets (
 CREATE TABLE declares_availabilities(
     start_timestamp 		TIMESTAMP 	NOT NULL,
     end_timestamp 			TIMESTAMP 	NOT NULL,
-    caretaker_username 		VARCHAR REFERENCES caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    caretaker_username 		VARCHAR REFERENCES Caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
+    CHECK(start_timestamp >= CURRENT_TIMESTAMP),
+    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years')
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                 --They will be merged
 );
+
 
 -- TIMINGS, BIDS
 CREATE TABLE Timings (
@@ -113,6 +116,12 @@ $$ DECLARE new_start TIMESTAMP WITHOUT TIME ZONE;
   old_start TIMESTAMP WITHOUT TIME ZONE;
     BEGIN
     RAISE NOTICE 'Entering merge_availabilities function ...';
+
+    IF EXISTS (SELECT 1 FROM Caretakers WHERE NEW.caretaker_username = username AND is_full_time IS TRUE) THEN
+    -- Do not need to merge availability for full-time caretakers as they do not insert availability, but take leave instead
+    RETURN NEW;
+    END IF;
+
     IF NEW.start_timestamp >= NEW.end_timestamp THEN
     RETURN NULL;
     ELSIF
@@ -141,25 +150,26 @@ BEFORE INSERT ON declares_availabilities
 FOR EACH ROW EXECUTE PROCEDURE merge_availabilities();
 
 --delete availabilities only if there are no pets the caretaker is scheduled to care for
-CREATE OR REPLACE FUNCTION check_deletable()
-RETURNS TRIGGER AS
+--This is only called when the table is manually deleted
+CREATE OR REPLACE PROCEDURE delete_availability(old_username VARCHAR, old_start_timestamp TIMESTAMP WITH TIME ZONE)
 $$
    BEGIN
    IF EXISTS (SELECT 1
               FROM bids b1
-              WHERE b1.caretaker_username = OLD.caretaker_username AND (GREATEST (b1.bid_start_timestamp, NEW.start_timestamp) < LEAST (b1.bid_end_timestamp, NEW.end_timestamp)) ) THEN --There is overlap
+              WHERE b1.caretaker_username = OLD.caretaker_username
+              AND (GREATEST (b1.bid_start_timestamp, NEW.start_timestamp) < LEAST (b1.bid_end_timestamp, NEW.end_timestamp))
+               AND b1.is_successful IS TRUE)
+               THEN --There is overlap
 
    RAISE EXCEPTION 'The period cannot be deleted as there is a successful bid within that period';
    ELSE
-   RETURN OLD;
+   DELETE FROM declares_availabilities WHERE old_username = username AND old_start_timestamp = start_timestamp;
    END IF;
 
    END $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER check_deletable
-BEFORE DELETE ON declares_availabilities
-FOR EACH ROW EXECUTE PROCEDURE check_deletable();
+
 
 --Update availabilities while checking if it can be shrunked and merging if it is expanded
 --Break update down into delete and insertion
@@ -171,12 +181,17 @@ $$ DECLARE first_result INTEGER := 0;
   BEGIN
   RAISE NOTICE 'update avail function is called ...';
 
+
+
   IF (OLD.start_timestamp < NEW.start_timestamp)
   THEN
     RAISE NOTICE 'entering 1st part';
     IF EXISTS(SELECT 1
               FROM bids b1
-              WHERE b1.caretaker_username = OLD.caretaker_username AND GREATEST(b1.bid_start_timestamp, OLD.start_timestamp) < LEAST(b1.bid_end_timestamp, NEW.start_timestamp)) THEN
+              WHERE b1.caretaker_username = OLD.caretaker_username
+              AND GREATEST(b1.bid_start_timestamp, OLD.start_timestamp) < LEAST(b1.bid_end_timestamp, NEW.start_timestamp)
+              AND b1.is_successful IS TRUE)
+              THEN
                RAISE NOTICE 'there is a bid between the old and new starting timestamp';
     first_result := 1;
     ELSE
@@ -190,7 +205,10 @@ $$ DECLARE first_result INTEGER := 0;
     RAISE NOTICE 'entering 2nd part';
     IF EXISTS(SELECT 1
               FROM bids b2
-              WHERE b2.caretaker_username = OLD.caretaker_username AND GREATEST(b2.bid_start_timestamp, NEW.end_timestamp) < LEAST(b2.bid_end_timestamp, OLD.end_timestamp)) THEN
+              WHERE b2.caretaker_username = OLD.caretaker_username
+              AND GREATEST(b2.bid_start_timestamp, NEW.end_timestamp) < LEAST(b2.bid_end_timestamp, OLD.end_timestamp)
+              AND b1.is_successful IS TRUE)
+              THEN
     RAISE NOTICE 'there is a bid between the old and new ending timestamp';
     second_result := 1;
     ELSE
@@ -211,6 +229,33 @@ LANGUAGE plpgsql;
 CREATE TRIGGER update_availabilities
 BEFORE UPDATE ON declares_availabilities
 FOR EACH ROW EXECUTE PROCEDURE update_availabilities();
+
+CREATE OR REPLACE PROCEDURE delete_coincide_availabilities(leave_start_timestamp TIMESTAMP WITH TIME ZONE, leave_end_timestamp TIMESTAMP WITH TIME ZONE, username VARCHAR) AS
+$$
+BEGIN
+DELETE FROM declares_availabilities
+WHERE caretaker_username = username AND GREATEST (start_timestamp, leave_start_timestamp) <= LEAST (end_timestamp, leave_end_timestamp);
+END; $$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE PROCEDURE take_leave(leave_start_timestamp TIMESTAMP WITH TIME ZONE, leave_end_timestamp TIMESTAMP WITH TIME ZONE, username VARCHAR) AS
+$$ DECLARE avail_start_timestamp TIMESTAMP;
+DECLARE avail_end_timestamp TIMESTAMP;
+BEGIN
+RAISE NOTICE 'in take_leave procedure';
+IF EXISTS (SELECT 1 FROM bids WHERE caretaker_username = username AND bid_start_timestamp >= leave_start_timestamp AND bid_start_timestamp <= leave_end_timestamp AND is_successful IS TRUE) THEN
+RAISE EXCEPTION 'Leave cannot be taken as there are scheduled pet-care jobs within the leave period';
+ELSE
+ SELECT MIN(start_timestamp) INTO avail_start_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_start_timestamp > start_timestamp AND leave_start_timestamp <= end_timestamp;
+ SELECT MAX(end_timestamp) INTO avail_end_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_end_timestamp < end_timestamp AND leave_end_timestamp >= start_timestamp;
+  CALL delete_coincide_availabilities(leave_start_timestamp, leave_end_timestamp, username); --Delete all availabilties within this period
+INSERT INTO declares_availabilities VALUES (avail_start_timestamp, leave_start_timestamp, username);
+INSERT INTO declares_availabilities VALUES (leave_end_timestamp, avail_end_timestamp, username);
+
+END IF;
+END; $$
+LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE PROCEDURE add_owner (username 		VARCHAR,
@@ -248,6 +293,22 @@ CREATE OR REPLACE PROCEDURE add_ct (username 		VARCHAR,
 	   INSERT INTO Caretakers VALUES (username, is_full_time);
 	   END; $$
 	LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fill_availabilities()
+RETURNS TRIGGER AS
+$$
+  BEGIN
+  IF NEW.is_full_time IS TRUE THEN
+  INSERT INTO declares_availabilities VALUES (CURRENT_TIMESTAMP + INTERVAL '8 hours', CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours' , NEW.username); --To account for Singapore time
+  END IF;
+  RETURN NEW;
+  END $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER fill_availabilities
+AFTER INSERT ON Caretakers
+FOR EACH ROW EXECUTE PROCEDURE fill_availabilities();
+
 
 --trigger to enable and disable account
 CREATE OR REPLACE FUNCTION update_disable()

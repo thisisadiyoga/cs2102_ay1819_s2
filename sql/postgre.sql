@@ -31,7 +31,8 @@ CREATE TABLE Caretakers (
 	is_full_time		BOOLEAN			NOT NULL,
 	avg_rating			FLOAT			   NOT NULL DEFAULT 0,
 	no_of_reviews		INT				NOT NULL DEFAULT 0,
-	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0) DEFAULT 0
+	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0) DEFAULT 0,
+	is_disabled			BOOLEAN			NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE ownsPets (

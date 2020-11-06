@@ -53,7 +53,7 @@ CREATE TABLE declares_availabilities(
     end_timestamp 			TIMESTAMP 	NOT NULL,
     caretaker_username 		VARCHAR REFERENCES Caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
-    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours'),
+    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours'), -- Additional add hours is to account for converstion to SGT
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
                                                --They will be merged
 );
@@ -187,6 +187,8 @@ $$ DECLARE new_start TIMESTAMP WITHOUT TIME ZONE;
     RETURN NEW;
     END IF;
 
+
+
     IF NEW.start_timestamp >= NEW.end_timestamp THEN
     RETURN NULL;
     ELSIF
@@ -272,7 +274,7 @@ $$ DECLARE first_result INTEGER := 0;
               FROM bids b2
               WHERE b2.caretaker_username = OLD.caretaker_username
               AND GREATEST(b2.bid_start_timestamp, NEW.end_timestamp) < LEAST(b2.bid_end_timestamp, OLD.end_timestamp)
-              AND b1.is_successful IS TRUE)
+              AND b2.is_successful IS TRUE)
               THEN
     RAISE NOTICE 'there is a bid between the old and new ending timestamp';
     second_result := 1;
@@ -304,27 +306,80 @@ END; $$
 LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE PROCEDURE take_leave(leave_start_timestamp TIMESTAMP WITH TIME ZONE, leave_end_timestamp TIMESTAMP WITH TIME ZONE, username VARCHAR) AS
-$$ DECLARE avail_start_timestamp TIMESTAMP;
-DECLARE avail_end_timestamp TIMESTAMP;
-DECLARE num_consecutive_days_first_period NUMERIC;
-DECLARE num_consecutive_days_second_period NUMERIC;
+CREATE OR REPLACE PROCEDURE take_leave(leave_start TIMESTAMP WITH TIME ZONE, leave_end TIMESTAMP WITH TIME ZONE, username VARCHAR) AS
+$$ DECLARE avail_first_start TIMESTAMP;
+DECLARE avail_second_start TIMESTAMP;
+DECLARE avail_second_end TIMESTAMP;
+
+DECLARE consecutive_days_first NUMERIC := 0;
+DECLARE consecutive_days_second NUMERIC := 0;
+DECLARE consecutive_days_other NUMERIC := 0;
+
+DECLARE result NUMERIC := 0;
 
 BEGIN
 RAISE NOTICE 'in take_leave procedure';
-IF EXISTS (SELECT 1 FROM bids WHERE caretaker_username = username AND bid_start_timestamp >= leave_start_timestamp AND bid_start_timestamp <= leave_end_timestamp AND is_successful IS TRUE) THEN
+
+IF EXISTS (SELECT 1
+            FROM bids
+            WHERE caretaker_username = username
+                AND bid_start_timestamp >= leave_start
+                    AND bid_start_timestamp <= leave_end
+                       AND is_successful IS TRUE) THEN
 RAISE EXCEPTION 'Leave cannot be taken as there are scheduled pet-care jobs within the leave period';
-ELSE
- 
- SELECT MIN(start_timestamp) INTO avail_start_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_start_timestamp > start_timestamp AND leave_start_timestamp <= end_timestamp;
- SELECT MAX(end_timestamp) INTO avail_end_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_end_timestamp < end_timestamp AND leave_end_timestamp >= start_timestamp;
-
-
-  CALL delete_coincide_availabilities(leave_start_timestamp, leave_end_timestamp, username); --Delete all availabilties within this period
-INSERT INTO declares_availabilities VALUES (avail_start_timestamp, leave_start_timestamp, username);
-INSERT INTO declares_availabilities VALUES (leave_end_timestamp, avail_end_timestamp, username);
-
 END IF;
+
+SELECT start_timestamp INTO avail_first_start
+FROM declares_availabilities
+WHERE caretaker_username = username AND leave_start > start_timestamp AND leave_start <= end_timestamp;
+
+SELECT start_timestamp, end_timestamp INTO avail_second_start, avail_second_end
+FROM declares_availabilities
+WHERE caretaker_username = username AND leave_end < end_timestamp AND leave_end >= start_timestamp;
+
+SELECT DATE_PART('day', leave_start - avail_first_start) INTO consecutive_days_first;
+SELECT DATE_PART('day', avail_second_end - leave_end) INTO consecutive_days_second;
+
+SELECT DATE_PART('day', end_timestamp - start_timestamp) INTO consecutive_days_other
+FROM declares_availabilities
+WHERE caretaker_username = username
+    AND start_timestamp <> avail_first_start
+    AND start_timestamp <> avail_second_start
+    AND DATE_PART('day', end_timestamp - start_timestamp) >= 150;
+
+IF (consecutive_days_first >= 300 OR consecutive_days_second >= 300 OR consecutive_days_other >= 300) THEN
+ result := result + 2;
+ END IF;
+
+IF (consecutive_days_first >= 150) THEN
+ result := result + 1;
+ END IF;
+
+IF (consecutive_days_second >= 150) THEN
+ result := result + 1;
+END IF;
+
+IF (consecutive_days_other >= 150) THEN
+    result := result + 1;
+END IF;
+
+IF (result < 2) THEN
+    RAISE EXCEPTION 'Cannot take leave as you are not working for 2 X 150 consecutive days this year';
+END IF;
+
+
+UPDATE bids SET bid_end_timestamp = leave_start WHERE bid_start_timestamp >= avail_first_start AND bid_end_timestamp <= leave_start;
+
+UPDATE declares_availabilities SET end_timestamp = leave_start WHERE start_timestamp = avail_first_start;
+
+INSERT INTO declares_availabilities VALUES (leave_end, avail_second_end, username);
+
+UPDATE bids SET bid_start_timestamp = leave_end WHERE bid_start_timestamp >= avail_second_start AND bid_end_timestamp <= avail_second_end;
+
+IF (avail_first_start <> avail_second_start) THEN
+DELETE FROM declares_availabilities WHERE start_timestamp = avail_second_start;
+END IF;
+
 END; $$
 LANGUAGE plpgsql;
 
@@ -370,7 +425,8 @@ RETURNS TRIGGER AS
 $$
   BEGIN
   IF NEW.is_full_time IS TRUE THEN
-  INSERT INTO declares_availabilities VALUES (CURRENT_TIMESTAMP + INTERVAL '8 hours', CURRENT_TIMESTAMP + INTERVAL '2 year 8 hours' , NEW.username); --To account for Singapore time
+ INSERT INTO declares_availabilities VALUES (CURRENT_TIMESTAMP + INTERVAL '8 hours', CURRENT_TIMESTAMP + INTERVAL '1 year 8 hours' , NEW.username); --To account for Singapore time
+
   END IF;
   RETURN NEW;
   END $$
@@ -441,7 +497,12 @@ CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH
 $$ DECLARE tot_p NUMERIC;
 BEGIN
 SELECT DATE_PART('day', pe - ps) INTO tot_p;
-tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
+tot_p := tot_p * (SELECT daily_price
+                  FROM Charges
+                  WHERE caretaker_username = ct AND cat_name = (SELECT cat_name
+                                                                FROM ownsPets
+                                                                WHERE ou = username AND pn = name));
+
 IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
 INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
 UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
@@ -453,14 +514,38 @@ $$ DECLARE tot_p NUMERIC;
 DECLARE sd TIMESTAMP WITH TIME ZONE;
 DECLARE ed TIMESTAMP WITH TIME ZONE;
 BEGIN
-IF NOT EXISTS (SELECT 1 FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct) THEN RAISE EXCEPTION "Boo Boo!"; END IF;
+
+IF NOT EXISTS (SELECT 1
+               FROM declares_availabilities
+               WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct) THEN
+RAISE EXCEPTION 'The bid period is not within the availability period of caretaker.';
+END IF;
+
 SELECT start_timestamp, end_timestamp INTO sd, ed
-FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct;
+FROM declares_availabilities
+WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct;
+
 SELECT DATE_PART('day', pe - ps) INTO tot_p;
-tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
-IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+tot_p := tot_p * (SELECT daily_price
+                    FROM Charges
+                    WHERE caretaker_username = ct AND cat_name = (SELECT cat_name
+                                                                 FROM ownsPets
+                                                                 WHERE ou = username AND pn = name));
+
+IF NOT EXISTS (SELECT 1
+              FROM TIMINGS
+              WHERE start_timestamp = ps AND end_timestamp = pe) THEN
+INSERT INTO TIMINGS VALUES (ps, pe);
+END IF;
+
 INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
-UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
+
+UPDATE bids SET is_successful = (CASE
+                                    WHEN random() < 0.5 THEN
+                                    true
+                                     ELSE
+                                     false
+                                     END) WHERE is_successful IS NULL;
 END; $$
 LANGUAGE plpgsql;
 
@@ -483,103 +568,86 @@ BEFORE DELETE ON bids
 FOR EACH ROW EXECUTE PROCEDURE check_deletable_bid();
 
 
---Update bids
--- Check that the new bid period coincide with availability period
--- TODO: Check that pet belongs ot a category that caretaker can care for
-CREATE OR REPLACE FUNCTION update_bids()
-RETURNS TRIGGER AS
-$$ DECLARE first_result INTEGER := 0;
-  DECLARE second_result INTEGER := 0;
-  DECLARE total_result INTEGER;
-  BEGIN
-
-  END $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER update_bids
-BEFORE UPDATE ON bids
-FOR EACH ROW EXECUTE PROCEDURE update_bids();
-/*
-
-insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hchilcotte1', 'Hannah', 'Chilcotte', 'VxyTOEHQQ', 'hchilcotte1@bigcartel.com', '2000-01-19', '5048372273574703', null, '688741', 'https://robohash.org/expeditaquiaea.png?size=50x50&set=set1', '2020-01-27');
-insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('mlongridge2', 'Maynard', 'Longridge', 'Wwa1uuMOUiB2', 'mlongridge2@nih.gov', '1956-09-27', '4041378363311', null, '760607', 'https://robohash.org/consequaturquasiet.jpg?size=50x50&set=set1', '2020-09-19');
-
-insert into Caretakers (username, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken,is_disabled) values ('hchilcotte1', TRUE, 4.45, 1, 1, FALSE);
-insert into categories(cat_name, base_price) values ('dog', 3.10);
-
-insert into Owners (username, is_disabled) values ('mlongridge2', FALSE);
-INSERT INTO ownsPets (username, name, description,	cat_name, size, sociability, special_req, img) values ('mlongridge2', 'pet1', 'asdasdasd', 'dog', 'Large', 'very', 'none', 'https://robohash.org/atareiciendis.png?size=50x50&set=set1');
-INSERT INTO Timings (p_start_date ,p_end_date) values ('2020-10-10', '2020-10-15');
-insert into Bids(owner_username ,pet_name ,p_start_date ,p_end_date ,starting_date ,ending_date ,username ,rating ,review ,is_successful ,payment_method ,mode_of_transfer ,is_paid ,total_price,type_of_service) 
-          values ( 'mlongridge2', 'pet1', '2020-10-10', '2020-10-15', '2020-10-05', '2020-10-20', 'hchilcotte1', null, null, TRUE, null, null, FALSE, 30, 'something' );
 
 
-
-
-
-CREATE OR REPLACE PROCEDURE rate_or_review(rat NUMERIC, rev VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
-$$ BEGIN
-UPDATE Bids SET rating = rat, review = rev WHERE owner_username = ou AND pet_name = pn AND
-username = ct AND p_start_date = ps AND p_end_date = pe;
-END; $$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE PROCEDURE set_transac_details(pm VARCHAR, mot VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
-$$ BEGIN
-UPDATE Bids SET payment_method = pm, mode_of_transfer = mot WHERE owner_username = ou AND pet_name = pn AND
-username = ct AND p_start_date = ps AND p_end_date = pe;
-END; $$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE PROCEDURE pay_bid(ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
-$$ BEGIN
-UPDATE Bids SET is_paid = true WHERE owner_username = ou AND pet_name = pn AND username = ct AND
-p_start_date = ps AND p_end_date = pe;
-END; $$
-LANGUAGE plpgsql;
-*/
-
-
-/*INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code, 
-						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
-VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_2',
-		'sample_2', 's2@s.com', '02-01-2000', '1231231231231231',
-		'2', '123123', '02-10-2020', 'true', 4.5, 2, 2); 
-
-
--- INSERT categories
-CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10), 
-							  			 base_price		NUMERIC) AS
-	$$ BEGIN
-	   INSERT INTO Categories (cat_name, base_price) 
-	   VALUES (cat_name, base_price);
-	   END; $$
-	LANGUAGE plpgsql;
-
-
-	
-CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
-									 name 				NAME, 
-									 description		VARCHAR, 
-									 cat_name			VARCHAR(10),
-									 size				VARCHAR, 
-									 sociability		VARCHAR,
-									 special_req		VARCHAR, 
-									 img 				BYTEA
-									 ) AS
-	$$ BEGIN
-	   INSERT INTO ownsPets
-	   VALUES (username, name, description, cat_name, size, sociability, special_req, img);
-	   END; $$
-	LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
-										password 		VARCHAR(64),
-										last_login_time TIMESTAMP
-										) AS
-	$$ BEGIN
-	   INSERT INTO Administrators (admin_id, password, last_login_time )
-	   VALUES (admin_id, password, last_login_time );
-	   END; $$
-	LANGUAGE plpgsql;*/
+--insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hchilcotte1', 'Hannah', 'Chilcotte', 'VxyTOEHQQ', 'hchilcotte1@bigcartel.com', '2000-01-19', '5048372273574703', null, '688741', 'https://robohash.org/expeditaquiaea.png?size=50x50&set=set1', '2020-01-27');
+--insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('mlongridge2', 'Maynard', 'Longridge', 'Wwa1uuMOUiB2', 'mlongridge2@nih.gov', '1956-09-27', '4041378363311', null, '760607', 'https://robohash.org/consequaturquasiet.jpg?size=50x50&set=set1', '2020-09-19');
+--
+--insert into Caretakers (username, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken,is_disabled) values ('hchilcotte1', TRUE, 4.45, 1, 1, FALSE);
+--insert into categories(cat_name, base_price) values ('dog', 3.10);
+--
+--insert into Owners (username, is_disabled) values ('mlongridge2', FALSE);
+--INSERT INTO ownsPets (username, name, description,	cat_name, size, sociability, special_req, img) values ('mlongridge2', 'pet1', 'asdasdasd', 'dog', 'Large', 'very', 'none', 'https://robohash.org/atareiciendis.png?size=50x50&set=set1');
+--INSERT INTO Timings (p_start_date ,p_end_date) values ('2020-10-10', '2020-10-15');
+--insert into Bids(owner_username ,pet_name ,p_start_date ,p_end_date ,starting_date ,ending_date ,username ,rating ,review ,is_successful ,payment_method ,mode_of_transfer ,is_paid ,total_price,type_of_service)
+--          values ( 'mlongridge2', 'pet1', '2020-10-10', '2020-10-15', '2020-10-05', '2020-10-20', 'hchilcotte1', null, null, TRUE, null, null, FALSE, 30, 'something' );
+--
+--
+--
+--
+--
+--CREATE OR REPLACE PROCEDURE rate_or_review(rat NUMERIC, rev VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
+--$$ BEGIN
+--UPDATE Bids SET rating = rat, review = rev WHERE owner_username = ou AND pet_name = pn AND
+--username = ct AND p_start_date = ps AND p_end_date = pe;
+--END; $$
+--LANGUAGE plpgsql;
+--
+--CREATE OR REPLACE PROCEDURE set_transac_details(pm VARCHAR, mot VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
+--$$ BEGIN
+--UPDATE Bids SET payment_method = pm, mode_of_transfer = mot WHERE owner_username = ou AND pet_name = pn AND
+--username = ct AND p_start_date = ps AND p_end_date = pe;
+--END; $$
+--LANGUAGE plpgsql;
+--
+--CREATE OR REPLACE PROCEDURE pay_bid(ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
+--$$ BEGIN
+--UPDATE Bids SET is_paid = true WHERE owner_username = ou AND pet_name = pn AND username = ct AND
+--p_start_date = ps AND p_end_date = pe;
+--END; $$
+--LANGUAGE plpgsql;
+--
+--
+--INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code,
+--						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
+--VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_2',
+--		'sample_2', 's2@s.com', '02-01-2000', '1231231231231231',
+--		'2', '123123', '02-10-2020', 'true', 4.5, 2, 2);
+--
+--
+---- INSERT categories
+--CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10),
+--							  			 base_price		NUMERIC) AS
+--	$$ BEGIN
+--	   INSERT INTO Categories (cat_name, base_price)
+--	   VALUES (cat_name, base_price);
+--	   END; $$
+--	LANGUAGE plpgsql;
+--
+--
+--
+--CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
+--									 name 				NAME,
+--									 description		VARCHAR,
+--									 cat_name			VARCHAR(10),
+--									 size				VARCHAR,
+--									 sociability		VARCHAR,
+--									 special_req		VARCHAR,
+--									 img 				BYTEA
+--									 ) AS
+--	$$ BEGIN
+--	   INSERT INTO ownsPets
+--	   VALUES (username, name, description, cat_name, size, sociability, special_req, img);
+--	   END; $$
+--	LANGUAGE plpgsql;
+--
+--
+--CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
+--										password 		VARCHAR(64),
+--										last_login_time TIMESTAMP
+--										) AS
+--	$$ BEGIN
+--	   INSERT INTO Administrators (admin_id, password, last_login_time )
+--	   VALUES (admin_id, password, last_login_time );
+--	   END; $$
+--	LANGUAGE plpgsql;

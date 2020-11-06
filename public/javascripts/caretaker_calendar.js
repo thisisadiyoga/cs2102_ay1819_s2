@@ -5,13 +5,6 @@ var availabilities = $('.availabilities-test').attr('data-test-value');
 var  bids = $('.bids-test').attr('data-test-value');
     bids = JSON.parse(bids);
 
-    console.log("THERE IS A BIDS ARRAY" + bids);
-
- //alert(availabilities[0].start);
-
-
-
-
 
 $(".startTimestamp").flatpickr({
      enableTime: true,
@@ -36,8 +29,17 @@ $('#calendar').fullCalendar({
   navLinks: true,
   disableDragging: true,
   eventLimit: true,
-  events: availabilities,
-  events: bids,
+  eventSources: [
+     {
+       events: availabilities,
+       color: '#A8EEC1',
+     },
+     {
+       events: bids,
+       textColor: black;
+       color: '#1E90FF',
+
+     }],
   eventColor: '#A8EEC1',
   dayClick: function (date, jsEvent, view) {
     //Manipulate display side of display time to UTC time

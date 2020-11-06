@@ -40,11 +40,11 @@ $('#calendar').fullCalendar({
    var sg_start = new Date(event.start);
       sg_start.setHours(sg_start.getHours() - 8);
     if(event.extendedProps.is_successful == true)
-        element.css('background-color', 'green');
+        element.css('background-color', '#1E90FF');
     else if(sg_start >= new Date())
         element.css('background-color', 'orange');
     else
-         element.css('background-color', 'red');
+         element.css('background-color', '#F08080');
   },
   dayClick: function (date, jsEvent, view) {
     //Manipulate display side of display time to UTC time

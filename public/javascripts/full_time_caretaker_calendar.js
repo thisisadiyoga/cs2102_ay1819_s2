@@ -5,9 +5,8 @@ var availabilities = $('.availabilities-test').attr('data-test-value');
 var  bids = $('.bids-test').attr('data-test-value');
     bids = JSON.parse(bids);
 
-    console.log("THERE IS A BIDS ARRAY" + bids);
 
- //alert(availabilities[0].start);
+
 
 
 
@@ -36,9 +35,17 @@ $('#calendar').fullCalendar({
   navLinks: true,
   disableDragging: true,
   eventLimit: true,
-  events: availabilities,
-  events: bids,
-  eventColor: '#A8EEC1',
+  eventSources: [
+    {
+      events: availabilities,
+      color: '#A8EEC1',
+    },
+    {
+      events: bids,
+      color: '#1E90FF',
+
+    }],
+
   dayClick: function (date, jsEvent, view) {
     //Manipulate display side of display time to UTC time
     //Original time is still the same

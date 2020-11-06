@@ -29,6 +29,7 @@ sql.query = {
 	search_past_orders: 'SELECT pet_name, bid_start_timestamp, bid_end_timestamp, caretaker_username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true',
     search_petdays: 'SELECT SUM(duration) FROM (SELECT EXTRACT(DAY FROM AGE(bid_start_timestamp, bid_end_timestamp)) + 1 AS duration FROM Bids WHERE caretaker_username = $1 AND bid_start_timestamp >= $2 AND bid_start_timestamp <= $3 AND is_successful = true)',
 
+	get_user_old : "SELECT * FROM Users WHERE username = $1;",
 	get_user : "SELECT username, password, avatar, is_owner, is_caretaker, (SELECT is_full_time FROM Caretakers WHERE username = $1) FROM Users WHERE username = $1;",
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
 	get_admin: "SELECT * FROM Administrators WHERE admin_id = $1;",

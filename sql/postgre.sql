@@ -98,9 +98,8 @@ CREATE TABLE isPaidSalaries (
 );
 
 CREATE TABLE Administrators (
-	admin_id 					VARCHAR 		PRIMARY KEY,
-	password 					VARCHAR(64) 	NOT NULL,
-	last_login_time TIMESTAMP
+	admin_username				VARCHAR 		PRIMARY KEY,
+	password 					VARCHAR(64) 	NOT NULL
 );
 
 ---Availabilities Trigger

@@ -592,9 +592,7 @@ function reg_admin(req, res, next) {
 	// console.log(req.body);
 	var admin_username  = req.body.admin_username;
 	var admin_password  = bcrypt.hashSync(req.body.admin_password, salt);
-	// var last_login_time = Date.now();
-	var last_login_time = "2020-10-17 04:05:06";
-	pool.query(sql_query.query.add_admin, [admin_username, admin_password, last_login_time], (err, data) => {
+	pool.query(sql_query.query.add_admin, [admin_username, admin_password], (err, data) => {
 		if(err) {
 			console.error("Error in adding admin", err);
 			res.redirect('/admin?reg=fail');
@@ -660,12 +658,12 @@ function del_user (req, res, next) {
 }
 
 function del_admin (req, res, next) {
-	var admin_id = req.user.admin_username;
+	var admin_username = req.user.admin_username;
 
 	req.session.destroy()
 	req.logout()
 
-	pool.query(sql_query.query.del_admin, [admin_id], (err, data) => {
+	pool.query(sql_query.query.del_admin, [admin_username], (err, data) => {
 		if(err) {
 			console.error("Error in deleting admin account", err);
 		} else {

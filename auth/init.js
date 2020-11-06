@@ -57,7 +57,7 @@ function findAdmin (username, callback) {
 			return callback(null)
 		} else if(data.rows.length == 1) {
 			return callback(null, {
-				admin_username    : data.rows[0].admin_id,
+				admin_username    : data.rows[0].admin_username,
         passwordHash      : data.rows[0].password,
 			});
 		} else {

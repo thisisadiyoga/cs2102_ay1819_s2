@@ -451,9 +451,12 @@ $$ DECLARE tot_p NUMERIC;
 DECLARE sd TIMESTAMP WITH TIME ZONE;
 DECLARE ed TIMESTAMP WITH TIME ZONE;
 BEGIN
-IF NOT EXISTS (SELECT 1 FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= ed) THEN RAISE EXCEPTION 'The bid does not correspond to any availability period'; ELSE SELECT start_timestamp INTO sd, end_timestamp = ed FROM declares_availabilities WHERE start_timestamp <= sd AND end_timestamp >= ed AND caretaker_username = ct; END IF;
-SELECT DATE_PART('day', pe - ps INTO tot_p);
-IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe AND caretaker_username = ct) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+IF NOT EXISTS (SELECT 1 FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct) THEN RAISE EXCEPTION "Boo Boo!"; END IF;
+SELECT start_timestamp, end_timestamp INTO sd, ed
+FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct;
+SELECT DATE_PART('day', pe - ps) INTO tot_p;
+tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
+IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
 INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
 UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
 END; $$

@@ -18,19 +18,19 @@ sql.query = {
 	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
 	
 	insert_bid: 'CALL insert_bid($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5::timestamp AT TIME ZONE \'UTC\', $6::timestamp AT TIME ZONE \'UTC\', $7, $8);',
-
-    view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
+	/** insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)', **/
+	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
 	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
-	set_transac_details: 'UPDATE Bids SET payment_method = $1, mode_of_transfer = $2 WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND bid_start_timestamp = $6 AND bid_end_timestamp = $7',
+	set_transac_details: 'UPDATE Bids SET payment_method = $1, mode_of_transfer = $2, is_paid = true WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND bid_start_timestamp = $6 AND bid_end_timestamp = $7',
     pay_bid: 'UPDATE Bids SET is_paid = true WHERE owner_username = $1 AND pet_name = $2 AND caretaker_username = $3 AND bid_start_timestamp = $4 AND bid_end_timestamp = $5',
     search_reviews: 'SELECT review FROM Bids WHERE caretaker_username = $1 AND review IS NOT NULL',
 	search_avg_rating: 'SELECT AVG(rating) FROM Bids WHERE caretaker_username = $1',
 	search_past_orders: 'SELECT pet_name, bid_start_timestamp, bid_end_timestamp, caretaker_username, rating, review, payment_method, mode_of_transfer, is_paid, total_price FROM Bids WHERE owner_username = $1 AND is_successful = true',
     search_petdays: 'SELECT SUM(duration) FROM (SELECT EXTRACT(DAY FROM AGE(bid_start_timestamp, bid_end_timestamp)) + 1 AS duration FROM Bids WHERE caretaker_username = $1 AND bid_start_timestamp >= $2 AND bid_start_timestamp <= $3 AND is_successful = true)',
 
-
-	get_user : "SELECT * FROM Users WHERE username = $1;",
+	get_user_old : "SELECT * FROM Users WHERE username = $1;",
+	get_user : "SELECT username, password, avatar, is_owner, is_caretaker, (SELECT is_full_time FROM Caretakers WHERE username = $1) FROM Users WHERE username = $1;",
 	get_pet : "SELECT * FROM ownsPets WHERE username = $1 AND name = $2;", 
 	get_admin: "SELECT * FROM Administrators WHERE admin_username = $1;",
 	get_caretaker : "SELECT * FROM Caretakers WHERE username = $1 AND NOT is_disabled;", 
@@ -40,7 +40,7 @@ sql.query = {
 	list_users: "SELECT * FROM Users;", 
 	list_pets : "SELECT * FROM ownsPets WHERE username = $1;", 
 	list_cats  : "SELECT * FROM Categories;", 
-	list_caretakers: "SELECT username, first_name, last_name, is_full_time, avg_rating, no_of_pets_taken FROM caretakers NATURAL JOIN Users WHERE NOT is_disabled;",
+	list_caretakers: "SELECT username, first_name, last_name, is_full_time, avg_rating, no_of_pets_taken FROM caretakers NATURAL JOIN Uers WHERE NOT is_disabled;",
 	search_caretaker : "SELECT username, first_name, last_name, postal_code, is_full_time, avg_rating, no_of_reviews, avatar FROM Caretakers NATURAL JOIN Users WHERE username <> $1 AND (username LIKE $2 OR first_name LIKE $2 OR last_name LIKE $2);", 
 
 	filter_location:"SELECT * FROM Users WHERE postal_code LIKE $2 AND username <> $1;", 
@@ -81,7 +81,10 @@ sql.query = {
 	update_availability: 'UPDATE declares_availabilities SET start_timestamp = $1::timestamp AT TIME ZONE \'UTC\', end_timestamp = $2::timestamp AT TIME ZONE \'UTC\' WHERE start_timestamp = $3::timestamp AT TIME ZONE \'UTC\' AND caretaker_username = $4',
 
 	//Deletion
-	delete_availability: 'DELETE FROM declares_availabilities WHERE start_timestamp = $1::timestamp AT TIME ZONE \'UTC\' AND caretaker_username = $2',
+	delete_availability: 'CALL delete_availability($2,  $1::timestamp AT TIME ZONE \'UTC\' )',
+
+	//Take leave
+	take_leave: 'CALL take_leave($1::timestamp AT TIME ZONE \'UTC\', $2::timestamp AT TIME ZONE \'UTC\', $3)',
 
 
 	get_area : "SELECT postal_code FROM Users WHERE username = $1;", 

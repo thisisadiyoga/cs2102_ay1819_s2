@@ -17,7 +17,7 @@ const pool = new Pool({
 	user: postgres_details.user,
     database: postgres_details.database,
     host: postgres_details.host,
-    port: postgres_details.port,
+   	port: postgres_details.port,
     password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
@@ -237,31 +237,31 @@ function adminStatistics (req, res, next) {
 			} else {
 				allPets = data.rows;
 			}
-			
+
 			pool.query(sql_query.query.get_number_of_jobs_every_month, (err,data) => {
 				if(err || !data.rows || data.rows.length == 0) {
 					allJobs = [];
 				} else {
 					allJobs = data.rows;
 				}
-	
+
 				pool.query(sql_query.query.get_all_caretaker_salaries, (err,data) => {
 					if(err || !data.rows || data.rows.length == 0) {
 						allSalary = [];
 					} else {
 						allSalary = data.rows;
 					}
-		
+
 					pool.query(sql_query.query.get_all_underperforming_caretakers, (err,data) => {
 						if(err || !data.rows || data.rows.length == 0) {
 							allUnderperforming = [];
 						} else {
 							allUnderperforming = data.rows;
 						}
-			
-						basic(req, res, 'adminStatistics', { caretakers : allCaretakers, 
-							allPets: allPets, 
-							allJobs: allJobs, 
+
+						basic(req, res, 'adminStatistics', { caretakers : allCaretakers,
+							allPets: allPets,
+							allJobs: allJobs,
 							allSalary: allSalary,
 							allUnderperforming: allUnderperforming,
 							auth: true });
@@ -790,6 +790,7 @@ function take_leave(req, res, next) {
 
 
 
+
 function search_caretaker (req, res, next) {
 	var caretaker;
 	pool.query(sql_query.query.search_caretaker, [req.user.username, "%" + req.body.name + "%"], (err, data) => {
@@ -981,7 +982,6 @@ module.exports = initRouter;
 	var filter;
 	var nearby;
 	console.log(username);
-
 	pool.query(sql_query.query.get_area, [username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			filter = [];
@@ -996,7 +996,6 @@ module.exports = initRouter;
 				} else if (!data.rows || data.rows.length == 0){
 					console.info("No nearby caretaker found");
 					nearby = []
-
 					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'No nearby caretaker found', 'Error in searching caretaker'), auth: true });
 				} else {
 					console.log("Caretaker found");
@@ -1007,6 +1006,7 @@ module.exports = initRouter;
 		}
 	});
 }*/
+
 
 
 

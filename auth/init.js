@@ -11,11 +11,13 @@ const antiMiddleware = require('./antimiddle');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
-  user : postgres_details.user, 
-	host : postgres_details.host,
-	database : postgres_details.database, 
-	password : postgres_details.password, 
-	port : postgres_details.port,
+    //ssl: true
+    user: postgres_details.user,
+    database: postgres_details.database,
+    host: postgres_details.host,
+    port: postgres_details.port,
+    password: postgres_details.password,
+    idleTimeoutMillis: 2000
 });
 
 function findUser (username, callback) {
@@ -34,7 +36,8 @@ function findUser (username, callback) {
         passwordHash: data.rows[0].password,
         avatar      : data.rows[0].avatar, 
         is_owner    : data.rows[0].is_owner, 
-        is_caretaker: data.rows[0].is_caretaker
+        is_caretaker: data.rows[0].is_caretaker,
+        is_full_time: data.rows[0].is_full_time
 			});
 		} else {
 			console.error("More than one user?");

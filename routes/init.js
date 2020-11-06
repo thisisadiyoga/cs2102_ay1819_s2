@@ -872,7 +872,7 @@ function rate_review (req, res, next) {
 		if (err) {
 			console.error("Error in creating rating/review", err);
 		} else {
-			pool.query(sql_query.query.rate_review_update, [rating, caretaker], (err, data) => {
+			pool.query(sql_query.query.rate_review_updatect, [rating, caretaker], (err, data) => {
 				if (err) {
 					console.error("Error in updating caretaker avg_rating and no_of_reviews", err);
 				} else {

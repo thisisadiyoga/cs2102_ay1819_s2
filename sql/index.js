@@ -22,7 +22,7 @@ sql.query = {
 	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
 	ctview_bids: 'SELECT * FROM Bids WHERE caretaker_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
-	rate_review_update: 'UPDATE Caretakers SET avg_rating = ((avg_rating*no_of_reviews)+$1)/(no_of_reviews+1) , no_of_reviews = no_of_reviews + 1 WHERE username = $2;',
+	rate_review_updatect: 'UPDATE Caretakers SET avg_rating = ((avg_rating*no_of_reviews)+$1)/(no_of_reviews+1) , no_of_reviews = no_of_reviews + 1 WHERE username = $2;',
 	choose_bids: 'UPDATE Bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;',
 	set_transac_details: 'UPDATE Bids SET payment_method = $1, mode_of_transfer = $2, is_paid = true WHERE owner_username = $3 AND pet_name = $4 AND caretaker_username = $5 AND bid_start_timestamp = $6 AND bid_end_timestamp = $7',
     pay_bid: 'UPDATE Bids SET is_paid = true WHERE owner_username = $1 AND pet_name = $2 AND caretaker_username = $3 AND bid_start_timestamp = $4 AND bid_end_timestamp = $5',

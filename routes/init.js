@@ -35,6 +35,7 @@ function initRouter(app) {
 	app.get('/pets', passport.authMiddleware(), pets);
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 	app.get('/caretaker' , passport.authMiddleware(), caretaker );
+	app.get('/ctreviews' , passport.authMiddleware(), ctview_bids );
 
     app.get('/caretaker_calendar'   , passport.authMiddleware(), caretaker_calendar);
     app.get('/full_time_caretaker_calendar'   , passport.authMiddleware(), full_time_caretaker_calendar);
@@ -804,18 +805,27 @@ function search_caretaker (req, res, next) {
 
 function caretaker (req, res, next) {
 	var caretaker;
-	var date = new Date();
-	var currmonth = date.getMonth();
-	var curryear = date.getFullYear();
+	var pet_days = [];
+	var firstday = "2020-11-01 00:00:01";
+	var lastday = "2020-11-30 23:59:59";
 
-	pool.query(sql_query.query.get_ct, [req.user.username, currmonth, curryear], (err, data) => {
+	pool.query(sql_query.query.get_caretaker, [req.user.username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			caretaker = [];
 		} else {
 			caretaker = data.rows;
-		}
+			
+			pool.query(sql_query.query.search_petdays, [req.user.username, firstday, lastday], (err, data) => {
+				if (err || !data.rows || data.rows.length == 0) {
+					pet_days = [];
+					console.log("Unable to calculate pet_days");
+				} else {
+					pet_days = data.rows;
 
-		basic(req, res, 'caretaker', { caretaker : caretaker, add_msg: msg(req, 'add', 'Caretaker added successfully', 'Error in adding caretaker'), auth: true });
+				}
+			})
+		}
+		basic(req, res, 'caretaker', { caretaker : caretaker, pet_days : pet_days, add_msg: msg(req, 'add', 'Caretaker added successfully', 'Error in adding caretaker'), auth: true });
 	});
 }
 
@@ -830,6 +840,18 @@ function viewbids (req, res, next) {
 			bids = data.rows;
 		}
 		basic(req, res, 'viewbids', {data: bids, auth : true});
+	});
+}
+
+function ctview_bids (req, res, next) {
+	var bids;
+	pool.query(sql_query.query.ctview_bids, [req.user.username], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			bids = [];
+		} else {
+			bids = data.rows;
+		}
+		basic(req, res, 'ctreviews', {bids: bids, auth : true});
 	});
 }
 
@@ -850,7 +872,15 @@ function rate_review (req, res, next) {
 		if (err) {
 			console.error("Error in creating rating/review", err);
 		} else {
-			res.redirect('/viewbids');
+			pool.query(sql_query.query.rate_review_updatect, [rating, caretaker], (err, data) => {
+				if (err) {
+					console.error("Error in updating caretaker avg_rating and no_of_reviews", err);
+				} else {
+					res.redirect('/viewbids');
+				}
+			});
+
+			//res.redirect('/viewbids');
 		}
 	});
 }

@@ -14,11 +14,11 @@ const { Pool } = require('pg');
 const pool = new Pool({
 
 	//ssl: true
-	user: postgres_details.user,
+	//user: postgres_details.user,
     database: postgres_details.database,
-    host: postgres_details.host,
-    port: postgres_details.port,
-    password: postgres_details.password,
+   // host: postgres_details.host,
+   // port: postgres_details.port,
+    //password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
 
@@ -236,31 +236,31 @@ function adminStatistics (req, res, next) {
 			} else {
 				allPets = data.rows;
 			}
-			
+
 			pool.query(sql_query.query.get_number_of_jobs_every_month, (err,data) => {
 				if(err || !data.rows || data.rows.length == 0) {
 					allJobs = [];
 				} else {
 					allJobs = data.rows;
 				}
-	
+
 				pool.query(sql_query.query.get_all_caretaker_salaries, (err,data) => {
 					if(err || !data.rows || data.rows.length == 0) {
 						allSalary = [];
 					} else {
 						allSalary = data.rows;
 					}
-		
+
 					pool.query(sql_query.query.get_all_underperforming_caretakers, (err,data) => {
 						if(err || !data.rows || data.rows.length == 0) {
 							allUnderperforming = [];
 						} else {
 							allUnderperforming = data.rows;
 						}
-			
-						basic(req, res, 'adminStatistics', { caretakers : allCaretakers, 
-							allPets: allPets, 
-							allJobs: allJobs, 
+
+						basic(req, res, 'adminStatistics', { caretakers : allCaretakers,
+							allPets: allPets,
+							allJobs: allJobs,
 							allSalary: allSalary,
 							allUnderperforming: allUnderperforming,
 							auth: true });
@@ -769,17 +769,7 @@ function delete_availability(req, res, next) {
     });
 }
 
-// function delete_category(req, res, next) {
-// 	console.log(req.body.name);
-// 	pool.query(sql_query.query.del_category, [req.body.name], (err, data) => {
-// 		if(err) {
-// 			console.error("Category not found");
-// 			res.redirect('/category?del=fail');
-// 		} else {
-// 			res.redirect('/category?del=pass');
-// 		}
-// 	});
-// }
+
 function take_leave(req, res, next) {
     var leave_start_timestamp = req.body.leave_start_timestamp;
     var leave_end_timestamp = req.body.leave_end_timestamp;
@@ -796,6 +786,7 @@ function take_leave(req, res, next) {
         }
     });
 }
+
 
 
 
@@ -968,7 +959,6 @@ module.exports = initRouter;
 	var filter;
 	var nearby;
 	console.log(username);
-
 	pool.query(sql_query.query.get_area, [username], (err, data) => {
 		if(err || !data.rows || data.rows.length == 0) {
 			filter = [];
@@ -983,7 +973,6 @@ module.exports = initRouter;
 				} else if (!data.rows || data.rows.length == 0){
 					console.info("No nearby caretaker found");
 					nearby = []
-
 					basic(req, res, 'display', { category : category, search_msg: msg(req, 'search', 'No nearby caretaker found', 'Error in searching caretaker'), auth: true });
 				} else {
 					console.log("Caretaker found");
@@ -994,6 +983,7 @@ module.exports = initRouter;
 		}
 	});
 }*/
+
 
 
 

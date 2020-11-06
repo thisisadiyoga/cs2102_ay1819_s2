@@ -16,7 +16,8 @@ sql.query = {
 
 	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
 	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
-	
+
+	insert_bids: 'CALL insert_bid($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $7, $8);',
 	insert_bid: 'CALL insert_bid($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5::timestamp AT TIME ZONE \'UTC\', $6::timestamp AT TIME ZONE \'UTC\', $7, $8);',
 	/** insert_bid: 'CALL insert_bid($1, $2, $3, $4, $5, $6, $7, $8)', **/
 	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',

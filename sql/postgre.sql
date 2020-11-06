@@ -446,6 +446,19 @@ UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false E
 END; $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE PROCEDURE insert_bids(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH TIME ZONE, pe TIMESTAMP WITH TIME ZONE, ct VARCHAR, ts VARCHAR) AS
+$$ DECLARE tot_p NUMERIC;
+DECLARE sd TIMESTAMP WITH TIME ZONE;
+DECLARE ed TIMESTAMP WITH TIME ZONE;
+BEGIN
+IF NOT EXISTS (SELECT 1 FROM declares_availabilities WHERE start_timestamp <= ps AND end_timestamp >= ed) THEN RAISE EXCEPTION 'The bid does not correspond to any availability period'; ELSE SELECT start_timestamp INTO sd, end_timestamp = ed FROM declares_availabilities WHERE start_timestamp <= sd AND end_timestamp >= ed AND caretaker_username = ct; END IF;
+SELECT DATE_PART('day', pe - ps INTO tot_p);
+IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe AND caretaker_username = ct) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
+UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
+END; $$
+LANGUAGE plpgsql;
+
 --delete bids only if they are in the future and unsuccessful (pending bids). Cannot delete confirmed or expired bids.
 CREATE OR REPLACE FUNCTION check_deletable_bid()
 RETURNS TRIGGER AS

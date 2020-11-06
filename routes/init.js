@@ -894,7 +894,7 @@ function insert_bid (req, res, next) {
 	var service = req.body.servicetype;
 	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
 	console.log("calling insert bid query  with avail start and end timestamp " + start + " " + end);
-	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+	pool.query(sql_query.query.insert_bids, [owner, pet, p_start, p_end, caretaker, service], (err, data) => {
 		if (err) {
 		  req.flash('error', 'Error creating bids. Check the bid start and end time is within the start and end time of caretaker\'s availability');
 			console.error("Error in creating bid", err);

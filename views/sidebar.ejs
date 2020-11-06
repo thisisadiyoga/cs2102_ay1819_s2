@@ -47,7 +47,7 @@
 		</i>
 	</div>
 
-	<div style="<%=caretaker%>">
+	<div style="<%=isPartTime%> <%=caretaker%>">
 		<li class="nav-item" <%= page==="caretaker_calendar" ? "active" : "" %>>
 			<a class="nav-link" href="<%= page==="caretaker_calendar" ? "#" : "/caretaker_calendar" %>">
 			<i class="fas fa-calendar-alt">&nbsp;</i>
@@ -63,7 +63,7 @@
 		</i>
 	</div>
 
-	<div style="<%=isFullTime%>">
+	<div style="<%=isFullTime%> <%=caretaker%>">
 		<li class="nav-item" <%= page==="full_time_caretaker_calendar" ? "active" : "" %> >
 			<a class="nav-link" href="<%= page==="full_time_caretaker_calendar" ? "#" : "/full_time_caretaker_calendar" %>">
 			<i class="fas fa-calendar-alt">&nbsp;</i>

@@ -36,6 +36,7 @@ function initRouter(app) {
 	app.get('/add_pets', passport.authMiddleware(), add_pets);
 	app.get('/caretaker' , passport.authMiddleware(), caretaker );
 	app.get('/ctreviews' , passport.authMiddleware(), ctview_bids );
+	app.get('/dailyprice' , passport.authMiddleware(), dailyprice );
 
     app.get('/caretaker_calendar'   , passport.authMiddleware(), caretaker_calendar);
     app.get('/full_time_caretaker_calendar'   , passport.authMiddleware(), full_time_caretaker_calendar);
@@ -81,6 +82,7 @@ function initRouter(app) {
 	/*BIDS*/
 	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
+	app.post('/dailyprice', passport.authMiddleware(), set_dailyprice);
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('user', {
@@ -219,6 +221,20 @@ function pets (req, res, next) {
 		}
 
 		basic(req, res, 'pets', { pet : pet, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), edit_msg: msg(req, 'edit', 'Pet edited successfully', 'Error in editing pet'), del_msg: msg(req, 'del', 'Pet deleted successfully', 'Error in deleting pet'), auth: true });
+	});
+}
+
+function dailyprice(req, res, next) {
+	var cat_list;
+	pool.query(sql_query.query.list_cats, [], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+		    console.log('Error adding pet: ', err);
+			cat_list = [];
+		} else {
+			cat_list = data.rows;
+		}
+
+		basic(req, res, 'dailyprice', { cat_list : cat_list, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
 	});
 }
 
@@ -667,6 +683,21 @@ function reg_pet(req, res, next) {
 			res.redirect('/pets?add=fail');
 		} else {
 			res.redirect('/pets?add=pass');
+		}
+	});
+}
+
+function set_dailyprice(req, res, next) {
+	var cat_name = req.body.cat_name;
+	var caretaker_username = req.user.username;
+	var daily_price = req.body.daily_price;
+
+	pool.query(sql_query.query.insert_charges, [daily_price, cat_name, caretaker_username], (err, data) => {
+		if(err) {
+			console.error("Unable to insert daily price", err);
+			res.redirect('/dailyprice?add=fail');
+		} else {
+			res.redirect('/dailyprice?add=pass');
 		}
 	});
 }

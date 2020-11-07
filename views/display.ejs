@@ -87,7 +87,7 @@
                                 <tbody>
                                     <% for(var i=0; i<caretaker.length; i++) { %>
                                     <tr>
-                                        <td><%= caretaker[i].username%></td>
+                                        <td><a class="nav-link" href="<%= page==="ctreviews" ? "#" : "/ctreviews" %>"><%= caretaker[i].username%></a></td>
                                         <td><%= caretaker[i].first_name%></td>
                                         <td><%= caretaker[i].last_name%></td>
                                         <td><%= caretaker[i].postal_code%></td>

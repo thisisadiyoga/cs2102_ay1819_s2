@@ -477,6 +477,132 @@ LANGUAGE plpgsql;
 CREATE TRIGGER update_bids
 BEFORE UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE update_bids();
+
+
+
+
+
+
+
+insert into administrators (admin_username, password) values ('ccommuzzo0', 'fS5qCNwfQeZ');
+insert into administrators (admin_username, password) values ('etarling1', 'ak2HqHBWiid');
+insert into administrators (admin_username, password) values ('bcahani2', 'eYf3UI9L');
+insert into administrators (admin_username, password) values ('sdeport3', 'QP7Jlk9t0');
+insert into administrators (admin_username, password) values ('ztarbett4', 'WZ1bSUAFMS');
+insert into administrators (admin_username, password) values ('sboddam5', '2vYzSCxd');
+insert into administrators (admin_username, password) values ('ahouldin6', 'jOc0QYEfCBy');
+insert into administrators (admin_username, password) values ('bgraeber7', 'HoPzGF');
+insert into administrators (admin_username, password) values ('fbauldry8', '0CdwN0jdI1r');
+insert into administrators (admin_username, password) values ('rbowlands9', 'cBh8VTIQXGD');
+insert into administrators (admin_username, password) values ('kberthona', 'TfT6MpGv8');
+insert into administrators (admin_username, password) values ('rinsealb', '7QUERYW7');
+insert into administrators (admin_username, password) values ('aolrenshawc', 'HRjNt98C');
+insert into administrators (admin_username, password) values ('zclinningd', '4gn8E1cfsZ');
+insert into administrators (admin_username, password) values ('lmcbeane', 'mF7TzcCxm');
+insert into administrators (admin_username, password) values ('cbeldingf', 'cUK03821');
+insert into administrators (admin_username, password) values ('hquakleyg', 'YKPSFOM');
+insert into administrators (admin_username, password) values ('tdechastelainh', 'bjruYUH');
+insert into administrators (admin_username, password) values ('gnyei', '9uZC8m');
+insert into administrators (admin_username, password) values ('wtroakj', 'EEHmIvl');
+insert into administrators (admin_username, password) values ('wspriddlek', '8cvLsnOImQEn');
+insert into administrators (admin_username, password) values ('gmatuszkiewiczl', 'w9bsGqDbAC9');
+insert into administrators (admin_username, password) values ('cgrigorushkinm', 'Te4LISIHQP');
+insert into administrators (admin_username, password) values ('mferrinin', 'r7WOHzs0coY');
+insert into administrators (admin_username, password) values ('wedsero', 'zmDDM4UhQ');
+insert into administrators (admin_username, password) values ('adamettip', 'x28pGrX');
+insert into administrators (admin_username, password) values ('blouedeyq', 'iCMWiTX');
+insert into administrators (admin_username, password) values ('gcastror', 'xVR6te5RY');
+insert into administrators (admin_username, password) values ('cwoofs', 'MMenaO');
+insert into administrators (admin_username, password) values ('pcullityt', 'X13zKbq');
+insert into administrators (admin_username, password) values ('alohmeyeru', '5GlzVbxkcp8');
+insert into administrators (admin_username, password) values ('csiddonv', '4rqTYyjt');
+insert into administrators (admin_username, password) values ('agionettittiw', 'D7BVWL');
+insert into administrators (admin_username, password) values ('msegox', '6Rc67z3');
+insert into administrators (admin_username, password) values ('tvliesy', 'mc1Osuykva');
+insert into administrators (admin_username, password) values ('gbruntz', 'ML5tb85dUm');
+insert into administrators (admin_username, password) values ('hmcilory10', 'TDOO3MbN2jc5');
+insert into administrators (admin_username, password) values ('malsopp11', 'PEusIgP0tQ');
+insert into administrators (admin_username, password) values ('kdeighan12', 'lRfgNLS7');
+insert into administrators (admin_username, password) values ('mhaighton13', 'FMTkX7lnSO9');
+insert into administrators (admin_username, password) values ('ctwells14', 'ofry84');
+insert into administrators (admin_username, password) values ('amaypother15', 'FDeN2Rlb');
+insert into administrators (admin_username, password) values ('seddisforth16', '4V2rP7Q4LAm');
+insert into administrators (admin_username, password) values ('jchiswell17', '2KNiX1j2');
+insert into administrators (admin_username, password) values ('ifarlane18', 'avJFMvRdm');
+insert into administrators (admin_username, password) values ('fsurmeyer19', 'CMK9a9P');
+insert into administrators (admin_username, password) values ('epenright1a', 'FG7Lt05iZLI');
+insert into administrators (admin_username, password) values ('afilasov1b', 'LeY1JU1');
+insert into administrators (admin_username, password) values ('ilowe1c', 'OcSEbiT5');
+insert into administrators (admin_username, password) values ('msumers1d', 'gUdoqO');
+insert into administrators (admin_username, password) values ('mbengochea1e', 'c30PYHYu2n');
+insert into administrators (admin_username, password) values ('scruwys1f', 'Poq3wFyu');
+insert into administrators (admin_username, password) values ('magerskow1g', '9gwkLy');
+insert into administrators (admin_username, password) values ('bwalkingshaw1h', '1SdJFYDu');
+insert into administrators (admin_username, password) values ('squodling1i', 'kVRo7ki');
+insert into administrators (admin_username, password) values ('erelf1j', 'a4jKRqnE');
+insert into administrators (admin_username, password) values ('rsibun1k', 'KYXsxVjH');
+insert into administrators (admin_username, password) values ('aasbury1l', 'k8PpAbVWs');
+insert into administrators (admin_username, password) values ('aleggat1m', 'Zs34cZ');
+insert into administrators (admin_username, password) values ('lpunshon1n', 'yScoeGmI');
+insert into administrators (admin_username, password) values ('rmoxsom1o', 'lKujNTi2LVc');
+insert into administrators (admin_username, password) values ('jbotha1p', '4Cpr9ogA0k');
+insert into administrators (admin_username, password) values ('ltchir1q', 'dslCsO2I');
+insert into administrators (admin_username, password) values ('gjakubovits1r', 'ujWP9BU');
+insert into administrators (admin_username, password) values ('zelintune1s', 'r69qZUyowQl');
+insert into administrators (admin_username, password) values ('jarmell1t', 'sDTkWB7AMzmQ');
+insert into administrators (admin_username, password) values ('bpelz1u', 'pSiLbKeO');
+insert into administrators (admin_username, password) values ('fduchateau1v', 'FJjQe6mh');
+insert into administrators (admin_username, password) values ('lferbrache1w', 'O5PBNb');
+insert into administrators (admin_username, password) values ('fklemz1x', 'qGF6S8mZtCb');
+insert into administrators (admin_username, password) values ('gpulman1y', 'zkeDnEV8QkP1');
+insert into administrators (admin_username, password) values ('jrochelle1z', 'jdcE1mm3WvM');
+insert into administrators (admin_username, password) values ('doaks20', 'gTr9uTVaznAo');
+insert into administrators (admin_username, password) values ('csleany21', 'Mloda6f');
+insert into administrators (admin_username, password) values ('rchallender22', 'swm3vL');
+insert into administrators (admin_username, password) values ('dtuppeny23', 'Zxm3WPZ');
+insert into administrators (admin_username, password) values ('azannutti24', 'MO4zmrdlX46D');
+insert into administrators (admin_username, password) values ('dhowis25', 'V4rgZM');
+insert into administrators (admin_username, password) values ('ngerge26', 'NreoYAYRx');
+insert into administrators (admin_username, password) values ('tjellico27', 'A0jSF4');
+insert into administrators (admin_username, password) values ('elaurant28', 'eYtNvGD');
+insert into administrators (admin_username, password) values ('bkay29', 'ueMgjxx');
+insert into administrators (admin_username, password) values ('ddabs2a', 'dBnHM8');
+insert into administrators (admin_username, password) values ('oridley2b', 'Uk2b5bWQit');
+insert into administrators (admin_username, password) values ('msydenham2c', 'bswA6eNQL');
+insert into administrators (admin_username, password) values ('sweildish2d', 'moxyoZk0s');
+insert into administrators (admin_username, password) values ('dmonckman2e', 'jtg5NGQ');
+insert into administrators (admin_username, password) values ('cpardi2f', '9X5XpTA');
+insert into administrators (admin_username, password) values ('zstanyan2g', 'nIkw9uktS');
+insert into administrators (admin_username, password) values ('ppaoletti2h', 'zRHrmG2j');
+insert into administrators (admin_username, password) values ('cmaccoveney2i', 'd4mzjidj7Sc');
+insert into administrators (admin_username, password) values ('cdjorevic2j', '6bTrq2tYHCef');
+insert into administrators (admin_username, password) values ('mhiggonet2k', 'QSPhzuoN');
+insert into administrators (admin_username, password) values ('llongdon2l', 'dJ4OmmTl0');
+insert into administrators (admin_username, password) values ('nillwell2m', '3oSD01zh4S2T');
+insert into administrators (admin_username, password) values ('sgayton2n', 'rKQdhsoG6WN');
+insert into administrators (admin_username, password) values ('ukaas2o', 'ys2Hcj8wf');
+insert into administrators (admin_username, password) values ('tsize2p', 'IC547FwaD3r1');
+insert into administrators (admin_username, password) values ('jknightly2q', '9edr99QRR2');
+insert into administrators (admin_username, password) values ('rcordero2r', 'NEBVMS');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 
 insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hchilcotte1', 'Hannah', 'Chilcotte', 'VxyTOEHQQ', 'hchilcotte1@bigcartel.com', '2000-01-19', '5048372273574703', null, '688741', 'https://robohash.org/expeditaquiaea.png?size=50x50&set=set1', '2020-01-27');

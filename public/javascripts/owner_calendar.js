@@ -41,8 +41,6 @@ $('#calendar').fullCalendar({
       sg_start.setHours(sg_start.getHours() - 8);
     if(event.extendedProps.is_successful == true)
         element.css('background-color', '#1E90FF');
-    else if(sg_start >= new Date())
-        element.css('background-color', 'orange');
     else
          element.css('background-color', '#F08080');
   },

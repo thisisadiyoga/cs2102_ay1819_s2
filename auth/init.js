@@ -20,7 +20,6 @@ const pool = new Pool({
     password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
-
 function findUser (username, callback) {
 	pool.query(sql_query.query.get_user, [username], (err, data) => {
 		if(err) {

@@ -22,12 +22,12 @@
 			<div class="card card-register mx-auto mt-5">
 				<div class="card-header">Add Daily Price</div>
 				<div class="card-body">
-					<form action="/add_pets" enctype="multipart/form-data" method="post">
+					<form action="/dailyprice" method="post">
 						<div class="form-group">
 							<div class="form-row">
 								<div class="col-md-12">
 									<div class="form-label-group">
-										<input type="text" id="daily_price" class="form-control" placeholder="Daily Price" required="required" name="daily_price">
+										<input type="number" step="0.01" id="daily_price" class="form-control" placeholder="Daily Price" required="required" name="daily_price">
 										<label for="daily_price">Daily Price</label>
 									</div>
 								</div>

@@ -36,6 +36,7 @@ function initRouter(app) {
 	app.get('/caretaker' , passport.authMiddleware(), caretaker );
 	app.get('/ctreviews' , passport.authMiddleware(), ctview_bids );
 	app.get('/dailyprice' , passport.authMiddleware(), dailyprice );
+	app.get('/edit_dailyprice' , passport.authMiddleware(), edit_dailyprice );
 
     app.get('/caretaker_calendar'   , passport.authMiddleware(), caretaker_calendar);
     app.get('/full_time_caretaker_calendar'   , passport.authMiddleware(), full_time_caretaker_calendar);
@@ -82,6 +83,7 @@ function initRouter(app) {
 	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
 	app.post('/ctregister', [passport.antiMiddleware(), upload.single('avatar')], reg_ct);
 	app.post('/dailyprice', passport.authMiddleware(), set_dailyprice);
+	app.post('/edit_dailyprice' , passport.authMiddleware(), change_dailyprice);
 
 	/* LOGIN */
 	app.post('/login', passport.authenticate('user', {
@@ -234,6 +236,35 @@ function dailyprice(req, res, next) {
 		}
 
 		basic(req, res, 'dailyprice', { cat_list : cat_list, add_msg: msg(req, 'add', 'Pet added successfully', 'Error in adding pet'), auth: true });
+	});
+}
+
+function edit_dailyprice(req, res, next) {
+	var dailyprice;
+	pool.query(sql_query.query.view_charges, [req.user.username], (err, data) => {
+		if(err || !data.rows || data.rows.length == 0) {
+		    console.log('Error adding charges: ', err);
+			dailyprice = [];
+		} else {
+			dailyprice = data.rows;
+		}
+
+		basic(req, res, 'edit_dailyprice', { dailyprice : dailyprice, add_msg: msg(req, 'add', 'Charges added successfully', 'Error in adding charges'), auth: true });
+	});
+}
+
+function change_dailyprice (req, res, next) {
+	var username = req.user.username;
+	var daily_price = req.body.daily_price;
+	var cat_name = req.body.cat_name;
+
+	pool.query(sql_query.query.update_charges, [daily_price, cat_name, username], (err, data) => {
+		if(err) {
+			console.error("Error in updating daily price");
+			res.redirect('/edit_dailyprice?edit=fail');
+		} else {
+			res.redirect('/edit_dailyprice?edit=pass');
+		}
 	});
 }
 

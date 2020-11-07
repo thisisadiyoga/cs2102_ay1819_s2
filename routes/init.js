@@ -12,13 +12,12 @@ const flash = require('connect-flash');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
-
 	// ssl: true
-	user: postgres_details.user,
+	//user: postgres_details.user,
     database: postgres_details.database,
-	host: postgres_details.host,
-	port: postgres_details.port,
-    password: postgres_details.password,
+	//host: postgres_details.host,
+	//port: postgres_details.port,
+    //password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
 
@@ -334,7 +333,7 @@ function owner_calendar(req, res, next) {
     var error_message, success_message;
 
 
-    pool.query(sql_query.query.read_bids,[req.user.username], (err, data) => { //TODO req.user.username
+    pool.query(sql_query.query.read_all_bids,[req.user.username], (err, data) => { //TODO req.user.username
             if(err || !data.rows || data.rows.length == 0) {
                         bids = [];
                         console.log('Error reading bids: ' + err);
@@ -362,14 +361,15 @@ function caretaker_calendar(req, res, next) {
                     }
 
 
-    pool.query(sql_query.query.read_bids, [req.user.username], (err, data) => {
+    pool.query(sql_query.query.read_successful_bids, [req.user.username], (err, data) => {
            if(err || !data.rows || data.rows.length == 0) {
                           bids = [];
                            console.log('Error reading bids: ' + err);
           } else {
                     bids = data.rows;
-          }
 
+          }
+                    console.log('Bids read is  ' + bids);
                       error_message = req.flash('error');
                       success_message = req.flash('success');
 
@@ -392,12 +392,13 @@ function full_time_caretaker_calendar(req, res, next) {
                     }
 
 
-    pool.query(sql_query.query.read_bids, [req.user.username], (err, data) => {
+    pool.query(sql_query.query.read_successful_bids, [req.user.username], (err, data) => {
            if(err || !data.rows || data.rows.length == 0) {
                           bids = [];
                            console.log('Error reading bids: ' + err);
           } else {
                     bids = data.rows;
+                    console.log('Bids is ' + bids);
           }
 
                       error_message = req.flash('error');
@@ -808,7 +809,7 @@ function take_leave(req, res, next) {
 
     pool.query(sql_query.query.take_leave, [leave_start_timestamp, leave_end_timestamp, req.user.username], (err, data) => { //TODO: username
         if(err) {
-              req.flash('error', 'Leave cannot be applied. Check that there are no scheduled pet-care jobs within the leave period.');
+              req.flash('error', 'Leave cannot be applied. You must work at least 2 X 150 consecutive days per year. Also, Check that there are no scheduled pet-care jobs within the leave period.');
               console.log("Cannot apply leave. " + err);
 
              res.redirect('/full_time_caretaker_calendar?update=fail');
@@ -950,19 +951,18 @@ function insert_bid (req, res, next) {
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
 	var p_end = req.body.penddate;
-	var start = req.body.startdate;
-	var end = req.body.enddate;
 	var caretaker = req.body.caretakername;
 	var service = req.body.servicetype;
+	console.log(p_start);
+	console.log(p_end);
 	console.log("calling insert bid query  with start and end timestamp " + p_start + " " + p_end);
-	console.log("calling insert bid query  with avail start and end timestamp " + start + " " + end);
-	pool.query(sql_query.query.insert_bid, [owner, pet, p_start, p_end, start, end, caretaker, service], (err, data) => {
+	pool.query(sql_query.query.insert_bids, [owner, pet, p_start, p_end, caretaker, service], (err, data) => {
 		if (err) {
 		  req.flash('error', 'Error creating bids. Check the bid start and end time is within the start and end time of caretaker\'s availability');
 			console.error("Error in creating bid", err);
 		} else {
-		    req.flash('success', 'New bid is successfully added.');
-			basic(req, res, 'owner_calendar', {auth:true});
+			res.redirect('/owner_calendar?insert=pass');
+
 		}
 	});
 }

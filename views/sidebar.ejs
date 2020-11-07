@@ -1,8 +1,8 @@
 <!-- Sidebar -->
 <% var owner = (!is_owner) ? "display: none" : "" %> 
 <% var caretaker = (!is_caretaker) ? "display: none" : "" %>
-<% var isFullTime = (!is_full_time) ? "display: none" : "" %>
-<% var isPartTime = is_full_time ? "display: none" : "" %>
+<% var isFullTime = (is_full_time) ? "" : "display: none" %>
+<% var isPartTime = (is_full_time != null && !is_full_time) ? "" : "display: none" %>
 
 <ul class="sidebar navbar-nav">
 	<div>
@@ -70,13 +70,12 @@
 			<span>My Availabilities</span></a>
 			</li>
 	</div>
-
 	<div style="<%=owner%>">
-		<li class="nav-item" <%= page==="insert_transac" ? "active" : "" %>>
-			<a class="nav-link" href="<%= page==="insert_transac" ? "#" : "/insert_transac" %>>
-				<i class="fas fa-fw fa-dog"></i>
-				<span>Complete Transaction</span></a>
-		</li>
+	<li class="nav-item" <%= page==="insert_transac" ? "active" : "" %>>
+		<a class="nav-link" href="<%= page==="insert_transac" ? "#" : "/insert_transac" %>">
+			<i class="fas fa-fw fa-dog"></i>
+			<span>Complete Transaction</span></a>
+	</li>
 	</div>
 
 	<div style="<%=caretaker%>">

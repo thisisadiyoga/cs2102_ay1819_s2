@@ -7,7 +7,9 @@ sql.query = {
 	add_admin : "INSERT INTO Administrators VALUES ($1, $2);", 
 	//BIDS
 	//Information
-	read_bids: 'SELECT bid_start_timestamp AS start, bid_end_timestamp AS end, \'Caretaker: \' || caretaker_username AS title, total_price, rating, review, is_paid, is_successful, caretaker_username, pet_name, avail_start_timestamp, avail_end_timestamp, type_of_service, mode_of_transfer FROM Bids WHERE owner_username = $1', //TODO: cast $2 to 12am of the day
+	read_all_bids: 'SELECT bid_start_timestamp AS start, bid_end_timestamp AS end, \'Caretaker: \' || caretaker_username AS title, total_price, rating, review, is_paid, is_successful, caretaker_username, pet_name, avail_start_timestamp, avail_end_timestamp, type_of_service, mode_of_transfer FROM bids WHERE owner_username = $1', //TODO: cast $2 to 12am of the day
+	read_successful_bids: 'SELECT bid_start_timestamp AS start, bid_end_timestamp AS end, \'Pet Owner: \' || owner_username AS title, total_price, rating, review, is_paid, is_successful, pet_name, avail_start_timestamp, avail_end_timestamp, type_of_service, mode_of_transfer FROM bids WHERE caretaker_username = $1', //TODO: cast $2 to 12am of the day
+
     //Deletion
     delete_bid: 'DELETE FROM bids WHERE bid_start_timestamp = $1::timestamp AT TIME ZONE \'UTC\' AND avail_start_timestamp = $2::timestamp AT TIME ZONE \'UTC\' AND caretaker_username = $3 AND pet_name = $4',
     // Update
@@ -16,7 +18,8 @@ sql.query = {
 
 	add_caretaker : "INSERT INTO Caretakers VALUES ($1, $2);", 
 	add_ct : "CALL add_ct ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);",
-	
+
+	insert_bids: 'CALL insert_bids($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5, $6);',
 	insert_bid: 'CALL insert_bid($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5::timestamp AT TIME ZONE \'UTC\', $6::timestamp AT TIME ZONE \'UTC\', $7, $8);',
 
 	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',

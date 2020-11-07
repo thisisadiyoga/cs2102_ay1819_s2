@@ -95,4 +95,22 @@
 			</a>
 		</li>
 	</div>
+
+	<div style="<%=caretaker%>">
+		<li class="nav-item" <%= page==="dailyprice" ? "active" : "" %>>
+			<a class="nav-link" href="<%= page==="dailyprice" ? "#" : "/dailyprice" %>">
+			<i class="fas fa-fw fa-address-card"></i>
+			<span>Add Daily Price</span>
+			</a>
+		</li>
+	</div>
+
+	<div style="<%=caretaker%>">
+		<li class="nav-item" <%= page==="edit_dailyprice" ? "active" : "" %>>
+			<a class="nav-link" href="<%= page==="edit_dailyprice" ? "#" : "/edit_dailyprice" %>">
+			<i class="fas fa-fw fa-address-card"></i>
+			<span>Change Daily Price</span>
+			</a>
+		</li>
+	</div>
 </ul>

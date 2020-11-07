@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>The Collar Klub</title>
+
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+		<!-- Custom styles for this template-->
+		<link href="stylesheets/index.css" rel="stylesheet">
+	</head>
+	
+	<body class="bg-dark">
+		<div class="container">
+			<div class="card card-register mx-auto mt-5">
+				<div class="card-header">Add Daily Price</div>
+				<div class="card-body">
+					<form action="/dailyprice" method="post">
+						<div class="form-group">
+							<div class="form-row">
+								<div class="col-md-12">
+									<div class="form-label-group">
+										<input type="number" step="0.01" id="daily_price" class="form-control" placeholder="Daily Price" required="required" name="daily_price">
+										<label for="daily_price">Daily Price</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="form-row">
+								<div class="col-md-6">
+									<label for="cat_name">Pet Type</label>
+									<select class="form-control" id="cat_name" name="cat_name" required="required">
+										<% for(var i=0; i<cat_list.length; i++) { %>
+										<option><%= cat_list[i].cat_name%></option>
+										<% } %>
+									</select>
+								</div>
+							</div>
+						</div>
+						<button class="btn btn-primary btn-block" type="submit">Add Daily Price</button>
+					</form>
+					<div class="text-center">
+						<a class="d-block small mt-3" href="/dashboard">Back to Dashboard</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<%- include bottomscript.ejs %>
+	</body>
+</html>

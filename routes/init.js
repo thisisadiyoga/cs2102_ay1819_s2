@@ -919,12 +919,11 @@ function ctview_bids (req, res, next) {
 }
 
 function rate_review_form (req, res, next) {
-	console.log("lol");
 	res.render('rate_review_form', {auth:true});
 }
 
 function rate_review (req, res, next) {
-    var owner = req.body.ownername;
+    var owner = req.user.username;
     var pet = req.body.petname;
     var start = req.body.startdate;
     var end = req.body.enddate;
@@ -953,8 +952,7 @@ function view_transac (req, res, next) {
 }
 
 function insert_transac (req, res, next) {
-	console.log("Hello");
-	var owner = req.body.ownername;
+	var owner = req.user.username;
 	var pet = req.body.petname;
 	var start = req.body.startdate;
 	var end = req.body.enddate;
@@ -966,7 +964,7 @@ function insert_transac (req, res, next) {
 		if (err) {
 			console.error("Error in setting transaction details", err);
 		} else {
-			res.redirect('/viewbids');
+			res.redirect('/owner_calendar?error_message=pass');
 		}
 	})
 }
@@ -976,9 +974,7 @@ function newbid (req, res, next) {
 }
 
 function insert_bid (req, res, next) {
-	console.log("Reached!");
-	console.log(req.body.ownername);
-	var owner = req.body.ownername;
+	var owner = req.user.username;
 	var pet = req.body.petname;
 	var p_start = req.body.pstartdate;
 	var p_end = req.body.penddate;

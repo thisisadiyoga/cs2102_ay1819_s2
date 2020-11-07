@@ -311,13 +311,14 @@ $$ DECLARE avail_first_start TIMESTAMP;
 DECLARE avail_second_start TIMESTAMP;
 DECLARE avail_second_end TIMESTAMP;
 
-DECLARE consecutive_days_first NUMERIC := 0;
-DECLARE consecutive_days_second NUMERIC := 0;
-DECLARE consecutive_days_other NUMERIC := 0;
+DECLARE consecutive_days_first NUMERIC;
+DECLARE consecutive_days_second NUMERIC;
 
-DECLARE result NUMERIC := 0;
+
+DECLARE result NUMERIC;
 
 BEGIN
+result := 0;
 RAISE NOTICE 'in take_leave procedure';
 
 IF EXISTS (SELECT 1
@@ -331,50 +332,59 @@ END IF;
 
 SELECT start_timestamp INTO avail_first_start
 FROM declares_availabilities
-WHERE caretaker_username = username AND leave_start > start_timestamp AND leave_start <= end_timestamp;
+WHERE caretaker_username = username AND leave_start > start_timestamp AND leave_start < end_timestamp;
 
 SELECT start_timestamp, end_timestamp INTO avail_second_start, avail_second_end
 FROM declares_availabilities
-WHERE caretaker_username = username AND leave_end < end_timestamp AND leave_end >= start_timestamp;
+WHERE caretaker_username = username AND leave_end < end_timestamp AND leave_end > start_timestamp;
 
 SELECT DATE_PART('day', leave_start - avail_first_start) INTO consecutive_days_first;
 SELECT DATE_PART('day', avail_second_end - leave_end) INTO consecutive_days_second;
 
-SELECT DATE_PART('day', end_timestamp - start_timestamp) INTO consecutive_days_other
+WITH days_interval AS
+(SELECT DATE_PART('day', end_timestamp - start_timestamp) AS days
 FROM declares_availabilities
 WHERE caretaker_username = username
-    AND start_timestamp <> avail_first_start
-    AND start_timestamp <> avail_second_start
-    AND DATE_PART('day', end_timestamp - start_timestamp) >= 150;
+       AND start_timestamp < avail_first_start
+       OR start_timestamp > avail_second_start)
 
-IF (consecutive_days_first >= 300 OR consecutive_days_second >= 300 OR consecutive_days_other >= 300) THEN
+SELECT COALESCE(SUM(CASE
+           WHEN days < 150 THEN 0
+           WHEN days >= 150 AND days < 300 THEN 1
+           WHEN days >= 300 THEN 2
+           END), 0) INTO result FROM days_interval;
+
+ RAISE NOTICE '1. result is %', result;
+
+IF (consecutive_days_first >= 300) THEN
  result := result + 2;
- END IF;
-
-IF (consecutive_days_first >= 150) THEN
+ELSIF (consecutive_days_first >= 150)  THEN
  result := result + 1;
  END IF;
 
-IF (consecutive_days_second >= 150) THEN
- result := result + 1;
-END IF;
+ RAISE NOTICE '2. result is %', result;
 
-IF (consecutive_days_other >= 150) THEN
-    result := result + 1;
-END IF;
+IF (consecutive_days_second >= 300) THEN
+ result := result + 2;
+ ELSIF (consecutive_days_second >= 150)  THEN
+ result := result + 1;
+ END IF;
+
+  RAISE NOTICE '3. result is %', result;
+
 
 IF (result < 2) THEN
     RAISE EXCEPTION 'Cannot take leave as you are not working for 2 X 150 consecutive days this year';
 END IF;
 
 
-UPDATE bids SET bid_end_timestamp = leave_start WHERE bid_start_timestamp >= avail_first_start AND bid_end_timestamp <= leave_start;
+UPDATE bids SET avail_end_timestamp = leave_start WHERE bid_start_timestamp >= avail_first_start AND bid_end_timestamp <= leave_start;
 
 UPDATE declares_availabilities SET end_timestamp = leave_start WHERE start_timestamp = avail_first_start;
 
 INSERT INTO declares_availabilities VALUES (leave_end, avail_second_end, username);
 
-UPDATE bids SET bid_start_timestamp = leave_end WHERE bid_start_timestamp >= avail_second_start AND bid_end_timestamp <= avail_second_end;
+UPDATE bids SET avail_start_timestamp = leave_end WHERE bid_start_timestamp >= avail_second_start AND bid_end_timestamp <= avail_second_end;
 
 IF (avail_first_start <> avail_second_start) THEN
 DELETE FROM declares_availabilities WHERE start_timestamp = avail_second_start;

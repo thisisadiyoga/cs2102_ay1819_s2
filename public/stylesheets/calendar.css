@@ -82,15 +82,15 @@ body {
 }
 
 .bid-color {
-  background: red;
+  background: #1E90FF;
 }
 
 .successful-bid-color {
-  background:  #a8eec1;
+  background:  #1E90FF;
 }
 
 .unsuccessful-bid-color {
-  background:  red;
+  background:  #F08080;
 }
 
 .pending-bid-color {

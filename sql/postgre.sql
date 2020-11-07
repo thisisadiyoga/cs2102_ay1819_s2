@@ -31,7 +31,8 @@ CREATE TABLE Caretakers (
 	is_full_time		BOOLEAN			NOT NULL,
 	avg_rating			FLOAT			   NOT NULL DEFAULT 0,
 	no_of_reviews		INT				NOT NULL DEFAULT 0,
-	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0) DEFAULT 0
+	no_of_pets_taken	INT				CHECK (no_of_pets_taken >= 0) DEFAULT 0,
+	is_disabled			BOOLEAN			NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE ownsPets (
@@ -42,7 +43,7 @@ CREATE TABLE ownsPets (
 	size			VARCHAR 		NOT NULL CHECK (size IN ('Extra Small', 'Small', 'Medium', 'Large', 'Extra Large')), 
 	sociability		TEXT, 
 	special_req		TEXT, 
-	img				BYTEA, 
+	img				BYTEA NOT NULL, 
 	PRIMARY KEY (username, name)
 );
 
@@ -52,10 +53,9 @@ CREATE TABLE declares_availabilities(
     end_timestamp 			TIMESTAMP 	NOT NULL,
     caretaker_username 		VARCHAR REFERENCES Caretakers(username) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (end_timestamp > start_timestamp),
-    CHECK(start_timestamp >= CURRENT_TIMESTAMP),
-    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years'),
+    CHECK(end_timestamp <= CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours'), -- Additional add hours is to account for converstion to SGT
     PRIMARY KEY(caretaker_username, start_timestamp) --Two availabilities belonging to the same caretaker should not have the same start date.
-                                                --They will be merged
+                                               --They will be merged
 );
 
 
@@ -180,6 +180,8 @@ $$ DECLARE new_start TIMESTAMP WITHOUT TIME ZONE;
     RETURN NEW;
     END IF;
 
+
+
     IF NEW.start_timestamp >= NEW.end_timestamp THEN
     RETURN NULL;
     ELSIF
@@ -265,7 +267,7 @@ $$ DECLARE first_result INTEGER := 0;
               FROM bids b2
               WHERE b2.caretaker_username = OLD.caretaker_username
               AND GREATEST(b2.bid_start_timestamp, NEW.end_timestamp) < LEAST(b2.bid_end_timestamp, OLD.end_timestamp)
-              AND b1.is_successful IS TRUE)
+              AND b2.is_successful IS TRUE)
               THEN
     RAISE NOTICE 'there is a bid between the old and new ending timestamp';
     second_result := 1;
@@ -297,21 +299,90 @@ END; $$
 LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE PROCEDURE take_leave(leave_start_timestamp TIMESTAMP WITH TIME ZONE, leave_end_timestamp TIMESTAMP WITH TIME ZONE, username VARCHAR) AS
-$$ DECLARE avail_start_timestamp TIMESTAMP;
-DECLARE avail_end_timestamp TIMESTAMP;
-BEGIN
-RAISE NOTICE 'in take_leave procedure';
-IF EXISTS (SELECT 1 FROM bids WHERE caretaker_username = username AND bid_start_timestamp >= leave_start_timestamp AND bid_start_timestamp <= leave_end_timestamp AND is_successful IS TRUE) THEN
-RAISE EXCEPTION 'Leave cannot be taken as there are scheduled pet-care jobs within the leave period';
-ELSE
- SELECT MIN(start_timestamp) INTO avail_start_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_start_timestamp > start_timestamp AND leave_start_timestamp <= end_timestamp;
- SELECT MAX(end_timestamp) INTO avail_end_timestamp FROM declares_availabilities WHERE caretaker_username = username AND leave_end_timestamp < end_timestamp AND leave_end_timestamp >= start_timestamp;
-  CALL delete_coincide_availabilities(leave_start_timestamp, leave_end_timestamp, username); --Delete all availabilties within this period
-INSERT INTO declares_availabilities VALUES (avail_start_timestamp, leave_start_timestamp, username);
-INSERT INTO declares_availabilities VALUES (leave_end_timestamp, avail_end_timestamp, username);
+CREATE OR REPLACE PROCEDURE take_leave(leave_start TIMESTAMP WITH TIME ZONE, leave_end TIMESTAMP WITH TIME ZONE, username VARCHAR) AS
+$$ DECLARE avail_first_start TIMESTAMP;
+DECLARE avail_second_start TIMESTAMP;
+DECLARE avail_second_end TIMESTAMP;
 
+DECLARE consecutive_days_first NUMERIC;
+DECLARE consecutive_days_second NUMERIC;
+
+
+DECLARE result NUMERIC;
+
+BEGIN
+result := 0;
+RAISE NOTICE 'in take_leave procedure';
+
+IF EXISTS (SELECT 1
+            FROM bids
+            WHERE caretaker_username = username
+                AND bid_start_timestamp >= leave_start
+                    AND bid_start_timestamp <= leave_end
+                       AND is_successful IS TRUE) THEN
+RAISE EXCEPTION 'Leave cannot be taken as there are scheduled pet-care jobs within the leave period';
 END IF;
+
+SELECT start_timestamp INTO avail_first_start
+FROM declares_availabilities
+WHERE caretaker_username = username AND leave_start > start_timestamp AND leave_start < end_timestamp;
+
+SELECT start_timestamp, end_timestamp INTO avail_second_start, avail_second_end
+FROM declares_availabilities
+WHERE caretaker_username = username AND leave_end < end_timestamp AND leave_end > start_timestamp;
+
+SELECT DATE_PART('day', leave_start - avail_first_start) INTO consecutive_days_first;
+SELECT DATE_PART('day', avail_second_end - leave_end) INTO consecutive_days_second;
+
+WITH days_interval AS
+(SELECT DATE_PART('day', end_timestamp - start_timestamp) AS days
+FROM declares_availabilities
+WHERE caretaker_username = username
+       AND start_timestamp < avail_first_start
+       OR start_timestamp > avail_second_start)
+
+SELECT COALESCE(SUM(CASE
+           WHEN days < 150 THEN 0
+           WHEN days >= 150 AND days < 300 THEN 1
+           WHEN days >= 300 THEN 2
+           END), 0) INTO result FROM days_interval;
+
+ RAISE NOTICE '1. result is %', result;
+
+IF (consecutive_days_first >= 300) THEN
+ result := result + 2;
+ELSIF (consecutive_days_first >= 150)  THEN
+ result := result + 1;
+ END IF;
+
+ RAISE NOTICE '2. result is %', result;
+
+IF (consecutive_days_second >= 300) THEN
+ result := result + 2;
+ ELSIF (consecutive_days_second >= 150)  THEN
+ result := result + 1;
+ END IF;
+
+  RAISE NOTICE '3. result is %', result;
+
+
+IF (result < 2) THEN
+    RAISE EXCEPTION 'Cannot take leave as you are not working for 2 X 150 consecutive days this year';
+END IF;
+
+
+UPDATE bids SET avail_end_timestamp = leave_start WHERE bid_start_timestamp >= avail_first_start AND bid_end_timestamp <= leave_start;
+
+UPDATE declares_availabilities SET end_timestamp = leave_start WHERE start_timestamp = avail_first_start;
+
+INSERT INTO declares_availabilities VALUES (leave_end, avail_second_end, username);
+
+UPDATE bids SET avail_start_timestamp = leave_end WHERE bid_start_timestamp >= avail_second_start AND bid_end_timestamp <= avail_second_end;
+
+IF (avail_first_start <> avail_second_start) THEN
+DELETE FROM declares_availabilities WHERE start_timestamp = avail_second_start;
+END IF;
+
 END; $$
 LANGUAGE plpgsql;
 
@@ -357,7 +428,8 @@ RETURNS TRIGGER AS
 $$
   BEGIN
   IF NEW.is_full_time IS TRUE THEN
-  INSERT INTO declares_availabilities VALUES (CURRENT_TIMESTAMP + INTERVAL '8 hours', CURRENT_TIMESTAMP + INTERVAL '2 years 8 hours' , NEW.username); --To account for Singapore time
+ INSERT INTO declares_availabilities VALUES (CURRENT_TIMESTAMP + INTERVAL '8 hours', CURRENT_TIMESTAMP + INTERVAL '1 year 8 hours' , NEW.username); --To account for Singapore time
+
   END IF;
   RETURN NEW;
   END $$
@@ -424,14 +496,43 @@ AFTER INSERT OR DELETE ON Owners
 FOR EACH ROW EXECUTE PROCEDURE update_owner();
 --------------------------------------------------------
 
-CREATE OR REPLACE PROCEDURE insert_bid(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH TIME ZONE, pe TIMESTAMP WITH TIME ZONE, sd TIMESTAMP WITH TIME ZONE, ed TIMESTAMP WITH TIME ZONE, ct VARCHAR, ts VARCHAR) AS
+CREATE OR REPLACE PROCEDURE insert_bids(ou VARCHAR, pn VARCHAR, ps TIMESTAMP WITH TIME ZONE, pe TIMESTAMP WITH TIME ZONE, ct VARCHAR, ts VARCHAR) AS
 $$ DECLARE tot_p NUMERIC;
+DECLARE sd TIMESTAMP WITH TIME ZONE;
+DECLARE ed TIMESTAMP WITH TIME ZONE;
 BEGIN
+
+IF NOT EXISTS (SELECT 1
+               FROM declares_availabilities
+               WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct) THEN
+RAISE EXCEPTION 'The bid period is not within the availability period of caretaker.';
+END IF;
+
+SELECT start_timestamp, end_timestamp INTO sd, ed
+FROM declares_availabilities
+WHERE start_timestamp <= ps AND end_timestamp >= pe AND caretaker_username = ct;
+
 SELECT DATE_PART('day', pe - ps) INTO tot_p;
-tot_p := tot_p * (SELECT daily_price FROM Charges WHERE caretaker_username = ct AND cat_name = (SELECT cat_name FROM ownsPets WHERE ou = username AND pn = name));
-IF NOT EXISTS (SELECT 1 FROM TIMINGS WHERE start_timestamp = ps AND end_timestamp = pe) THEN INSERT INTO TIMINGS VALUES (ps, pe); END IF;
+tot_p := tot_p * (SELECT daily_price
+                    FROM Charges
+                    WHERE caretaker_username = ct AND cat_name = (SELECT cat_name
+                                                                 FROM ownsPets
+                                                                 WHERE ou = username AND pn = name));
+
+IF NOT EXISTS (SELECT 1
+              FROM TIMINGS
+              WHERE start_timestamp = ps AND end_timestamp = pe) THEN
+INSERT INTO TIMINGS VALUES (ps, pe);
+END IF;
+
 INSERT INTO bids VALUES (ou, pn, ps, pe, sd, ed, ct, NULL, NULL, NULL, NULL, NULL, NULL, tot_p, ts);
-UPDATE bids SET is_successful = (CASE WHEN random() < 0.5 THEN true ELSE false END) WHERE is_successful IS NULL;
+
+UPDATE bids SET is_successful = (CASE
+                                    WHEN random() < 0.5 THEN
+                                    true
+                                     ELSE
+                                     false
+                                     END) WHERE is_successful IS NULL;
 END; $$
 LANGUAGE plpgsql;
 
@@ -453,20 +554,3 @@ CREATE TRIGGER check_deletable_bid
 BEFORE DELETE ON bids
 FOR EACH ROW EXECUTE PROCEDURE check_deletable_bid();
 
-
---Update bids
--- Check that the new bid period coincide with availability period
--- TODO: Check that pet belongs ot a category that caretaker can care for
-CREATE OR REPLACE FUNCTION update_bids()
-RETURNS TRIGGER AS
-$$ DECLARE first_result INTEGER := 0;
-  DECLARE second_result INTEGER := 0;
-  DECLARE total_result INTEGER;
-  BEGIN
-
-  END $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER update_bids
-BEFORE UPDATE ON bids
-FOR EACH ROW EXECUTE PROCEDURE update_bids();

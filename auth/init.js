@@ -11,7 +11,8 @@ const antiMiddleware = require('./antimiddle');
 // Postgre SQL Connection
 const { Pool } = require('pg');
 const pool = new Pool({
-    //ssl: true
+
+    // ssl: true,
     user: postgres_details.user,
     database: postgres_details.database,
     host: postgres_details.host,
@@ -19,7 +20,6 @@ const pool = new Pool({
     password: postgres_details.password,
     idleTimeoutMillis: 2000
 });
-
 function findUser (username, callback) {
 	pool.query(sql_query.query.get_user, [username], (err, data) => {
 		if(err) {

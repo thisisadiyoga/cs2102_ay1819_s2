@@ -1,10 +1,5 @@
 $(document).ready(function() {
 
-
-
-
-
-
 $("#pstartdate").flatpickr({
      enableTime: true,
      dateFormat: "Y-m-d H:i:00",

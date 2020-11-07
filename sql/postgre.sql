@@ -43,7 +43,7 @@ CREATE TABLE ownsPets (
 	size			VARCHAR 		NOT NULL CHECK (size IN ('Extra Small', 'Small', 'Medium', 'Large', 'Extra Large')), 
 	sociability		TEXT, 
 	special_req		TEXT, 
-	img				BYTEA, 
+	img				BYTEA NOT NULL, 
 	PRIMARY KEY (username, name)
 );
 
@@ -561,87 +561,3 @@ CREATE TRIGGER check_deletable_bid
 BEFORE DELETE ON bids
 FOR EACH ROW EXECUTE PROCEDURE check_deletable_bid();
 
-
-
-
---insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('hchilcotte1', 'Hannah', 'Chilcotte', 'VxyTOEHQQ', 'hchilcotte1@bigcartel.com', '2000-01-19', '5048372273574703', null, '688741', 'https://robohash.org/expeditaquiaea.png?size=50x50&set=set1', '2020-01-27');
---insert into Users (username, first_name, last_name, password, email, dob, credit_card_no, unit_no, postal_code, avatar, reg_date) values ('mlongridge2', 'Maynard', 'Longridge', 'Wwa1uuMOUiB2', 'mlongridge2@nih.gov', '1956-09-27', '4041378363311', null, '760607', 'https://robohash.org/consequaturquasiet.jpg?size=50x50&set=set1', '2020-09-19');
---
---insert into Caretakers (username, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken,is_disabled) values ('hchilcotte1', TRUE, 4.45, 1, 1, FALSE);
---insert into categories(cat_name, base_price) values ('dog', 3.10);
---
---insert into Owners (username, is_disabled) values ('mlongridge2', FALSE);
---INSERT INTO ownsPets (username, name, description,	cat_name, size, sociability, special_req, img) values ('mlongridge2', 'pet1', 'asdasdasd', 'dog', 'Large', 'very', 'none', 'https://robohash.org/atareiciendis.png?size=50x50&set=set1');
---INSERT INTO Timings (p_start_date ,p_end_date) values ('2020-10-10', '2020-10-15');
---insert into Bids(owner_username ,pet_name ,p_start_date ,p_end_date ,starting_date ,ending_date ,username ,rating ,review ,is_successful ,payment_method ,mode_of_transfer ,is_paid ,total_price,type_of_service)
---          values ( 'mlongridge2', 'pet1', '2020-10-10', '2020-10-15', '2020-10-05', '2020-10-20', 'hchilcotte1', null, null, TRUE, null, null, FALSE, 30, 'something' );
---
---
---
---
---
---CREATE OR REPLACE PROCEDURE rate_or_review(rat NUMERIC, rev VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
---$$ BEGIN
---UPDATE Bids SET rating = rat, review = rev WHERE owner_username = ou AND pet_name = pn AND
---username = ct AND p_start_date = ps AND p_end_date = pe;
---END; $$
---LANGUAGE plpgsql;
---
---CREATE OR REPLACE PROCEDURE set_transac_details(pm VARCHAR, mot VARCHAR, ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
---$$ BEGIN
---UPDATE Bids SET payment_method = pm, mode_of_transfer = mot WHERE owner_username = ou AND pet_name = pn AND
---username = ct AND p_start_date = ps AND p_end_date = pe;
---END; $$
---LANGUAGE plpgsql;
---
---CREATE OR REPLACE PROCEDURE pay_bid(ou VARCHAR, pn VARCHAR, ct VARCHAR, ps DATE, pe DATE) AS
---$$ BEGIN
---UPDATE Bids SET is_paid = true WHERE owner_username = ou AND pet_name = pn AND username = ct AND
---p_start_date = ps AND p_end_date = pe;
---END; $$
---LANGUAGE plpgsql;
---
---
---INSERT INTO caretakers (username, password, first_name, last_name, email, dob, credit_card_no, unit_no, postal_code,
---						reg_date, is_full_time, avg_rating, no_of_reviews, no_of_pets_taken )
---VALUES ('caretaker_2', ' $2b$10$4AyNzxs91dwycBYoBuGPT.cjSwtzWEmDQhQjzaDijewkTALzY57pO', 'sample_2',
---		'sample_2', 's2@s.com', '02-01-2000', '1231231231231231',
---		'2', '123123', '02-10-2020', 'true', 4.5, 2, 2);
---
---
----- INSERT categories
---CREATE OR REPLACE PROCEDURE add_category(cat_name		VARCHAR(10),
---							  			 base_price		NUMERIC) AS
---	$$ BEGIN
---	   INSERT INTO Categories (cat_name, base_price)
---	   VALUES (cat_name, base_price);
---	   END; $$
---	LANGUAGE plpgsql;
---
---
---
---CREATE OR REPLACE PROCEDURE add_pet (username			VARCHAR,
---									 name 				NAME,
---									 description		VARCHAR,
---									 cat_name			VARCHAR(10),
---									 size				VARCHAR,
---									 sociability		VARCHAR,
---									 special_req		VARCHAR,
---									 img 				BYTEA
---									 ) AS
---	$$ BEGIN
---	   INSERT INTO ownsPets
---	   VALUES (username, name, description, cat_name, size, sociability, special_req, img);
---	   END; $$
---	LANGUAGE plpgsql;
---
---
---CREATE OR REPLACE PROCEDURE add_admin(	admin_id 		VARCHAR ,
---										password 		VARCHAR(64),
---										last_login_time TIMESTAMP
---										) AS
---	$$ BEGIN
---	   INSERT INTO Administrators (admin_id, password, last_login_time )
---	   VALUES (admin_id, password, last_login_time );
---	   END; $$
---	LANGUAGE plpgsql;

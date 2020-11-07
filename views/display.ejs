@@ -87,7 +87,13 @@
                                 <tbody>
                                     <% for(var i=0; i<caretaker.length; i++) { %>
                                     <tr>
-                                        <td><a class="nav-link" href="<%= page==="ctreviews" ? "#" : "/ctreviews" %>"><%= caretaker[i].username%></a></td>
+                                        <td><form action="/displayreview" method="post">
+                                            <input type="hidden" id="username" class="form-control" required="required" name="username" value="<%= caretaker[i].username%>">
+                                            <button class="btn btn-link" type="submit">
+                                                <%= caretaker[i].username%>
+                                            </button>
+                                            </form>
+                                        </td>
                                         <td><%= caretaker[i].first_name%></td>
                                         <td><%= caretaker[i].last_name%></td>
                                         <td><%= caretaker[i].postal_code%></td>

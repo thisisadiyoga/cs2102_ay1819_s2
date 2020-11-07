@@ -78,6 +78,7 @@ function initRouter(app) {
     app.post('/add_availability'   , passport.authMiddleware(), add_availability);
 	app.post('/delete_availability' , passport.authMiddleware(), delete_availability);
 	app.post('/take_leave' , passport.authMiddleware(), take_leave);
+	app.post('/displayreview' , passport.authMiddleware(), displayreview);
 
 	/*BIDS*/
 	app.get('/rate_review', passport.authMiddleware(), rate_review_form);
@@ -917,6 +918,20 @@ function ctview_bids (req, res, next) {
 		basic(req, res, 'ctreviews', {bids: bids, auth : true});
 	});
 }
+
+function displayreview (req, res, next) {
+	var username = req.body.username;
+	var bids;
+	pool.query(sql_query.query.ctview_bids, [username], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			bids = [];
+		} else {
+			bids = data.rows;
+		}
+		basic(req, res, 'ctreviews', {bids: bids, auth : true});
+	});
+}
+
 
 function rate_review_form (req, res, next) {
 	res.render('rate_review_form', {auth:true});

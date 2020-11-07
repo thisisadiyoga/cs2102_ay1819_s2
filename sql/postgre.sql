@@ -378,13 +378,13 @@ IF (result < 2) THEN
 END IF;
 
 
-UPDATE bids SET bid_end_timestamp = leave_start WHERE bid_start_timestamp >= avail_first_start AND bid_end_timestamp <= leave_start;
+UPDATE bids SET avail_end_timestamp = leave_start WHERE bid_start_timestamp >= avail_first_start AND bid_end_timestamp <= leave_start;
 
 UPDATE declares_availabilities SET end_timestamp = leave_start WHERE start_timestamp = avail_first_start;
 
 INSERT INTO declares_availabilities VALUES (leave_end, avail_second_end, username);
 
-UPDATE bids SET bid_start_timestamp = leave_end WHERE bid_start_timestamp >= avail_second_start AND bid_end_timestamp <= avail_second_end;
+UPDATE bids SET avail_start_timestamp = leave_end WHERE bid_start_timestamp >= avail_second_start AND bid_end_timestamp <= avail_second_end;
 
 IF (avail_first_start <> avail_second_start) THEN
 DELETE FROM declares_availabilities WHERE start_timestamp = avail_second_start;

@@ -915,6 +915,19 @@ function ctview_bids (req, res, next) {
 	});
 }
 
+function displayreviewautomatic (caretaker, req, res) {
+	var username = caretaker;
+	var bids;
+	pool.query(sql_query.query.ctview_bids, [username], (err, data) => {
+		if (err || !data.rows || data.rows.length == 0) {
+			bids = [];
+		} else {
+			bids = data.rows;
+		}
+		basic(req, res, 'ctreviews', {bids: bids, auth : true});
+	});
+}
+
 function displayreview (req, res, next) {
 	var username = req.body.username;
 	var bids;
@@ -949,7 +962,8 @@ function rate_review (req, res, next) {
 				if (err) {
 					console.error("Error in updating caretaker avg_rating and no_of_reviews", err);
 				} else {
-					res.redirect('/viewbids');
+					// res.redirect('/viewbids');
+					displayreviewautomatic(caretaker, req, res);
 				}
 			});
 

@@ -21,7 +21,7 @@ sql.query = {
 
 	insert_bids: 'CALL insert_bids($1, $2, $3::timestamp AT TIME ZONE \'UTC\', $4::timestamp AT TIME ZONE \'UTC\', $5, $6);',
 	
-	view_bids: 'SELECT * FROM Bids WHERE owner_username = $1',
+	view_bids: 'SELECT * FROM Bids WHERE is_successful;',
 	ctview_bids: 'SELECT * FROM Bids WHERE caretaker_username = $1',
 	rate_review: 'UPDATE Bids SET rating = $1, review = $2 WHERE owner_username = $3 AND pet_name = $4 AND bid_start_timestamp = $5 AND bid_end_timestamp = $6 AND caretaker_username = $7',
 	rate_review_updatect: 'UPDATE Caretakers SET avg_rating = ((avg_rating*no_of_reviews)+$1)/(no_of_reviews+1) , no_of_reviews = no_of_reviews + 1 WHERE username = $2;',

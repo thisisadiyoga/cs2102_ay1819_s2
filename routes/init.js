@@ -1,6 +1,6 @@
 
 const sql_query = require('../sql');
-//const postgres_details = require('../config')
+const postgres_details = require('../config')
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const multer = require("multer");
@@ -13,12 +13,12 @@ const flash = require('connect-flash');
 const { Pool } = require('pg');
 const pool = new Pool({
 	// ssl: true
-	user : 'hgyoiuyzopzgwa', 
-	host : 'ec2-54-228-170-125.eu-west-1.compute.amazonaws.com',
-	database : 'd77amq3smn9npd', 
-	password : '9bd38cda8c65382de924af4937714349a62eaf2038e01988dd5be687dce69c85', 
-	port : 5432, 
-    	idleTimeoutMillis: 2000
+	user: postgres_details.user,
+    database: postgres_details.database,
+    host: postgres_details.host,
+    port: postgres_details.port,
+    password: postgres_details.password,
+      idleTimeoutMillis: 2000
 });
 
 const round = 10;

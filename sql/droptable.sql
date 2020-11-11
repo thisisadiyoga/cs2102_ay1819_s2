@@ -10,6 +10,7 @@ DROP TABLE Owners CASCADE;
 DROP TABLE Categories CASCADE;
 DROP TABLE Bids CASCADE;
 DROP TABLE timings CASCADE;
+DROP TABLE CHARGES CASCADE;
 drop table declares_availabilities;
 drop trigger merge_availabilities;
 drop trigger check_deletable;

@@ -40,6 +40,7 @@
                                     </thead>
                                     <tbody>
                                         <% for(var i=0; i< bids.length; i++) { %>
+                                            <% if (bids[i].is_successful) { %>
                                         <tr>
                                             <td style="max-width:5px;"><%= bids[i].bid_start_timestamp%></td>
                                             <td style="max-width:5px;"><%= bids[i].owner_username%></td>
@@ -47,7 +48,7 @@
                                             <td style="max-width:5px;"><%= bids[i].rating%></td>
                                             <td style="max-width:400px;"><%= bids[i].review%></td>
                                         </tr>
-                                        <% } %>
+                                        <% }} %>
                                     </tbody>
                                 </table>
                             </div>

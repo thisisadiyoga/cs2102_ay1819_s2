@@ -1,4 +1,4 @@
-//const postgres_details = require('../config')
+const postgres_details = require('../config')
 const sql_query = require('../sql');
 
 const passport = require('passport');
@@ -13,12 +13,12 @@ const { Pool } = require('pg');
 const pool = new Pool({
 
     // ssl: true,
-	user : 'hgyoiuyzopzgwa', 
-	host : 'ec2-54-228-170-125.eu-west-1.compute.amazonaws.com',
-	database : 'd77amq3smn9npd', 
-	password : '9bd38cda8c65382de924af4937714349a62eaf2038e01988dd5be687dce69c85', 
-	port : 5432, 
-	idleTimeoutMillis: 2000
+    user: postgres_details.user,
+    database: postgres_details.database,
+    host: postgres_details.host,
+    port: postgres_details.port,
+    password: postgres_details.password,
+      idleTimeoutMillis: 2000
 });
 function findUser (username, callback) {
 	pool.query(sql_query.query.get_user, [username], (err, data) => {
